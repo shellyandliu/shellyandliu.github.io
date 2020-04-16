@@ -1,0 +1,282 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>多元线性回归 | 会飞的猪</title><meta name="description" content="最小二乘估计、最大似然估计、参数显著性检验"><meta name="keywords" content="多元线性回归"><meta name="author" content="会飞的猪"><meta name="copyright" content="会飞的猪"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.ico"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="crossorigin"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="twitter:card" content="summary"><meta name="twitter:title" content="多元线性回归"><meta name="twitter:description" content="最小二乘估计、最大似然估计、参数显著性检验"><meta name="twitter:image" content="http://shellyandliu.github.io/img/post.jpg"><meta property="og:type" content="article"><meta property="og:title" content="多元线性回归"><meta property="og:url" content="http://shellyandliu.github.io/2020/04/16/%E5%A4%9A%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/"><meta property="og:site_name" content="会飞的猪"><meta property="og:description" content="最小二乘估计、最大似然估计、参数显著性检验"><meta property="og:image" content="http://shellyandliu.github.io/img/post.jpg"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>var autoChangeMode = '1'
+var t = Cookies.get("theme")
+if (autoChangeMode == '1'){
+  var isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+  var isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
+  var isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined){
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport){
+      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour < 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+  }
+  } else if (t == 'light') activateLightMode()
+  else activateDarkMode()
+
+} else if (autoChangeMode == '2'){
+  now = new Date();
+  hour = now.getHours();
+  isNight = hour < 6 || hour >= 18
+  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode() 
+} else {
+  if ( t == 'dark' ) activateDarkMode()
+  else if ( t == 'light') activateLightMode()
+}
+
+function activateDarkMode(){
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
+  }
+}
+function activateLightMode(){
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
+  }
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="canonical" href="http://shellyandliu.github.io/2020/04/16/%E5%A4%9A%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/"><link rel="next" title="一元线性回归" href="http://shellyandliu.github.io/2020/04/16/%E4%B8%80%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://xxx/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  baiduPush: false,
+  highlightCopy: true,
+  highlightLang: true,
+  highlightShrink: 'false',
+  isFontAwesomeV5: false,
+  isPhotoFigcaption: false
+  
+}</script><script>var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isSidebar: true  
+  }</script><noscript><style>
+#page-header {
+  opacity: 1
+}
+.justified-gallery img{
+  opacity: 1
+}
+</style></noscript><meta name="generator" content="Hexo 4.2.0"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/longmao.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">2</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">2</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">1</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 清单</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 电影</span></a></li></ul></div></div></div></div><i class="fa fa-arrow-right on" id="toggle-sidebar" aria-hidden="true">     </i><div id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#多元线性回归"><span class="toc-number">1.</span> <span class="toc-text">多元线性回归</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#参数估计"><span class="toc-number">1.1.</span> <span class="toc-text">参数估计</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#残差的协方差阵"><span class="toc-number">1.1.1.</span> <span class="toc-text">残差的协方差阵</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#sigma-2-的无偏估计"><span class="toc-number">1.1.2.</span> <span class="toc-text">$\sigma^2$的无偏估计</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#参数的性质"><span class="toc-number">1.2.</span> <span class="toc-text">参数的性质</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#最佳线性无偏估计"><span class="toc-number">1.2.1.</span> <span class="toc-text">最佳线性无偏估计</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#拟合优度"><span class="toc-number">1.2.2.</span> <span class="toc-text">拟合优度</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#显著性检验"><span class="toc-number">1.3.</span> <span class="toc-text">显著性检验</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#方程显著性检验"><span class="toc-number">1.3.1.</span> <span class="toc-text">方程显著性检验</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#系数显著性检验"><span class="toc-number">1.3.2.</span> <span class="toc-text">系数显著性检验</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#部分系数显著性检验"><span class="toc-number">1.3.3.</span> <span class="toc-text">部分系数显著性检验</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#中心化，标准化"><span class="toc-number">1.3.4.</span> <span class="toc-text">中心化，标准化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#样本相关阵"><span class="toc-number">1.3.5.</span> <span class="toc-text">样本相关阵</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#参数-hat-beta-的数值求解与QR分解"><span class="toc-number">1.4.</span> <span class="toc-text">参数 $\hat{\beta}$ 的数值求解与QR分解</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#矩阵的条件数"><span class="toc-number">1.4.1.</span> <span class="toc-text">矩阵的条件数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#最小二乘问题的QR分解"><span class="toc-number">1.4.2.</span> <span class="toc-text">最小二乘问题的QR分解</span></a></li></ol></li></ol></li></ol></div></div></div><div id="body-wrap"><div class="post-bg" id="nav" style="background-image: url(/img/post.jpg)"><div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">会飞的猪</a></span><span class="pull_right menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 清单</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 电影</span></a></li></ul></div></div><span class="toggle-menu close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span></span></div><div id="post-info"><div id="post-title"><div class="posttitle">多元线性回归</div></div><div id="post-meta"><div class="meta-firstline"><time class="post-meta__date"><span class="post-meta__date-created" title="发表于 2020-04-16 16:04:44"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2020-04-16</span><span class="post-meta__separator">|</span><span class="post-meta__date-updated" title="更新于 2020-04-16 16:12:15"><i class="fa fa-history" aria-hidden="true"></i> 更新于 2020-04-16</span></time><span class="post-meta__categories"><span class="post-meta__separator">|</span><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/">-线性回归</a></span></div><div class="meta-secondline"> </div><div class="meta-thirdline"><span class="post-meta-pv-cv"><i class="fa fa-eye post-meta__icon" aria-hidden="true"> </i><span>阅读量:</span><span id="busuanzi_value_page_pv"></span></span><span class="post-meta-commentcount"></span></div></div></div></div><main class="layout_post" id="content-inner"><article id="post"><div id="article-container"><h2 id="多元线性回归"><a href="#多元线性回归" class="headerlink" title="多元线性回归"></a>多元线性回归</h2><h3 id="参数估计"><a href="#参数估计" class="headerlink" title="参数估计"></a>参数估计</h3><p>多元线性回归的基本形式：$y=\beta_{0}+\beta_{1} x_{1}+\dots+\beta_px_p+\epsilon$</p>
+<p>若有n个样本，则用矩阵形式表达可得：$y=X\beta+\epsilon$</p>
+<blockquote>
+<p>假设：</p>
+<p>(1) $r(X)=p+1,$且$x_1,\dots,x_p$不是随机变量。</p>
+<p>(2)G-M条件</p>
+<p>(3)$\epsilon\sim N(0,\sigma^2I_n)$</p>
+</blockquote>
+<p>目标函数为均方误差函数：</p>
+<script type="math/tex; mode=display">
+L(\beta_0,\beta_1,\dots,\beta_p)=\frac{1}{2n}\|X \beta-y\|_{2}^2</script><p>对其求偏导可得：$e^TX=(y-X\hat{\beta})^TX=0$,因此</p>
+<blockquote>
+<p>$\hat{\beta}=(X^TX)^{-1}X^Ty$</p>
+</blockquote>
+<p>定义矩阵$H=X(X^TX)^{-1}X^T$为帽子矩阵,若观测值为$y$，则估计值就为$Hy$,帽子矩阵为<strong>对称幂等矩阵</strong></p>
+<h4 id="残差的协方差阵"><a href="#残差的协方差阵" class="headerlink" title="残差的协方差阵"></a>残差的协方差阵</h4><blockquote>
+<p>$\operatorname{cov}(e, e)=\operatorname{cov}((I-H) y,(I-H) y)=(I-H) \operatorname{cov}(y, y)(I-H)^{T}=(I-H) \sigma^{2} I_{n}(I-H)^{T}=\sigma^{2}(I-H)(I-H)=\sigma^{2}(I-H)$</p>
+</blockquote>
+<h4 id="sigma-2-的无偏估计"><a href="#sigma-2-的无偏估计" class="headerlink" title="$\sigma^2$的无偏估计"></a>$\sigma^2$的无偏估计</h4><p>容易计算矩阵$(I-H)X=0$</p>
+<p>因此</p>
+<script type="math/tex; mode=display">
+\begin{array}{l}e^{T} e=[(I-H) y]^{T}(I-H) y=y^{T}(I-H) y \\=(X \beta+\epsilon)^{T}(I-H)(X \beta+\epsilon)=\left(\beta^{T} X^{T}+\epsilon^{T}\right)(I-H)(X \beta+\epsilon) \\=\beta^{T} X^{T}(I-H) X \beta+\beta^{T} X^{T}(I-H) \epsilon+\epsilon^{T}(I-H) X \beta+\epsilon^{T}(I-H) \epsilon\\=\epsilon^{T}(I-H) \epsilon\end{array}​</script><p>则对$e^Te$求期望可得：</p>
+<script type="math/tex; mode=display">
+\begin{aligned}&E(e^Te)=E\left(\epsilon^{T}(I-H) \epsilon\right)=E\left(\operatorname{tr}\left(\epsilon^{T}(I-H) \epsilon\right)\right.\\&=\operatorname{tr}\left(E\left((I-H) \epsilon \epsilon^{T}\right)\right)=\operatorname{tr}\left((I-H) E\left(\epsilon \epsilon^{T}\right)\right)\\&=\sigma^{2} \operatorname{tr}(I-H)=\sigma^{2}(n-p-1)\end{aligned}</script><p>由于在多元回归中$e^Te=SSE$,所以$\sigma^2$的无偏估计为：</p>
+<blockquote>
+<p>$\hat{\sigma}^2=\frac{SSE}{n-p-1}$</p>
+</blockquote>
+<h3 id="参数的性质"><a href="#参数的性质" class="headerlink" title="参数的性质"></a>参数的性质</h3><blockquote>
+<p>$\hat{\beta}$ 是 $y$ 的一个线性变换</p>
+<p>$\hat{\beta}$ 是 $\beta$ 的无偏估计</p>
+<p>$\hat{\sigma}^2$ 是 $\sigma^2$ 的无偏估计</p>
+<p>$cov(\hat{\beta})=\sigma^2(X^TX)^{-1}$</p>
+<p>$cov(\hat{\beta},e)=0$</p>
+</blockquote>
+<h4 id="最佳线性无偏估计"><a href="#最佳线性无偏估计" class="headerlink" title="最佳线性无偏估计"></a>最佳线性无偏估计</h4><blockquote>
+<p>定理：设 $y\sim N(X\beta,\sigma^2I_n)$，则 $\beta$ 的任一线性函数 $c^T\beta$ 的最小方差线性无偏估计(BLUE)为 $c^T\beta$ ，其中$c$是常数向量。</p>
+</blockquote>
+<h4 id="拟合优度"><a href="#拟合优度" class="headerlink" title="拟合优度"></a>拟合优度</h4><blockquote>
+<p>定义：<strong>决定系数</strong>：$R^2=\frac{SSR}{SST}$</p>
+<p><strong>样本复相关系数</strong>：$R=\sqrt{\frac{SSR}{SST}}$, 表示因变量 $ y$ 与全体自变量之间的线性关系。</p>
+<p><strong>偏相关系数</strong>：$r_{y 1 ; 2,3, \cdots, p}^{2}=\frac{S S E\left(x_{2}, \ldots, x_{p}\right)-S S E\left(x_{1}, \ldots, x_{p}\right)}{S S E\left(x_{2}, \ldots, x_{p}\right)}$，用来衡量回归系数显著性(即在已经有了第2，3，…，p个自变量后，新添加第1个自变量后，$SSE$ 到底下降了多少。)</p>
+<p><strong>偏回归平方和</strong>: $\Delta S S R_{(j)}=S S R-S S R_{(j)}$，其中 $SSR_{(i)}$ 表示在原本 $p$ 个变量中剔除 $x_j$ 后的剩下 $p-1$ 个变量的回归后的残差平方和。同理可定义$SSE_{(i)}$</p>
+</blockquote>
+<h3 id="显著性检验"><a href="#显著性检验" class="headerlink" title="显著性检验"></a>显著性检验</h3><h4 id="方程显著性检验"><a href="#方程显著性检验" class="headerlink" title="方程显著性检验"></a>方程显著性检验</h4><p>目的：<strong>检验这个回归方程是否有效。</strong></p>
+<p>原假设为：</p>
+<blockquote>
+<p>$H_0:\beta_1=\beta_2=\dots=\beta_p=0$</p>
+<p>$SSR=\sum(\hat{y}_i-\bar{y})^2=\sum\hat{y}^2-n\bar{y}^2=Y^T\left[X(X^TX)^{-1}X^T-\frac 1n11^T\right]Y$</p>
+<p>$SSE=\sum(y_i-\hat y_i)^2=Y^T(I_n-X(X^TX)^{-1}X^T)Y$</p>
+</blockquote>
+<p>其中，令$J=X(X^TX)^{-1}X^T-\frac 1n11^T$,显然该矩阵为幂等矩阵，即秩和迹相同。</p>
+<blockquote>
+<p>引理1：设$X\sim N_p(\mu,I_p)$，$A$对称，那么$X^TAX\sim \chi^2(r,\mu^TA\mu)$的充要条件是$A$幂等，且$r(A)=r$。</p>
+<p>推论1：设$X\sim N_p(\mu,I_p)$，$A$对称，那么$X^TAX\sim \chi^2(r)$的充要条件是$A$幂等，且$r(A)=r,A\mu=0$。</p>
+<p>推论2：设$X\sim N_p(\mu,\Sigma),\Sigma&gt;0$，$A$对称，那么$X^TAX\sim \chi^2(r,\mu^TA\mu)$的充要条件是$A$幂等，且$A\Sigma A=A,r(A)=r$。</p>
+<p>推论3：若$Y\sim N(X\beta,\sigma^2I_n),SSE=Y^T(I_n-X(X^TX)^{-1}X^T)Y$，则$\frac 1{\sigma^2}SSE \sim \chi^2(n-r(X))$</p>
+</blockquote>
+<p>因此由引理1可以得到，$SSR\sim \sigma^2\chi^2\left(r(X)-1,\frac{1}{\sigma^2}\beta^TX^T\left[X(X^TX)^{-1}X^T-\frac 1n11^T\right]X\beta\right)$,由推论3，要想证明$SSR$服从中心的卡方分布，仅需说明$\frac{1}{\sigma^2}\beta^TX^T(I_n-\frac 1n11^T)X\beta=0$,由于再$H_0$得假设下，$X\beta=\beta_01,\beta^TX^T=\beta_01^T$，显然成立。则有下面结论：</p>
+<blockquote>
+<p>$\frac{SSR}{\sigma^2}\sim \chi^2(p)$</p>
+<p>$\frac 1{\sigma^2}SSE \sim \chi^2(n-p-1)$</p>
+</blockquote>
+<p>下面给出一个有用得定理及其相关推论p</p>
+<blockquote>
+<p>Cochran定理：</p>
+<p>设$X\sim N_p(\mu,I_p),X^TAX=X^TA_1X+X^TA_2X\sim \chi^2(r,\lambda),X^TA_1X\sim\chi^2(s,\lambda_1),A_2\geq 0$其中$\lambda=\mu^TA\mu,\lambda_1=\mu^TA_1\mu$，那么有以下结论：</p>
+<p>(1)$X^TA_2X\sim \chi^2(r-s,\lambda_2),\lambda_2=\mu^TA_2\mu$</p>
+<p>(2)$X^TA_1X,X^TA_2X$独立</p>
+<p>(3)$A_1A_2=0$</p>
+<p>推论4：设$X\sim N_p(\mu,I_p)$，$X^TA_1X，X^TA_2X$都服从$\chi^2$分布，那么二者独立得充要条件是$A_1A_2=0$.</p>
+<p>推论5：设$X\sim N_p(\mu,\Sigma),X^TAX=X^TA_1X+X^TA_2X\sim \chi^2(r,\lambda),X^TA_1X\sim\chi^2(s,\lambda_1),A_2\geq 0$，那么有:</p>
+<p>(1)$X^TA_2X\sim \chi^2(r-s,\lambda_2)$</p>
+<p>(2)$X^TA_1X,X^TA_2X$独立</p>
+<p>(3)$A_1\Sigma A_2=0$</p>
+<p>推论6：设$X\sim N_p(\mu,\Sigma)$，$X^TA_1X，X^TA_2X$都服从$\chi^2$分布，那么二者独立得充要条件是$A_1\Sigma  A_2=0$.</p>
+</blockquote>
+<p>由于$\left[I_{n}-X\left(X^{T} X\right)^{-1} X^{T}\right]\left[X\left(X^{T} X\right)^{-1} X^{T}-\frac{1}{n} \mathbf{1} \mathbf{1}^{T}\right]=0$，因此可以得到下面结论：</p>
+<blockquote>
+<p>$SSR$和$SSE$独立</p>
+</blockquote>
+<p>因此可以构造F检验：</p>
+<blockquote>
+<p>$\frac{SSR/p}{SSE/(n-p-1)}\sim F(p,n-p-1)$</p>
+</blockquote>
+<p>由方差分析，当 $F$ 较小时，应该接受 $H_0$.</p>
+<h4 id="系数显著性检验"><a href="#系数显著性检验" class="headerlink" title="系数显著性检验"></a>系数显著性检验</h4><p>原假设为：</p>
+<blockquote>
+<p>$H_{0j}:\beta_j=0$</p>
+</blockquote>
+<p>根据无偏性和$cov(\hat{\beta})=\sigma^2(X^TX)^{-1}$,可以得到：$\hat{\beta}_j\sim N(\beta_j,c_{jj}\sigma^2)，$其中</p>
+<p>$c_{jj}$是$(X^TX)^{-1}$的对角线元素。同样的，由于$SSE/\sigma^2\sim \chi^2(n-p-1)$，则可以构建t分布检验：</p>
+<blockquote>
+<p>$t_j=\frac{\hat{\beta}_j}{\sqrt{c_{jj}}\sigma} \cdot\sqrt{\frac{\sigma^2\cdot(n-p-1)}{SSE}}=\frac{\hat{\beta}_j}{\sqrt{c_{jj}}\hat{\sigma}}\sim t(n-p-1)$</p>
+</blockquote>
+<h4 id="部分系数显著性检验"><a href="#部分系数显著性检验" class="headerlink" title="部分系数显著性检验"></a>部分系数显著性检验</h4><p>设 $y=X\beta+\epsilon=\left[X_1\quad X_2\right]\left[\begin{array}{c}\beta_1 \ \beta_2\end{array}\right]+\epsilon$, 其中 $\beta_1,\beta_2,X_1,X_2$ 均表示分块矩阵。</p>
+<p>原假设为：</p>
+<blockquote>
+<p>$H_0:\beta_2=0$</p>
+</blockquote>
+<p>令 $H=X(X^TX)^{-1}X^T, H_1=X_1(X_1^TX_1)^{-1}X_1^T$, 则可以得到：</p>
+<blockquote>
+<p>$SSE_1-SSE=Y^T(H-H_1)Y$</p>
+</blockquote>
+<p>由于$\left(X^{\prime} X\right)^{-1}=\left[\begin{array}{cc}X_{1}^{\prime} X_{1} &amp; X_{1}^{\prime} X_{2} \ X_{2}^{\prime} X_{1} &amp; X_{2}^{\prime} X_{2}\end{array}\right]^{-1}=\left[\begin{array}{cc}\left(X_{1}^{\prime} X_{1}\right)^{-1} &amp; 0 \ 0 &amp; 0\end{array}\right]+\left[\begin{array}{c}-\left(X_{1}^{\prime} X_{1}\right)^{-1} X_{1}^{\prime} X_{2} \ I\end{array}\right] \Sigma_{22 \cdot 1}^{-1}\left[-X_{2}^{\prime} X_{1}\left(X_{1}^{\prime} X_{1}\right)^{-1} \quad I\right]$，其中 $\Sigma_{22 \cdot 1}^{-1}=X_2’(I-H_1)X_2$，因此：</p>
+<blockquote>
+<p>$H-H_1=(I-H_1)X_2[X_2^T(I-H_1)X_2]^{-1}X_2^T(I-H_1)$</p>
+</blockquote>
+<p>易证 $H-H_1$ 是对称幂等矩阵，因此：</p>
+<blockquote>
+<p>$\frac{SSE_1-SSE}{\sigma^2}\sim \chi^2(r,\lambda)$</p>
+<p>其中 $r=tr(H-H_1)=r(X)-r(X_1)$, $\lambda=\frac 1{\sigma^2}\beta^TX^T(H-H_1)X\beta=\frac 1{\sigma^2}\beta_2^TX_2^T(I-H_1)X_2\beta_2=0$</p>
+</blockquote>
+<p>由于$(I-H)(H-H_1)=0$ , 可以得到 $SSE_1-SSE$ 与 $SSE$ 独立，因此可以构造统计量：</p>
+<blockquote>
+<p>$F=\frac{(SSE_1-SSE)/(r(X)-r(X_1))}{SSE/(n-r(X))}\sim F(r(X_2),n-r(X))$</p>
+</blockquote>
+<p>当 $F$ 较小时，应该接受 $H_0$.</p>
+<h4 id="中心化，标准化"><a href="#中心化，标准化" class="headerlink" title="中心化，标准化"></a>中心化，标准化</h4><p><strong>中心化</strong>是指<strong>将所有数据点平移，使得回归的远点都变成数据的均值点</strong>。</p>
+<p>则所需做的变换为：$x_{ij}’=x_{ij}-\bar{x}_j,j=1,\dots,p$ 和$y_i’=y_i-\bar{y}$。</p>
+<p>这样就可以得到没有常数项的中心化方程：</p>
+<blockquote>
+<p>$\hat{y}^{\prime}=\hat{\beta}_{1} x_{1}^{\prime}+\cdots+\hat{\beta}_{p} x_{p}^{\prime}$</p>
+</blockquote>
+<p>实际上中心化相当于在原回归方程$y=X\beta+\epsilon$ 上乘了一个中心化矩阵$I_n-\frac 1n 11^T$ 。而由于$\epsilon$ 被乘了一个矩阵，它的独立同分布条件就不一定能够满足。</p>
+<p><strong>标准化</strong>就是做如下变换：</p>
+<blockquote>
+<p>$x_{i j}^{<em>}=\frac{x_{i j}-\bar{x}_{j}}{\sqrt{L_{j j}}}, y_{i}^{</em>}=\frac{y_{i}-\bar{y}}{\sqrt{L_{y y}}}, i=1, \cdots, n$</p>
+<p>其中$L_{jj}=\sum_{i=1}^n(x_{ij}-\bar{x}_j)^2$ </p>
+</blockquote>
+<p>标准化后的离差平方和是1.</p>
+<h4 id="样本相关阵"><a href="#样本相关阵" class="headerlink" title="样本相关阵"></a>样本相关阵</h4><p>定义相关系数：</p>
+<blockquote>
+<p>$r_{ij}=\frac{L_{ij}}{\sqrt{L_{ii}L_{jj}}}$</p>
+</blockquote>
+<p>将相关系数写成一个矩阵，可以得到样本相关矩阵：</p>
+<blockquote>
+<p>$r=\left[\begin{array}{cccc}1 &amp; r_{12} &amp; \cdots &amp; r_{1 p} \ r_{21} &amp; 1 &amp; \cdots &amp; r_{2 p} \ \vdots &amp; \vdots &amp; \ddots &amp; \vdots \ r_{p 1} &amp; r_{p 2} &amp; \cdots &amp; 1\end{array}\right]$</p>
+</blockquote>
+<p>设$X^<em>$是标准化后的样本矩阵，则可以验证:$r=(X^</em>)^TX^*$</p>
+<p>在高维数据的处理中(<strong>自变量的个数大于或者接近数据的个数</strong>)，会使用<strong>增广相关矩阵</strong>来筛掉一部分变量。：</p>
+<blockquote>
+<p>$r=\left[\begin{array}{ccccc}1 &amp; r_{y 1} &amp; r_{y 2} &amp; \cdots &amp; r_{y p} \ r_{1 y} &amp; 1 &amp; r_{12} &amp; \cdots &amp; r_{2 p} \ \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots \ r_{p y} &amp; r_{p 1} &amp; \cdots &amp; r_{p, p-1} &amp; 1\end{array}\right]$</p>
+</blockquote>
+<h3 id="参数-hat-beta-的数值求解与QR分解"><a href="#参数-hat-beta-的数值求解与QR分解" class="headerlink" title="参数 $\hat{\beta}$ 的数值求解与QR分解"></a>参数 $\hat{\beta}$ 的数值求解与QR分解</h3><h4 id="矩阵的条件数"><a href="#矩阵的条件数" class="headerlink" title="矩阵的条件数"></a>矩阵的条件数</h4><p>对于线性系统 $Ax=b$, $A$ 为系数矩阵，若通过某种方法得到的解为 $\hat{x}$, 而精确解为 $x_e$, 则相对误差为 $\frac{|x_e-\hat{x}|}{|x_e|}$ ,由于不知道精确解 $x_e$ ，因此可以通过残差 $\hat{e}=b-A\hat{x}$ 来判断解是否准确，但在某些情况下，尽管 $\hat{e}$ 的范数很小， $\hat{x}-x_e$ 仍相差很远，因此引入矩阵的条件数的概念。</p>
+<p>在 $A$ 可逆的情况下: $x_e-\hat{x}=A^{-1}\hat{e}$ ,选择对应的向量矩阵范数，可以得到 </p>
+<blockquote>
+<p>$|x_e-\hat{x}|=|A^{-1}\hat{e}|\le |A^{-1}||\hat{e}|$.</p>
+</blockquote>
+<p>又 $|b|=|Ax_e|\le|A||x_e|$, 可以得到 $\frac{1}{|x_e|}\le\frac{|A|}{|b|}$</p>
+<blockquote>
+<p>$\frac{|x_e-\hat{x}|}{|x_e|}\le|A||A^{-1}|\frac{|\hat{e}|}{|b|}$</p>
+</blockquote>
+<p>则可以定义<strong>矩阵 $A$ 的条件数为：$\kappa(\mathbf{A})=|\mathbf{A}|\left|\mathbf{A}^{-1}\right|$</strong></p>
+<blockquote>
+<p>$\frac{|x_e-\hat{x}|}{|x_e|}\le\kappa(A)\frac{|\hat{e}|}{|b|}$</p>
+</blockquote>
+<p><strong>线性系统解的相对误差由残差和条件数约束。当矩阵接近奇异时，条件数较大，解的相对误差可能较大</strong></p>
+<blockquote>
+<p>引理：正交矩阵的条件数为1，对称正定矩阵的条件数为 $\frac{\lambda_1}{\lambda_n}$，其中 $\lambda_1$ 为最大特征值，$\lambda_n$ 为最小特征值。</p>
+</blockquote>
+<p>当 $A$ 为$n\times p$ 阶矩阵，$n&gt;p$, 同样可以得到 $\kappa(A)=|A|\left|A^{\dagger}\right|$, 设 $A$ 的奇异值为 $\sigma_1\ge\sigma_2\ge\dots\ge\sigma_p$,则 $\kappa(A)=\frac{\sigma_1}{\sigma_p}$</p>
+<p>现在考虑最小二乘得到的正规方程 $X’X\beta=A’y$ 的条件数</p>
+<blockquote>
+<p>$\kappa(X’X)=\frac{\lambda_1}{\lambda_p}=\frac{\sigma_1^2}{\sigma_p^2}=\kappa(X)^2$</p>
+</blockquote>
+<p>即直接解正规方程得到的解的相对误差由 $\kappa(A)^2$ 约束。因此当 $\kappa(A)^2$ 较大时，即使残差很小时，解的x相对误差也可能很大。</p>
+<h4 id="最小二乘问题的QR分解"><a href="#最小二乘问题的QR分解" class="headerlink" title="最小二乘问题的QR分解"></a>最小二乘问题的QR分解</h4><p>记 $X_{n\times p}$ 为列满秩矩阵，$n&gt;p$， 对 $X$ 进行QR分解得：</p>
+<blockquote>
+<p>$X_{n \times p}=Q_{n \times n}\left[\begin{array}{l}R_{p \times p} \ 0_{(n-p) \times p}\end{array}\right]$</p>
+<p>其中 $Q$ 为正交矩阵， $R$ 为上三角矩阵</p>
+</blockquote>
+<p>则对于最小二乘问题 $\min_{\beta}|e|_2^2=|y-X\beta|^2_2$ 有</p>
+<blockquote>
+<p>$\begin{aligned}|e|_{2}^{2} &amp;=\left|y-Q\left[\begin{array}{l}R \ 0\end{array}\right] \beta\right|_{2}^{2}=\left|Q^T y-Q^T Q\left[\begin{array}{l}R \ 0\end{array}\right] \beta\right|_{2}^{2} \ &amp;=\left|[Q_1\quad Q_2]^T y-\left[\begin{array}{l}R \ 0\end{array}\right] \beta\right|_{2}^{2}=\left|\left[\begin{array}{l}Q_1^Ty \ Q_2^Ty\end{array}\right]-\left[\begin{array}{l}R \beta \ 0\end{array}\right]\right|_{2}^{2} \ &amp;=|Q_1^Ty-R \beta|_{2}^{2}+|Q_2^Ty|_{2}^{2} \end{aligned}$</p>
+</blockquote>
+<p>则 $\min_{\beta}|e|_2^2$ 即为优化 $\min_{\beta}|Q_1^Ty-R \beta|_{2}^{2}$, 由于条件数 $\kappa(R)=\kappa(A)$, 所以QR分解下得误差由 $\kappa(A)$ 约束。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">会飞的猪</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://shellyandliu.github.io/2020/04/16/%E5%A4%9A%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/">http://shellyandliu.github.io/2020/04/16/%E5%A4%9A%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://shellyandliu.github.io" target="_blank">会飞的猪</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%A4%9A%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/">多元线性回归</a></div><div class="post_share"><div class="social-share" data-image="/img/post.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"/><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-button button--primary button--animated"> <i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lazyload post-qr-code__img" src="/img/weixin.png" alt="微信打赏"/><div class="post-qr-code__desc">微信打赏</div></li><li class="reward-item"><img class="lazyload post-qr-code__img" src="/img/zhifubao.png" alt="支付宝打赏"/><div class="post-qr-code__desc">支付宝打赏</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="next-post pull-full"><a href="/2020/04/16/%E4%B8%80%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/"><img class="next_cover lazyload" data-src="/img/post.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">一元线性回归</div></div></a></div></nav></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 By 会飞的猪</div><div class="framework-info"><span>驱动 </span><a href="https://hexo.io" target="_blank" rel="noopener"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly" target="_blank" rel="noopener"><span>Butterfly</span></a></div><div class="footer_custom_text">欢迎来到我的博客</div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="阅读模式"></i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换" target="_self">繁</a><i class="darkmode fa fa-moon-o" id="darkmode" title="夜间模式"></i></div><div id="rightside-config-show"><div id="rightside_config" title="设置"><i class="fa fa-cog" aria-hidden="true"></i></div><i class="fa fa-list-ul close" id="mobile-toc-button" title="目录" aria-hidden="true"></i><i class="fa fa-arrow-up" id="go-up" title="回到顶部" aria-hidden="true"></i></div></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  CommonHTML: {
+    linebreaks: { automatic: true, width: "90% container" }
+  },
+  "HTML-CSS": { 
+    linebreaks: { automatic: true, width: "90% container" }
+  },
+  "SVG": { 
+    linebreaks: { automatic: true, width: "90% container" }
+  }
+});
+</script><script type="text/x-mathjax-config">MathJax.Hub.Queue(function() {
+  var all = MathJax.Hub.getAllJax(), i;
+  for (i=0; i < all.length; i += 1) {
+    all[i].SourceElement().parentNode.className += ' has-jax';
+  }
+});
+</script><script src="https://cdn.jsdelivr.net/npm/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@latest/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/lazysizes@latest/lazysizes.min.js" async=""></script></body></html>

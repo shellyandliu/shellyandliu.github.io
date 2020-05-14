@@ -254,29 +254,29 @@
         </header>
 
         <div class="post-content">
-            <h1 id="机器学习中的优化问题"><a href="#机器学习中的优化问题" class="headerlink" title="机器学习中的优化问题"></a>机器学习中的优化问题</h1><p>在机器学习问题（监督学习）中，设 $h(x;\beta)$ 为预测函数，其中 $x$ 表示输入，$\beta$ 表示参数，预测函数有着固定的形式，而损失函数设为 $l(h(x;\beta),y)$  , 其中 $h(x;\beta)$ 和 $y$ 分别表示预测输出和真实输出。</p>
-<p>理想情况下，我们希望选择参数 $\beta$ 来最小化期望损失函数，设 $P(x,y)$ 表示输入和真实输出的概率分布，则我们的希望最小化的目标函数为：</p>
+            <h1 id="机器学习中的优化问题"><a href="#机器学习中的优化问题" class="headerlink" title="机器学习中的优化问题"></a>机器学习中的优化问题</h1><p>在机器学习问题（监督学习）中，设 $h(x;w)$ 为预测函数，其中 $x$ 表示输入，$w$ 表示参数，预测函数有着固定的形式，而损失函数设为 $l(h(x;w),y)$  , 其中 $h(x;w)$ 和 $y$ 分别表示预测输出和真实输出。</p>
+<p>理想情况下，我们希望选择参数 $w$ 来最小化期望损失函数，设 $P(x,y)$ 表示输入和真实输出的概率分布，则我们的希望最小化的目标函数为：</p>
 <blockquote>
 <script type="math/tex; mode=display">
-R(\beta)=\int l(h(x;\beta),y)d P(x,y)=E_{P(x,y)}[l(h(x;\beta),y)]</script></blockquote>
+R(w)=\int l(h(x;w),y)d P(x,y)=E_{P(x,y)}[l(h(x;w),y)]</script></blockquote>
 <p>然而这样的目标永远不能达到，因为我们不知道 $P(x,y)$ 的真实分布。因此在实践中，我们一般寻求解决一个估计期望风险R的问题，若我们拥有 $n$ 个彼此独立的样本数据 $\{(x_i,y_i)\}_{i=1}^n$  。则我们可以定义经验风险函数：</p>
 <blockquote>
 <script type="math/tex; mode=display">
-R_n(\beta)=\frac 1n\sum_{i=1}^nl(h(x_i;\beta),y_i)</script></blockquote>
-<p>在样本独立性要求的情况下，通过大数定律我们可以得到当 $n\to\infty$ 时， $R_n\to R$ 。因此我们的目标是优化在拥有 $n$ 个训练样本的情况下的经验风险函数 $R_n(\beta)$.</p>
-<p>为了方便表示令 $f(\beta;\xi):=l(h(x;\beta),y)$, $f_i(\beta) := f(\beta;\xi_i)$, 其中 $\xi_i$ 表示样本点 $(x_i,y_i)$则期望风险函数为：</p>
+R_n(w)=\frac 1n\sum_{i=1}^nl(h(x_i;w),y_i)</script></blockquote>
+<p>在样本独立性要求的情况下，通过大数定律我们可以得到当 $n\to\infty$ 时， $R_n\to R$ 。因此我们的目标是优化在拥有 $n$ 个训练样本的情况下的经验风险函数 $R_n(w)$.</p>
+<p>为了方便表示令 $f(w;\xi):=l(h(x;w),y)$, $f_i(w) := f(w;\xi_i)$, 其中 $\xi_i$ 表示样本点 $(x_i,y_i)$则期望风险函数为：</p>
 <blockquote>
 <script type="math/tex; mode=display">
-R(\beta)=E_{P}(f(\beta;\xi))</script></blockquote>
+R(w)=E_{P}(f(w;\xi))</script></blockquote>
 <p>经验风险函数为： </p>
 <blockquote>
 <script type="math/tex; mode=display">
-R_n(\beta)=\frac 1n\sum_{i=1}^nf_i(\beta).</script></blockquote>
+R_n(w)=\frac 1n\sum_{i=1}^nf_i(w).</script></blockquote>
 <h1 id="梯度下降算法"><a href="#梯度下降算法" class="headerlink" title="梯度下降算法"></a>梯度下降算法</h1><p>在机器学习中，将传统的梯度下降法称为批量梯度下降法，其具体过程为：</p>
 <blockquote>
-<p>(1). 给定初值 $\beta_0$,</p>
+<p>(1). 给定初值 $w_0$,</p>
 <p>(2). 在第 $k$ 次迭代时，确定学习率（迭代步长）$\alpha_k$。</p>
-<p>(3). $\beta_{k+1}=\beta_k-\alpha_k\nabla R_n(\beta_k)=\beta_k-\frac{\alpha_k}{n}\sum_{i=1}^n\nabla f_i(\beta_k)$.</p>
+<p>(3). $w_{k+1}=w_k-\alpha_k\nabla R_n(w_k)=w_k-\frac{\alpha_k}{n}\sum_{i=1}^n\nabla f_i(w_k)$.</p>
 <p>(4). 直到满足停止准则。</p>
 </blockquote>
 <p>若采用上述的批量梯度下降算法来最小化 $R_n$。当样本数量 $n$ 较大时，计算量将非常大。原因在于：</p>
@@ -284,47 +284,47 @@ R_n(\beta)=\frac 1n\sum_{i=1}^nf_i(\beta).</script></blockquote>
 <p>(2). 当训练集冗余时，及相同的样本有 $m$ 个，那么采用梯度下降估计会花去 $m$ 倍的运算时间。</p>
 <h1 id="随机梯度下降算法"><a href="#随机梯度下降算法" class="headerlink" title="随机梯度下降算法"></a>随机梯度下降算法</h1><p>随机梯度下降法的具体步骤：</p>
 <blockquote>
-<p>(1). 给定初值 $\beta_0$,</p>
+<p>(1). 给定初值 $w_0$,</p>
 <p>(2). 在第 $k$ 次迭代时，确定学习率（迭代步长）$\alpha_k$。</p>
-<p>(3). $\beta_{k+1}=\beta_k-{\alpha_k}\nabla f_{i_k}(\beta_k)$. 其中 $i_k$ 是从 $\{1,\cdots,n\}$ 中随机选取。</p>
+<p>(3). $w_{k+1}=w_k-{\alpha_k}\nabla f_{i_k}(w_k)$. 其中 $i_k$ 是从 $\{1,\cdots,n\}$ 中随机选取。</p>
 <p>(4). 直到满足停止准则。</p>
 </blockquote>
-<p>由于 $i_k$ 为随机选取的，因此 $\beta_k$ 为一个随机过程，下面证明其算法的收敛性。</p>
+<p>由于 $i_k$ 为随机选取的，因此 $w_k$ 为一个随机过程，下面证明其算法的收敛性。</p>
 <p>我们设 $\xi_k$ 为第 $k$ 次迭代随机选择的样本（是一个随机变量）。不失一般性，设</p>
 <blockquote>
 <script type="math/tex; mode=display">
-F(\beta)=\left\{\begin{array}{c}R(\beta)=\mathbb{E}[f(\beta; \xi)] \\ \text { or } \\ R_{n}(\beta)=\frac{1}{n} \sum_{i=1}^{n} f_{i}(\beta)\end{array}\right.</script></blockquote>
+F(w)=\left\{\begin{array}{c}R(w)=\mathbb{E}[f(w; \xi)] \\ \text { or } \\ R_{n}(w)=\frac{1}{n} \sum_{i=1}^{n} f_{i}(w)\end{array}\right.</script></blockquote>
 <p>若迭代过程中，每次选择 $n_k$ 个样本，则该方程称为小批量梯度下降法。不是一般性，为了使算法包含随机梯度，小批量梯度下降，随机牛顿（拟牛顿）的情况，令：</p>
 <blockquote>
 <script type="math/tex; mode=display">
-g\left(\beta_{k}, \xi_{k}\right)=\left\{\begin{array}{l}
-\nabla f\left(\beta_{k} ; \xi_{k}\right) \\
-\frac{1}{n_{k}} \sum_{i=1}^{n_{k}} \nabla f\left(\beta_{k} ; \xi_{k, i}\right) \\
-H_{k} \frac{1}{n_{k}} \sum_{i=1}^{n_{k}} \nabla f\left(\beta_{k} ; \xi_{k, i}\right)
+g\left(w_{k}, \xi_{k}\right)=\left\{\begin{array}{l}
+\nabla f\left(w_{k} ; \xi_{k}\right) \\
+\frac{1}{n_{k}} \sum_{i=1}^{n_{k}} \nabla f\left(w_{k} ; \xi_{k, i}\right) \\
+H_{k} \frac{1}{n_{k}} \sum_{i=1}^{n_{k}} \nabla f\left(w_{k} ; \xi_{k, i}\right)
 \end{array}\right.</script></blockquote>
-<p>则每次迭代为：$\beta_{k+1}=\beta_k-{\alpha_k}g(\beta_k,\xi_k)$</p>
-<p>我们用 $\mathbb E_{\xi_k}[\cdot]$ 表示在已知迭代序列 $\beta_k$ 下，关于 $\xi_k$ 的期望。用 $E$ 表示所有随机变量的联合分布的期望值，即 $\mathbb E[F(\beta_k)]=\mathbb{E}_{\xi_{1}}\mathbb{E}_{\xi_{2}}\cdots\mathbb{E}_{\xi_{k-1}}[F(\beta_k)]$</p>
+<p>则每次迭代为：$w_{k+1}=w_k-{\alpha_k}g(w_k,\xi_k)$</p>
+<p>我们用 $\mathbb E_{\xi_k}[\cdot]$ 表示在已知迭代序列 $w_k$ 下，关于 $\xi_k$ 的期望。用 $E$ 表示所有随机变量的联合分布的期望值，即 $\mathbb E[F(w_k)]=\mathbb{E}_{\xi_{1}}\mathbb{E}_{\xi_{2}}\cdots\mathbb{E}_{\xi_{k-1}}[F(w_k)]$</p>
 <p>做下列假设：</p>
 <blockquote>
-<p>假设1：目标函数 $F$ 是连续可微的，并且偏导满足 Lipschitz 连续条件：对任意的 $\beta,\bar{\beta}$, 有 $|\nabla F(\beta )-\nabla F(\bar{\beta})|_{2} \leq L|\beta-\bar{\beta}|_{2}$.</p>
+<p>假设1：目标函数 $F$ 是连续可微的，并且偏导满足 Lipschitz 连续条件：对任意的 $w,\bar{w}$, 有 $|\nabla F(w )-\nabla F(\bar{w})|_{2} \leq L|w-\bar{w}|_{2}$.</p>
 <p>假设2：对于目标函数 $F$，和随机梯度下降算法满足以下条件：</p>
-<p>(1). 迭代序列 $\{\beta_k\}$ 属于一个开集中，并且在这个开集满足 $F$ 有下界 $F_{inf}$。</p>
-<p>(2). 存在常数 $\mu_G\ge \mu&gt;0$ , 满足对任意的 $k\in\mathbb{N},$ 有$<br>\nabla F\left(\beta_{k}\right)^{T} \mathbb{E}_{\xi_{k}}\left[g\left(\beta_{k}, \xi_{k}\right)\right] \geq \mu\left|\nabla F\left(\beta_{k}\right)\right|_{2}^{2},<br>\left|\mathbb{E}_{\xi_{k}}\left[g\left(\beta_{k}, \xi_{k}\right)\right]\right|_{2} \leq \mu_{G}\left|\nabla F\left(\beta_{k}\right)\right|_{2}<br>$</p>
-<p>(3). 存在常数 $M\ge0,M_V\ge0$, 对任意的 $k\in\mathbb{N}$ , 有：$\mathbb{V}_{\xi_{k}}\left[g\left(\beta_{k}, \xi_{k}\right)\right] \leq M+M_{V}\left|\nabla F\left(\beta_{k}\right)\right|_{2}^{2}$，其中 $\mathbb{V}_{\xi_{k}}\left[g\left(\beta_{k}, \xi_{k}\right)\right]:=\mathbb{E}_{\xi_{k}}\left[\left|g\left(\beta_{k}, \xi_{k}\right)\right|_{2}^{2}\right]-\left|\mathbb{E}_{\xi_{k}}\left[g\left(\beta_{k}, \xi_{k}\right)\right]\right|_{2}^{2}$.</p>
+<p>(1). 迭代序列 $\{w_k\}$ 属于一个开集中，并且在这个开集满足 $F$ 有下界 $F_{inf}$。</p>
+<p>(2). 存在常数 $\mu_G\ge \mu&gt;0$ , 满足对任意的 $k\in\mathbb{N},$ 有$<br>\nabla F\left(w_{k}\right)^{T} \mathbb{E}_{\xi_{k}}\left[g\left(w_{k}, \xi_{k}\right)\right] \geq \mu\left|\nabla F\left(w_{k}\right)\right|_{2}^{2},<br>\left|\mathbb{E}_{\xi_{k}}\left[g\left(w_{k}, \xi_{k}\right)\right]\right|_{2} \leq \mu_{G}\left|\nabla F\left(w_{k}\right)\right|_{2}<br>$</p>
+<p>(3). 存在常数 $M\ge0,M_V\ge0$, 对任意的 $k\in\mathbb{N}$ , 有：$\mathbb{V}_{\xi_{k}}\left[g\left(w_{k}, \xi_{k}\right)\right] \leq M+M_{V}\left|\nabla F\left(w_{k}\right)\right|_{2}^{2}$，其中 $\mathbb{V}_{\xi_{k}}\left[g\left(w_{k}, \xi_{k}\right)\right]:=\mathbb{E}_{\xi_{k}}\left[\left|g\left(w_{k}, \xi_{k}\right)\right|_{2}^{2}\right]-\left|\mathbb{E}_{\xi_{k}}\left[g\left(w_{k}, \xi_{k}\right)\right]\right|_{2}^{2}$.</p>
 </blockquote>
-<p>其中条件2的2是为了保证 $-g(\beta_k,\xi_k)$ 能使 $F$ 的梯度从 $\beta_k$ 开始是足够的下降方向，并且其范数与梯度范数相当。若 $g(\beta_k,\xi_k)$ 是 $\nabla F(\beta_k)$ 的无偏估计，则显然 $\mu_G=\mu=1$. 条件2的3是为了限制 $g(\beta_k,\xi_k)$ 的方差，但允许它关于梯度二次增长。为了简单起见，我们对 $F$ 做一个强凸性假设：</p>
+<p>其中条件2的2是为了保证 $-g(w_k,\xi_k)$ 能使 $F$ 的梯度从 $w_k$ 开始是足够的下降方向，并且其范数与梯度范数相当。若 $g(w_k,\xi_k)$ 是 $\nabla F(w_k)$ 的无偏估计，则显然 $\mu_G=\mu=1$. 条件2的3是为了限制 $g(w_k,\xi_k)$ 的方差，但允许它关于梯度二次增长。为了简单起见，我们对 $F$ 做一个强凸性假设：</p>
 <blockquote>
-<p>假设3：函数 $F$ 是强凸的，即存在常数 $c$ 满足对任意的 $\beta,\bar{\beta}$, 有 $F(\bar{\beta})\ge F(\beta)+\nabla F(\beta)^T(\bar{\beta}-\beta)+\frac 12c|\bar{\beta}-\beta|_2^2$.</p>
+<p>假设3：函数 $F$ 是强凸的，即存在常数 $c$ 满足对任意的 $w,\bar{w}$, 有 $F(\bar{w})\ge F(w)+\nabla F(w)^T(\bar{w}-w)+\frac 12c|\bar{w}-w|_2^2$.</p>
 </blockquote>
-<p>在强凸性假设的存在下， $F$ 将存在最小值点 $\beta^*$, 并且 $F^*:=F(\beta^*)=F_{inf}$</p>
+<p>在强凸性假设的存在下， $F$ 将存在最小值点 $w^*$, 并且 $F^*:=F(w^*)=F_{inf}$</p>
 <h2 id="收敛性"><a href="#收敛性" class="headerlink" title="收敛性"></a>收敛性</h2><p>显然，在条件1的假设下我们有：</p>
 <blockquote>
 <script type="math/tex; mode=display">
-\begin{aligned} F\left(\beta_{k+1}\right)-F\left(\beta_{k}\right) & \leq \nabla F\left(\beta_{k}\right)^{T}\left(\beta_{k+1}-\beta_{k}\right)+\frac{1}{2} L\left\|\beta_{k+1}-\beta_{k}\right\|_{2}^{2} \\ & \leq-\alpha_{k} \nabla F\left(\beta_{k}\right)^{T} g\left(\beta_{k}, \xi_{k}\right)+\frac{1}{2} \alpha_{k}^{2} L\left\|g\left(\beta_{k}, \xi_{k}\right)\right\|_{2}^{2} \end{aligned}</script></blockquote>
+\begin{aligned} F\left(w_{k+1}\right)-F\left(w_{k}\right) & \leq \nabla F\left(w_{k}\right)^{T}\left(w_{k+1}-w_{k}\right)+\frac{1}{2} L\left\|w_{k+1}-w_{k}\right\|_{2}^{2} \\ & \leq-\alpha_{k} \nabla F\left(w_{k}\right)^{T} g\left(w_{k}, \xi_{k}\right)+\frac{1}{2} \alpha_{k}^{2} L\left\|g\left(w_{k}, \xi_{k}\right)\right\|_{2}^{2} \end{aligned}</script></blockquote>
 <p>两边取期望可以得到：</p>
 <blockquote>
 <script type="math/tex; mode=display">
-\mathbb{E}_{\xi_{k}}\left[F\left(\beta_{k+1}\right)\right]-F\left(\beta_{k}\right) \leq-\alpha_{k} \nabla F\left(\beta_{k}\right)^{T} \mathbb{E}_{\xi_{k}}\left[g\left(\beta_{k}, \xi_{k}\right)\right]+\frac{1}{2} \alpha_{k}^{2} L \mathbb{E}_{\xi_{k}}\left[\left\|g\left(\beta_{k}, \xi_{k}\right)\right\|_{2}^{2}\right]\tag{1}</script></blockquote>
+\mathbb{E}_{\xi_{k}}\left[F\left(w_{k+1}\right)\right]-F\left(w_{k}\right) \leq-\alpha_{k} \nabla F\left(w_{k}\right)^{T} \mathbb{E}_{\xi_{k}}\left[g\left(w_{k}, \xi_{k}\right)\right]+\frac{1}{2} \alpha_{k}^{2} L \mathbb{E}_{\xi_{k}}\left[\left\|g\left(w_{k}, \xi_{k}\right)\right\|_{2}^{2}\right]\tag{1}</script></blockquote>
 <p>又由条件2的2、3，有：</p>
 <blockquote>
 <script type="math/tex; mode=display">
@@ -334,53 +334,53 @@ H_{k} \frac{1}{n_{k}} \sum_{i=1}^{n_{k}} \nabla f\left(\beta_{k} ; \xi_{k, i}\ri
 <blockquote>
 <script type="math/tex; mode=display">
 \begin{aligned}
-\mathbb{E}_{\xi_{k}}\left[F\left(\beta_{k+1}\right)\right]-F\left(\beta_{k}\right) & \leq-\alpha_{k} \nabla F\left(\beta_{k}\right)^{T} \mathbb{E}_{\xi_{k}}\left[g\left(\beta_{k}, \xi_{k}\right)\right]+\frac{1}{2} \alpha_{k}^{2} L \mathbb{E}_{\xi_{k}}\left[\left\|g\left(\beta_{k}, \xi_{k}\right)\right\|_{2}^{2}\right] \\
-& \leq-\mu \alpha_{k}\left\|\nabla F\left(\beta_{k}\right)\right\|_{2}^{2}+\frac{1}{2} \alpha_{k}^{2} L \mathbb{E}_{\xi_{k}}\left[\left\|g\left(\beta_{k}, \xi_{k}\right)\right\|_{2}^{2}\right]\\
-&\le-(\mu-\frac12\alpha_kLM_G)\alpha_k\|\nabla F(\beta_k)\|_2^2+\frac12\alpha_k^2LM
+\mathbb{E}_{\xi_{k}}\left[F\left(w_{k+1}\right)\right]-F\left(w_{k}\right) & \leq-\alpha_{k} \nabla F\left(w_{k}\right)^{T} \mathbb{E}_{\xi_{k}}\left[g\left(w_{k}, \xi_{k}\right)\right]+\frac{1}{2} \alpha_{k}^{2} L \mathbb{E}_{\xi_{k}}\left[\left\|g\left(w_{k}, \xi_{k}\right)\right\|_{2}^{2}\right] \\
+& \leq-\mu \alpha_{k}\left\|\nabla F\left(w_{k}\right)\right\|_{2}^{2}+\frac{1}{2} \alpha_{k}^{2} L \mathbb{E}_{\xi_{k}}\left[\left\|g\left(w_{k}, \xi_{k}\right)\right\|_{2}^{2}\right]\\
+&\le-(\mu-\frac12\alpha_kLM_G)\alpha_k\|\nabla F(w_k)\|_2^2+\frac12\alpha_k^2LM
 \end{aligned}\tag{3}</script></blockquote>
-<p>由假设3容易推出对任意的 $\beta$ ：</p>
+<p>由假设3容易推出对任意的 $w$ ：</p>
 <blockquote>
 <script type="math/tex; mode=display">
-2 c\left(F(\beta)-F_{*}\right) \leq\|\nabla F(\beta)\|_{2}^{2}\tag{4}</script></blockquote>
+2 c\left(F(w)-F_{*}\right) \leq\|\nabla F(w)\|_{2}^{2}\tag{4}</script></blockquote>
 <h3 id="固定步长"><a href="#固定步长" class="headerlink" title="固定步长"></a>固定步长</h3><p>下面给出确定性步长的收敛性结果：</p>
 <blockquote>
 <p>定理1：在假设1、2、3下，若随机梯度下降法采用固定步长 $\alpha_k = \bar{\alpha}$，且满足 </p>
 <script type="math/tex; mode=display">
 0<\bar{\alpha}\le \frac{\mu}{LM_G}\tag{5}</script><p>则期望下与最优值的误差满足：</p>
-<p>$\mathbb{E}\left[F\left(\beta_{k}\right)-F_{*}\right] \leq \frac{\bar{\alpha} L M}{2 c \mu}+(1-\bar{\alpha} c \mu)^{k-1}\left(F\left(\beta_{1}\right)-F_{*}-\frac{\bar{\alpha} L M}{2 c \mu}\right) \xrightarrow{k\to\infty}\frac {\bar{\alpha}LM}{2c\mu}\tag{6}$</p>
+<p>$\mathbb{E}\left[F\left(w_{k}\right)-F_{*}\right] \leq \frac{\bar{\alpha} L M}{2 c \mu}+(1-\bar{\alpha} c \mu)^{k-1}\left(F\left(w_{1}\right)-F_{*}-\frac{\bar{\alpha} L M}{2 c \mu}\right) \xrightarrow{k\to\infty}\frac {\bar{\alpha}LM}{2c\mu}\tag{6}$</p>
 </blockquote>
 <p>由 (3)(4)(5) 可得：</p>
 <blockquote>
 <script type="math/tex; mode=display">
 \begin{aligned}
-\mathbb{E}_{\xi_{k}}\left[F\left(\beta_{k+1}\right)\right]-F\left(\beta_{k}\right) & \leq-(\mu-\frac12\alpha_kLM_G)\alpha_k\|\nabla F(\beta_k)\|_2^2+\frac12\alpha_k^2LM\\
-&\le-\frac 12 \bar{\alpha}\mu\|\nabla F(\beta_k)\|_2^2+\frac12\bar{\alpha}^2LM\\
-&\le -\bar{\alpha}c\mu(F(\beta_k)-F^*)+\frac12\bar{\alpha}^2LM
+\mathbb{E}_{\xi_{k}}\left[F\left(w_{k+1}\right)\right]-F\left(w_{k}\right) & \leq-(\mu-\frac12\alpha_kLM_G)\alpha_k\|\nabla F(w_k)\|_2^2+\frac12\alpha_k^2LM\\
+&\le-\frac 12 \bar{\alpha}\mu\|\nabla F(w_k)\|_2^2+\frac12\bar{\alpha}^2LM\\
+&\le -\bar{\alpha}c\mu(F(w_k)-F^*)+\frac12\bar{\alpha}^2LM
 \end{aligned}\tag{7}</script></blockquote>
 <p>两边同时减去 $F^*$ 并取期望的：</p>
 <blockquote>
 <script type="math/tex; mode=display">
-\mathbb E[F(\beta_{k+1})-F^*]\le (1-\bar{\alpha}c\mu)\mathbb E[F(\beta_k)-F^*]+\frac12\bar{\alpha}^2LM</script></blockquote>
+\mathbb E[F(w_{k+1})-F^*]\le (1-\bar{\alpha}c\mu)\mathbb E[F(w_k)-F^*]+\frac12\bar{\alpha}^2LM</script></blockquote>
 <p>因此两边同时减掉 $\bar{\alpha}LM/(2c\mu)$ ，可得：</p>
 <blockquote>
 <script type="math/tex; mode=display">
 \begin{aligned}
-\mathbb{E}\left[F\left(\beta_{k+1}\right)-F_{*}\right]-\frac{\bar{\alpha} L M}{2 c \mu} & \leq(1-\bar{\alpha} c \mu) \mathbb{E}\left[F\left(\beta_{k}\right)-F_{*}\right]+\frac{\bar{\alpha}^{2} L M}{2}-\frac{\bar{\alpha} L M}{2 c \mu} \\
-&=(1-\bar{\alpha} c \mu)\left(\mathbb{E}\left[F\left(\beta_{k}\right)-F_{*}\right]-\frac{\bar{\alpha} L M}{2 c \mu}\right)
+\mathbb{E}\left[F\left(w_{k+1}\right)-F_{*}\right]-\frac{\bar{\alpha} L M}{2 c \mu} & \leq(1-\bar{\alpha} c \mu) \mathbb{E}\left[F\left(w_{k}\right)-F_{*}\right]+\frac{\bar{\alpha}^{2} L M}{2}-\frac{\bar{\alpha} L M}{2 c \mu} \\
+&=(1-\bar{\alpha} c \mu)\left(\mathbb{E}\left[F\left(w_{k}\right)-F_{*}\right]-\frac{\bar{\alpha} L M}{2 c \mu}\right)
 \end{aligned}\tag{8}</script></blockquote>
 <p>由 (5) 可知：</p>
 <blockquote>
 <script type="math/tex; mode=display">
 0<\bar{\alpha} c \mu \leq \frac{c \mu^{2}}{L M_{G}} \leq \frac{c \mu^{2}}{L \mu^{2}}=\frac{c}{L} \leq 1\tag{9}</script></blockquote>
 <p>得证。</p>
-<p>如果 $g(\beta_k,\xi_k)$ 是 $\nabla F(\beta_k)$ 的无偏估计，则 $\mu_G=\mu=1$, 又若 $g(\beta_k,\xi_k)$ 不含噪声的话，则 $M_G=1$, 在这种情况下，$\bar{\alpha}\in (0,1/L]$ , 与经典的批量梯度下降算法一致。</p>
-<p>可以看到若采用固定步长的随机梯度下降算法，则最终将不会收敛到最优值，而与最优值之间相差 $\frac{\bar{\alpha}LM}{2c\mu} $. 若梯度计算中没有噪声，或者噪声随着 $|\nabla F(\beta_k)|_2^2$ 衰减到 $0$ (即 $M=0$ .)。则可以得到最优值的线性收敛。 这是具有足够小的正步长的批量梯度方法的标准结果。当梯度计算有噪声时，显然会失去这一特性。 但我们仍然可以使用固定的步长，并确保预期的目标值将线性收敛到最优值的邻域，在某一点之后，梯度估计中的噪声阻止了进一步的进展。选择较小的步长会使收敛速度中的收缩常数恶化，但允许接近最优值。</p>
+<p>如果 $g(w_k,\xi_k)$ 是 $\nabla F(w_k)$ 的无偏估计，则 $\mu_G=\mu=1$, 又若 $g(w_k,\xi_k)$ 不含噪声的话，则 $M_G=1$, 在这种情况下，$\bar{\alpha}\in (0,1/L]$ , 与经典的批量梯度下降算法一致。</p>
+<p>可以看到若采用固定步长的随机梯度下降算法，则最终将不会收敛到最优值，而与最优值之间相差 $\frac{\bar{\alpha}LM}{2c\mu} $. 若梯度计算中没有噪声，或者噪声随着 $|\nabla F(w_k)|_2^2$ 衰减到 $0$ (即 $M=0$ .)。则可以得到最优值的线性收敛。 这是具有足够小的正步长的批量梯度方法的标准结果。当梯度计算有噪声时，显然会失去这一特性。 但我们仍然可以使用固定的步长，并确保预期的目标值将线性收敛到最优值的邻域，在某一点之后，梯度估计中的噪声阻止了进一步的进展。选择较小的步长会使收敛速度中的收缩常数恶化，但允许接近最优值。</p>
 <p>因为这个原因，在实践中选择固定步长时，我们通常采用如下方法：</p>
 <blockquote>
-<p>(1). 选择 $\alpha_1\in(0,\frac{\mu}{LM_G})$, 运行固定步长的随机梯度下降算法。直到迭代从 $k_1=1$ 进行到了 $k_2$ 步。其中 $\beta_{k_2}$ 是当迭代值与最优值之间的差值小于渐进最优值的两倍，即：$\mathbb E[F(\beta_{k_{2}})-F^*]\le 2F_{\alpha_1}$, 其中 $F_{\alpha}:=\frac{\alpha LM}{2c\mu}$。</p>
+<p>(1). 选择 $\alpha_1\in(0,\frac{\mu}{LM_G})$, 运行固定步长的随机梯度下降算法。直到迭代从 $k_1=1$ 进行到了 $k_2$ 步。其中 $w_{k_2}$ 是当迭代值与最优值之间的差值小于渐进最优值的两倍，即：$\mathbb E[F(w_{k_{2}})-F^*]\le 2F_{\alpha_1}$, 其中 $F_{\alpha}:=\frac{\alpha LM}{2c\mu}$。</p>
 <p>(2). 令第 $k_r$ 次迭代后的步长为 $\{\alpha_{r+1}\}=\{\alpha_12^{-r}\}$，依次进行下去。则最终 $\{F_{\alpha_r}\}=\{\frac{\alpha_r LM}{2c\mu}\}\to0$, 即迭代误差最终将趋于 $0$.</p>
 </blockquote>
-<p>进一步分析，可以得到，若采用这种方式 $\mathbb E[F(\beta_{k_{r+1}})-F^*]\le 2F_{\alpha_r}$, 其中 $\mathbb E[F(\beta_{k_r})-F^*]\approx 2F_{\alpha_{r-1}}=4F_{\alpha_r}$.则有定理1的迭代表达式 (8) 可得：</p>
+<p>进一步分析，可以得到，若采用这种方式 $\mathbb E[F(w_{k_{r+1}})-F^*]\le 2F_{\alpha_r}$, 其中 $\mathbb E[F(w_{k_r})-F^*]\approx 2F_{\alpha_{r-1}}=4F_{\alpha_r}$.则有定理1的迭代表达式 (8) 可得：</p>
 <blockquote>
 <script type="math/tex; mode=display">
 \begin{array}{c}
@@ -394,27 +394,27 @@ H_{k} \frac{1}{n_{k}} \sum_{i=1}^{n_{k}} \nabla f\left(\beta_{k} ; \xi_{k, i}\ri
 \alpha_k=\frac{\lambda}{\gamma+k}\tag{11}</script><p>其中 $\lambda&gt;\frac1{c\mu}$, 并且 $\gamma&gt;0,\alpha_1\le \frac{\mu}{LM_G}$.</p>
 <p>则对任意的 $k\in\mathbb N$,满足：</p>
 <script type="math/tex; mode=display">
-\mathbb E[F(\beta_k)-F^*]\le \frac{\nu}{\gamma+k}，\tag{12}</script><p>其中:</p>
+\mathbb E[F(w_k)-F^*]\le \frac{\nu}{\gamma+k}，\tag{12}</script><p>其中:</p>
 <script type="math/tex; mode=display">
-\nu:=\max \left\{\frac{\beta^{2} L M}{2(\beta c \mu-1)},(\gamma+1)\left(F\left(w_{1}\right)-F_{*}\right)\right\}\tag{13}</script></blockquote>
+\nu:=\max \left\{\frac{\lambda^{2} L M}{2(\lambda c \mu-1)},(\gamma+1)\left(F\left(w_{1}\right)-F_{*}\right)\right\}\tag{13}</script></blockquote>
 <p>下面证明之：</p>
 <p>由 (11) 可知 $\alpha_k LM_G\le \alpha_1LM_G\le \mu$，因此通过 (3)(4) 可以得到：</p>
 <blockquote>
 <script type="math/tex; mode=display">
 \begin{aligned}
-\mathbb{E}_{\xi_{k}}\left[F\left(\beta_{k+1}\right)\right]-F\left(\beta_{k}\right) & \leq-(\mu-\frac12\alpha_kLM_G)\alpha_k\|\nabla F(\beta_k)\|_2^2+\frac12\alpha_k^2LM\\
-&\le-\frac 12 \alpha_k\mu\|\nabla F(\beta_k)\|_2^2+\frac12\alpha_k^2LM\\
-&\le -\alpha_kc\mu(F(\beta_k)-F^*)+\frac12\alpha_k^2LM
+\mathbb{E}_{\xi_{k}}\left[F\left(w_{k+1}\right)\right]-F\left(w_{k}\right) & \leq-(\mu-\frac12\alpha_kLM_G)\alpha_k\|\nabla F(w_k)\|_2^2+\frac12\alpha_k^2LM\\
+&\le-\frac 12 \alpha_k\mu\|\nabla F(w_k)\|_2^2+\frac12\alpha_k^2LM\\
+&\le -\alpha_kc\mu(F(w_k)-F^*)+\frac12\alpha_k^2LM
 \end{aligned}\tag{14}</script></blockquote>
 <p>同样的两边减去 $F^*$ 的：</p>
 <blockquote>
 <script type="math/tex; mode=display">
-\mathbb E[F(\beta_{k+1})-F^*]\le (1-\alpha_kc\mu)\mathbb E[F(\beta_k)-F^*]+\frac12\alpha_k^2LM\tag{15}</script></blockquote>
+\mathbb E[F(w_{k+1})-F^*]\le (1-\alpha_kc\mu)\mathbb E[F(w_k)-F^*]+\frac12\alpha_k^2LM\tag{15}</script></blockquote>
 <p>由于当 $k=1$ 时，(12) 显然满足，若对任意的 $k\ge 1$, （12）式成立，则：</p>
 <blockquote>
 <script type="math/tex; mode=display">
 \begin{aligned}
-\mathbb{E}\left[F\left(\beta_{k+1}\right)-F_{*}\right] & \leq\left(1-\frac{\lambda c \mu}{\hat{k}}\right) \frac{\nu}{\hat{k}}+\frac{\lambda{2} L M}{2 \hat{k}^{2}} \quad( \hat{k}:=\gamma+k) \\
+\mathbb{E}\left[F\left(w_{k+1}\right)-F_{*}\right] & \leq\left(1-\frac{\lambda c \mu}{\hat{k}}\right) \frac{\nu}{\hat{k}}+\frac{\lambda{2} L M}{2 \hat{k}^{2}} \quad( \hat{k}:=\gamma+k) \\
 &=\left(\frac{\hat{k}-\lambda c \mu}{\hat{k}^{2}}\right) \nu+\frac{\lambda^{2} L M}{2 \hat{k}^{2}} \\
 &=\left(\frac{\hat{k}-1}{\hat{k}^{2}}\right) \nu \underbrace{-\left(\frac{\lambda c \mu-1}{\hat{k}^{2}}\right) \nu+\frac{\lambda^{2} L M}{2 \hat{k}^{2}}}_{\text {因为 $\nu$ 的非负性}} \leq \frac{\nu}{\hat{k}+1}
 \end{aligned}</script><p>其中最后一个不等式是因为 $\hat{k}^2\ge (\hat{k}+1)(\hat{k}-1)$.</p>
@@ -423,11 +423,11 @@ H_{k} \frac{1}{n_{k}} \sum_{i=1}^{n_{k}} \nabla f\left(\beta_{k} ; \xi_{k, i}\ri
 <p>实际上当迭代步长满足 $\sum_{k=1}^{\infty}\alpha_k=\infty,\sum_{k=1}^{\infty}\alpha_k^2&lt;\infty$ 时，仍能证明迭代算法满足收敛性。在实践中，一般会线性衰减迭代步长直到第 $l$ 次迭代：$\alpha_k=(1-\nu)\alpha_1+\nu\alpha_l$, 其中 $\nu=\frac{k}{l}$, 在第 $l$ 步迭代之后，一般使 $\alpha$ 保持常数。通常 $\alpha_l$ 应设为大约 $\alpha_1$的百分之一。</p>
 <blockquote>
 <p><strong>remark1</strong>：两种步长选取方法中强凸性所起到的作用不一样。在固定步长中，步长的上界与$c$ 无关。在递减步长的方法中，$\alpha_1$ 的上界仍与 $c$ 无关，但是步长参数 $\lambda$ 必须要大于 $\frac1{c\mu}$.这是至关重要的。 </p>
-<p><strong>remark2</strong>：初始点所起到的作用。在固定步长的情况下，初始差距 $F(\beta_1)-F^*$ 将以指数递减形式出现。而在递减步长的情况下，可以简单的消除初始作用点的影响。例如假设从一个固定步长 $\bar{\alpha}$ 开始运行随机梯度下降算法。直到得到一个点 $\beta_1$ ，满足 $F(\beta_1)-F^*\le \bar{\alpha}LM/(2c\mu)$. 然后令 $\alpha_1=\bar{\alpha}$，选择定理2选择 $\lambda,\gamma$.则：$(\gamma+1) \mathbb{E}\left[F\left(\beta_{1}\right)-F_{*}\right] \leq \lambda \alpha_{1}^{-1} \frac{\alpha_{1} L M}{2 c \mu}=\frac{\lambda L M}{2 c \mu}&lt;\frac{\lambda^{2} L M}{2(\lambda c \mu-1)}$. 也就是说初始点 $\beta_1$ 的作用将消失。</p>
-<p><strong>remark3</strong>：随机梯度下降算法和小批量随机梯度下降算法的比较。假设 $n_k$ 为第 $k$ 次迭代，小批量算法所使用的样本个数， $n_k\ll n$. 则 $g(\beta_k,\xi_k)$ 将比随机梯度下降算法增加 $n_k$ 倍的计算量。另一方面，由于选择样本迭代所带来的方差将减为 $1/n_k$. 也就是说 $M,M_V$ 将变为 $M/n_k,M_V/n_k$, 为了方便起见，考虑固定步长的迭代算法，则小批量梯度下降算法将有：</p>
-<p>$\mathbb{E}\left[F\left(\beta_{k}\right)-F_{*}\right] \leq \frac{\bar{\alpha} L M}{2 c \mu n_{k}}+[1-\bar{\alpha} c \mu]^{k-1}\left(F\left(\beta_{1}\right)-F_{*}-\frac{\bar{\alpha} L M}{2 c \mu n_{k}}\right)$</p>
+<p><strong>remark2</strong>：初始点所起到的作用。在固定步长的情况下，初始差距 $F(w_1)-F^*$ 将以指数递减形式出现。而在递减步长的情况下，可以简单的消除初始作用点的影响。例如假设从一个固定步长 $\bar{\alpha}$ 开始运行随机梯度下降算法。直到得到一个点 $w_1$ ，满足 $F(w_1)-F^*\le \bar{\alpha}LM/(2c\mu)$. 然后令 $\alpha_1=\bar{\alpha}$，选择定理2选择 $\lambda,\gamma$.则：$(\gamma+1) \mathbb{E}\left[F\left(w_{1}\right)-F_{*}\right] \leq \lambda \alpha_{1}^{-1} \frac{\alpha_{1} L M}{2 c \mu}=\frac{\lambda L M}{2 c \mu}&lt;\frac{\lambda^{2} L M}{2(\lambda c \mu-1)}$. 也就是说初始点 $w_1$ 的作用将消失。</p>
+<p><strong>remark3</strong>：随机梯度下降算法和小批量随机梯度下降算法的比较。假设 $n_k$ 为第 $k$ 次迭代，小批量算法所使用的样本个数， $n_k\ll n$. 则 $g(w_k,\xi_k)$ 将比随机梯度下降算法增加 $n_k$ 倍的计算量。另一方面，由于选择样本迭代所带来的方差将减为 $1/n_k$. 也就是说 $M,M_V$ 将变为 $M/n_k,M_V/n_k$, 为了方便起见，考虑固定步长的迭代算法，则小批量梯度下降算法将有：</p>
+<p>$\mathbb{E}\left[F\left(w_{k}\right)-F_{*}\right] \leq \frac{\bar{\alpha} L M}{2 c \mu n_{k}}+[1-\bar{\alpha} c \mu]^{k-1}\left(F\left(w_{1}\right)-F_{*}-\frac{\bar{\alpha} L M}{2 c \mu n_{k}}\right)$</p>
 <p>在随机梯度下降算法中，取步长为 $\bar{\alpha}/n_k$ ，则：</p>
-<p>$\mathbb{E}\left[F\left(\beta_{k}\right)-F_{*}\right] \leq \frac{\bar{\alpha} L M}{2 c \mu n_{k}}+[1-\frac{\bar{\alpha} c \mu}{n_k}]^{k-1}\left(F\left(\beta_{1}\right)-F_{*}-\frac{\bar{\alpha} L M}{2 c \mu n_{k}}\right)$</p>
+<p>$\mathbb{E}\left[F\left(w_{k}\right)-F_{*}\right] \leq \frac{\bar{\alpha} L M}{2 c \mu n_{k}}+[1-\frac{\bar{\alpha} c \mu}{n_k}]^{k-1}\left(F\left(w_{1}\right)-F_{*}-\frac{\bar{\alpha} L M}{2 c \mu n_{k}}\right)$</p>
 <p>也就是说在与 $F^*$ 相同逼近程度下，小批量梯度下降算法虽然每次迭代增加了 $n_k$ 倍的计算量，但将比随机梯度下降算法减少 $n_k$ 倍的迭代量。因此从这方面来看，两种算法的运算量差不多。但是在实际运算中，考虑到GPU的运算效率，小批量梯度下降算法相较于随机梯度下降算法仍有优势。</p>
 </blockquote>
 <p>由于随机梯度下降算法和小批量梯度下降算法在学习过程中加入了噪声，因此它们会有一些正则化的效果。而泛化误差通常在随机梯度下降算法时最好（即批量大小为1时）。</p>

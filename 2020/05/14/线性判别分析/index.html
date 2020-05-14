@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="会飞的猪">
+
+
+
+
+
+<link rel="stylesheet" href="/fonts/iconfont_new/iconfont.css">
+
+
+<title>线性判别分析（LDA） | 会飞的猪</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+            <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+        
+    
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">会飞的猪</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">文章</a>
+                
+                    <a class="menu-item" href="/categories">分类</a>
+                
+                    <a class="menu-item" href="/tags">标签</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">会飞的猪</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">文章</a>
+                
+                    <a class="menu-item" href="/categories">分类</a>
+                
+                    <a class="menu-item" href="/tags">标签</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">展开目录</a>
+        <a onclick="go_top()">回到顶部</a>
+        <a onclick="go_bottom()">到达底部</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">线性判别分析（LDA）</h1>
+            
+                <div class="post-meta">
+                    
+                        作者: <a itemprop="author" rel="author" href="/">会飞的猪</a>
+                    
+
+                    
+                        <span class="post-time">
+                        时间: <a href="#">五月 14, 2020&nbsp;&nbsp;10:31:23</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    类别:
+                            
+                                <a href="/categories/%E7%BA%BF%E6%80%A7%E5%88%86%E7%B1%BB%E6%A8%A1%E5%9E%8B/">-线性分类模型</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                            <span class="post-meta-item-icon">
+                              <i class="fa fa-keyboard-o"></i>
+                              <span class="post-meta-item-text">  字数统计: </span>
+                              <span class="post-count"><a href="#">1.8k字</a></span>
+                            </span>
+                        </span>
+                        <span class="post-time">
+                            <span class="post-meta-item-icon">
+                            <i class="fa fa-hourglass-half"></i>
+                            <span class="post-meta-item-text">  阅读时长: </span>
+                            <span class="post-count"><a href="#">8分</a></span>
+                            </span>
+                        </span>
+                    
+
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="二分类的线性判别分析"><a href="#二分类的线性判别分析" class="headerlink" title="二分类的线性判别分析"></a>二分类的线性判别分析</h1><h2 id="问题建模"><a href="#问题建模" class="headerlink" title="问题建模"></a>问题建模</h2><p>线性判别分析的思想是，假设有一个 $m$ 维的输入向量，我们希望它投影到一条一维直线上 $y=w^Tx$, 使得同类样本点的投影尽可能的接近，不同类样本点的投影尽可能的远离。</p>
+<p>我们假设问题中 $\mathcal C_1$ 类有 $N_1$ 个点， $\mathcal C_2$ 类有 $N_2$ 个点，因此设两个类的向量均值为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+m_{1}=\frac{1}{N_{1}} \sum_{n \in \mathcal{C}_{1}} x_{n}, \quad m_{2}=\frac{1}{N_{2}} \sum_{n \in \mathcal{C}_{2}} x_{n}\tag{1}</script></blockquote>
+<p>因此投影后的均值差为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\bar{m}_2-\bar{m}_1=w^T(m_2-m_1)\tag{2}</script></blockquote>
+<p>而类间方差可以定义为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+S_B=(m_2-m_1)(m_2-m_1)^T</script></blockquote>
+<p>又设两个类别的组内方差为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\Sigma_1=\sum_{x\in\mathcal C_1}(x-m_1)(x-m_1)^T,\quad\Sigma_2=\sum_{x\in\mathcal C_2}(x-m_2)(x-m_2)^T\tag{3}</script></blockquote>
+<p>因此投影之后的组内方差为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+S_1=w^T\Sigma_1w,\quad S_2=w^T\Sigma_2w\tag{4}</script></blockquote>
+<p>由于我们的目标是要使同类样本点的投影尽可能的接近，不同类样本点的投影尽可能的远离。因此可以将效用函数定义为类间方差和组内方差的比值：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+J(w)=\frac{w^TS_Bw}{w^TS_Ww}\tag{5}</script></blockquote>
+<p>其中 $S_W=S_1+S_2$。即 $S_B$ 和 $S_W $ 的广义瑞利商。</p>
+<h2 id="极值求解"><a href="#极值求解" class="headerlink" title="极值求解"></a>极值求解</h2><p>由于 (5) 式的分子分母都是 $w$ 的二次项，因此解与 $w$ 的长度无关，而只与其方向有关，不失一般性，令 $w^TS_Ww=1$。</p>
+<p>则 (5) 等价于：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\min_w -w^TS_Bw\\
+&\text{s.t.} \ \ \ \ \ w^TS_Bw=1.
+\end{aligned}\tag{6}</script></blockquote>
+<p>利用拉格朗日乘子法可得：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+S_Bw=\lambda S_Ww\tag{7}</script></blockquote>
+<p>由于 $S_Bw=(m_2-m_1)(m_2-m_1)^Tw$ , 即方向在 $m_2-m_1$ 上，因此可以令 $S_Bw=\gamma(m_2-m_1)$.</p>
+<blockquote>
+<script type="math/tex; mode=display">
+w=\frac{\gamma}{\lambda}S_W^{-1}(m_2-m_1)\tag{8}</script></blockquote>
+<p>因此只需要决定直线的方向，则令 $w=S_W^{-1}(m_2-m_1)$. </p>
+<p>由于上述我们要求 $S_W$ 可逆，在实际中可能并不满足（例如图像处理中，维数太高），这时可采用的做法是，先用PCA降维，对降维的数据再用LDA。</p>
+<h2 id="从贝叶斯决策角度来考虑"><a href="#从贝叶斯决策角度来考虑" class="headerlink" title="从贝叶斯决策角度来考虑"></a>从贝叶斯决策角度来考虑</h2><p>考虑概率生成模型，则 $\mathcal C_1$ 的后验概率可以写为:</p>
+<blockquote>
+<script type="math/tex; mode=display">
+p\left(\mathcal{C}_{1} | x\right) =\frac{p\left(x | \mathcal{C}_{1}\right) p\left(\mathcal{C}_{1}\right)}{p\left(x | \mathcal{C}_{1}\right) p\left(\mathcal{C}_{1}\right)+p\left(x | \mathcal{C}_{2}\right) p\left(\mathcal{C}_{2}\right)}\tag{9}</script></blockquote>
+<p>若使用Sigmod函数来表示，则</p>
+<blockquote>
+<script type="math/tex; mode=display">
+p\left(\mathcal{C}_{1} | x\right)=\frac{1}{1+\exp (-a)}=\sigma(a)\tag{10}</script></blockquote>
+<p>其中 $a=\ln\frac{p(x|\mathcal C_1)p(\mathcal C_1)}{p(x|\mathcal C_2)p(\mathcal C_2)}$.</p>
+<p>下面我们假设两类数据满足独立的高斯分布，且同方差，即：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+p\left(x | \mathcal{C}_{k}\right)=\frac{1}{(2 \pi)^{\frac{m}{2}}} \frac{1}{|\Sigma|^{\frac{1}{2}}} \exp \left\{-\frac{1}{2}\left(x-\mu_{k}\right)^{T} \Sigma^{-1}\left(x-\mu_{k}\right)\right\}\tag{11}</script></blockquote>
+<p>则由 (11) 我们有：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+p\left(\mathcal{C}_{1} | x\right)=\sigma(w^Tx+w_0)\tag{12}</script></blockquote>
+<p>其中：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{array}{l}
+w=\Sigma^{-1}\left(\mu_{1}-\mu_{2}\right) \\
+w_{0}=-\frac{1}{2} \mu_{1}^{T} \Sigma^{-1} \mu_{1}+\frac{1}{2} \mu_{2}^{T} \Sigma^{-1} \mu_{2}+\ln \frac{p\left(\mathcal{C}_{1}\right)}{p\left(\mathcal{C}_{2}\right)}
+\end{array}\tag{13}</script></blockquote>
+<p>假设我们有⼀个数据集 $\{x_i, y_i\}$，其中 $i = 1,\cdots,n$。令 $y_i = 1$ 表示类别 $\mathcal C_1$，$y_i = 0$ 表示类别 $\mathcal C_2$。 我们把先验概率记作 $ p(\mathcal C_1) = \pi$ ，从而 $p(\mathcal C_2) = 1 − \pi$。因此我们有：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}&p\left(x_{i}, \mathcal{C}_{1}\right)=p\left(\mathcal{C}_{1}\right) p\left(x_{i} | \mathcal{C}_{1}\right)=\pi \mathcal{N}\left(x_{i} | \mu_{1}, \Sigma\right)\\
+&p\left(x_{i}, \mathcal{C}_{2}\right)=p\left(\mathcal{C}_{2}\right) p\left(x_{i} | \mathcal{C}_{2}\right)=(1-\pi) \mathcal{N}\left(x_{i} | \mu_{2}, \Sigma\right)\end{aligned}\tag{14}</script></blockquote>
+<p>于是似然函数为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+L\left(y, X | \pi, \mu_{1}, \mu_{2}, \Sigma\right)=\prod_{i=1}^{n}\left[\pi \mathcal{N}\left(x_{i} | \mu_{1}, \Sigma\right)\right]^{y_{i}}\left[(1-\pi) \mathcal{N}\left(x_{i} | \mu_{2}, \Sigma\right)\right]^{1-y_{i}}\tag{15}</script></blockquote>
+<p>同样的取对数似然函数，考虑 $\pi$ 的最大化，则最大似然函数中关于 $\pi$ 的项为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\sum_{i=1}^{n}\left\{y_{i} \ln \pi+\left(1-y_{i}\right) \ln (1-\pi)\right\}\tag{16}</script></blockquote>
+<p>对 $\pi$ 求偏导为 $0$,可以得到：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\pi=\frac{1}{n}\sum_{i=1}^ny_i=\frac{N_1}n\tag{17}</script></blockquote>
+<p>考虑关于$\mu_1$ 的最大化，则最大似然函数中关于$\mu_1$ 的项为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+-\frac{1}{2} \sum_{i=1}^{n} y_{i}\left(x_{i}-\mu_{1}\right)^{T} \Sigma^{-1}\left(x_{i}-\mu_{1}\right)\tag{18}</script></blockquote>
+<p>令它关于 $\mu_1$ 的偏导为 $0$,</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\mu_1=\frac{1}{N_1}\sum_{i=1}^ny_ix_i\tag{19}</script></blockquote>
+<p>即 $u_1$ 为属于 $\mathcal C_1$ 类的输入向量的均值。</p>
+<p>同理：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\mu_2=\frac{1}{N_2}\sum_{i=1}^n(1-y_i)x_i\tag{20}</script></blockquote>
+<p>最后考虑关于协方差矩阵 $\Sigma$ 的最大似然解，令：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{array}{c}
+S=\frac{N_{1}}{N} S_{1}+\frac{N_{2}}{N}S_{2} \\
+S_{1}=\frac{1}{N_{1}} \sum_{i \in \mathcal C_{1}}\left(x_{i}-\mu_{1}\right)\left(x_{i}-\mu_{1}\right)^{T} \\
+S_{2}=\frac{1}{N_{2}} \sum_{i \in \mathcal C_{2}}\left(x_{i}-\mu_{2}\right)\left(x_{i}-\mu_{2}\right)^{T}
+\end{array}</script></blockquote>
+<p>则与 $\Sigma$ 相关的项为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{array}{l}
+-\frac{1}{2} \sum_{i=1}^{n} y_{i} \ln |\Sigma|-\frac{1}{2} \sum_{i=1}^{n} y_{i}\left(x_{i}-\mu_{1}\right)^{T} \Sigma^{-1}\left(x_{i}-\mu_{1}\right) \\
+-\frac{1}{2} \sum_{i=1}^{n}\left(1-t_{n}\right) \ln |\Sigma|-\frac{1}{2} \sum_{i=1}^{n}\left(1-t_{n}\right)\left(x_{i}-\mu_{2}\right)^{T} \Sigma^{-1}\left(x_{i}-\mu_{2}\right) \\
+=-\frac{N}{2} \ln |\Sigma|-\frac{N}{2} \operatorname{Tr}\left\{\Sigma^{-1} S\right\}
+\end{array}\tag{21}</script></blockquote>
+<p>因此最大似然的解为 $\Sigma=S$</p>
+<p>即 $w=S^{-1}(\mu_1-\mu_2)$ ，则我们有 $w$ 与 LDA 的方向相同。</p>
+<h1 id="多分类的线性判别分析"><a href="#多分类的线性判别分析" class="headerlink" title="多分类的线性判别分析"></a>多分类的线性判别分析</h1><p>假设有 $K$ 个类，每个类有线性投影 $y_k=w_k^Tx$  ,因此可以将 $y_k$ 写成向量 $y$ ,$\{w_k\}$ 写成矩阵 $W$ 的列，因此：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+y=W^Tx\tag{22}</script></blockquote>
+<p>因此可以将组内协方差矩阵扩展到 $K$ 类：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+S_W=\sum_{k=1}^KS_k,\quad S_k=\sum_{i\in\mathcal C_k}(x_i-m_k)(x_i-m_k)^T\tag{23}</script></blockquote>
+<p>其中 $m_k=\frac 1{N_k}\sum_{i\in\mathcal C_k}x_i$.</p>
+<p>针对类间协方差矩阵，我们先考虑整体协方差矩阵：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+S_T=\sum_{i=1}^n(x_i-m)(x_i-m)^T,\quad m=\frac 1n\sum_{i=1}^nx_i=\frac 1N\sum_{k=1}^KN_km_k\tag{24}</script></blockquote>
+<p>将整体协方差矩阵分解：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+S_T=S_W+S_B,\quad S_B=\sum_{k=1}^KN_k(m_k-m)(m_k-m)^T\tag{25}</script></blockquote>
+<p>上述矩阵都是定义在原始空间中的，常见的一种优化目标为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+J(W)=\max_{W}\frac{\operatorname{Tr}(W^TS_WW)}{\operatorname{Tr}(W^TS_BW)}\tag{26}</script></blockquote>
+<p>同样的固定分母的范数为 $1$, 经计算可以得到 $W$ 的 $m$ 列向量满足：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+S_W^{-1}S_Bw_i=\lambda w_i\tag{27}</script></blockquote>
+<p>显然这里我们要求 $S_W$ 可逆，另一方面，$S_B$ 是一个 $K\times K$ 的矩阵，且 $rank((m_k-m)(m_k-m)^T)=1$，则 $rank(S_B)=rank(m_1-m,\cdots,m_K-m)$，又因为存在 $N_1,N_2,\cdots,N_K$ , 使得：$N_1(m_1-m)+\cdots+N_K(m_k-m)=0$，所以 $rank(s_B)&lt;K-1$ ，即 $W$ 最多为 $K-1$ 维。</p>
+<hr>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p>[1] 周志华. 机器学习. 清华大学出版社，2016.1</p>
+<p>[2] 李航. 统计学习方法. 清华大学出版社，2019</p>
+<p>[3] Bishop, Christopher M. <em>Pattern recognition and machine learning</em>. springer, 2006.</p>
+<p>[4] Fukunaga, Keinosuke. <em>Introduction to statistical pattern recognition</em>. Elsevier, 2013.</p>
+
+        </div>
+        
+            <div style="text-align:center;color: rgb(125,125,125);font-size:14px;">
+               -------------本文结束 感谢您的阅读-------------
+            </div>
+        
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>文章作者:</span>
+                        <span>会飞的猪</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>文章链接:</span>
+                        <span><a href="http://shellyandliu.github.io/2020/05/14/%E7%BA%BF%E6%80%A7%E5%88%A4%E5%88%AB%E5%88%86%E6%9E%90/">http://shellyandliu.github.io/2020/05/14/%E7%BA%BF%E6%80%A7%E5%88%A4%E5%88%AB%E5%88%86%E6%9E%90/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>版权声明:</span>
+                        <span>本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC-BY-NC-4.0</a> ， 转载请注明来自 会飞的猪！</span>
+                    </p>
+                
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>标签:</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"> <i class="iconfont icon-tags"></i> 机器学习</a>
+                    
+                        <a href="/tags/%E7%BB%9F%E8%AE%A1/"> <i class="iconfont icon-tags"></i> 统计</a>
+                    
+                        <a href="/tags/%E4%BC%98%E5%8C%96/"> <i class="iconfont icon-tags"></i> 优化</a>
+                    
+                        <a href="/tags/%E5%88%86%E7%B1%BB/"> <i class="iconfont icon-tags"></i> 分类</a>
+                    
+                        <a href="/tags/LDA/"> <i class="iconfont icon-tags"></i> LDA</a>
+                    
+                        <a href="/tags/%E7%BA%BF%E6%80%A7%E5%88%A4%E5%88%AB%E5%88%86%E6%9E%90/"> <i class="iconfont icon-tags"></i> 线性判别分析</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">返回</a>
+                <span> /  </span>
+                <a href="/">首页</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2020/05/13/Logistic%E5%9B%9E%E5%BD%92/">Logistic回归</a>
+            
+        </section>
+        <div class="post-content">
+            <section style="font-size: 20px;font-weight: 700;margin-bottom: 10px;margin-top: 20px;">
+                <i class="iconfont icon-comments"></i>
+                <span>
+                    评论
+                </span>
+            </section>
+        </div>
+        
+            <section id="comments" class="comments">
+              <style>
+                .comments{margin:0px;padding:10px;background:#fff}
+                @media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#fff}}
+              </style>
+              <div class="valine_comment"></div>
+<!--����js����</body>֮ǰ���뼴��-->
+<!--Leancloud ������:-->
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<!--Valine �ĺ��Ĵ����-->
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+      el: '.valine_comment',
+      app_id: 'bCvyxhtL2V59mmqAp81lAGob-gzGzoHsz#Leancloud应用的appId',
+      app_key: 'J4zVKQfUjhToGJwBfLcoOHOv',
+      placeholder: '欢迎大家评论交流~',
+      notify: 'true',
+      verify: 'true',
+    });
+</script>
+            </section>
+        
+        
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 会飞的猪 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

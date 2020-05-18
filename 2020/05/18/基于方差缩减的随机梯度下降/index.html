@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="会飞的猪">
+
+
+
+
+
+<link rel="stylesheet" href="/fonts/iconfont_new/iconfont.css">
+
+
+<title>具有方差缩减的随机梯度下降法 | 会飞的猪</title>
+
+
+
+    <link rel="icon" href="/image/longmao.jpg">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+            <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+        
+    
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">会飞的猪</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">文章</a>
+                
+                    <a class="menu-item" href="/categories">分类</a>
+                
+                    <a class="menu-item" href="/tags">标签</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">会飞的猪</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">文章</a>
+                
+                    <a class="menu-item" href="/categories">分类</a>
+                
+                    <a class="menu-item" href="/tags">标签</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">展开目录</a>
+        <a onclick="go_top()">回到顶部</a>
+        <a onclick="go_bottom()">到达底部</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">具有方差缩减的随机梯度下降法</h1>
+            
+                <div class="post-meta">
+                    
+                        作者: <a itemprop="author" rel="author" href="/">会飞的猪</a>
+                    
+
+                    
+                        <span class="post-time">
+                        时间: <a href="#">五月 18, 2020&nbsp;&nbsp;15:33:03</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    类别:
+                            
+                                <a href="/categories/%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95/">-优化方法</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                            <span class="post-meta-item-icon">
+                              <i class="fa fa-keyboard-o"></i>
+                              <span class="post-meta-item-text">  字数统计: </span>
+                              <span class="post-count"><a href="#">309字</a></span>
+                            </span>
+                        </span>
+                        <span class="post-time">
+                            <span class="post-meta-item-icon">
+                            <i class="fa fa-hourglass-half"></i>
+                            <span class="post-meta-item-text">  阅读时长: </span>
+                            <span class="post-count"><a href="#">1分</a></span>
+                            </span>
+                        </span>
+                    
+
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>随机梯度下降算法通过每次迭代只选取一个或少量样本点进行计算，使得整体计算量大大减少，在实际应用具有较好的效果。但是由于其收到噪声方差的严重影响，当采取固定步长时，最终将不会收敛到最优解，而仅是收敛到最优解的一个领域中，但若使用递减步长序列 $\{\alpha_k\}$ ，收敛性可以得到满足，但是会导致缓慢的、次线性的收敛速度。 因此设计一种能降低方差影响的算法至关重要。</p>
+<h1 id="方差几何递减下的收敛率"><a href="#方差几何递减下的收敛率" class="headerlink" title="方差几何递减下的收敛率"></a>方差几何递减下的收敛率</h1><blockquote>
+<p>定理1：在假设1、2、3的条件下，若假设2的条件3变为存在常数 $M\ge0$ 和 $\zeta\in (0,1)$ , 使得对任意的 $k\in\mathbb N$，有：</p>
+<script type="math/tex; mode=display">
+\mathbb V_{\xi_k}[g(w_k,\xi_k)]\le M\zeta^{k-1}\tag{1}</script><p>假设是固定的学习率 $\alpha_k=\bar{\alpha}$，且 $0&lt;\bar{\alpha}\le \min\{\frac{\mu}{L\mu_G^2},\frac 1{c\mu}\}$, 则对任意 $k\in\mathbb N$ 满足:</p>
+<script type="math/tex; mode=display">
+\mathbb E[F(w_k)-F^*]\le \omega\rho{k-1}\tag{2}</script><p>其中:</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\omega &:=\max \left\{\frac{\bar{\alpha} L M}{c \mu}, F\left(w_{1}\right)-F^{*}\right\} \\
+ \rho &:=\max \left\{1-\frac{\bar{\alpha} c \mu}{2}, \zeta\right\}<1
+\end{aligned}\tag{3}</script></blockquote>
+<p>证明如下：<br>由上一篇文章的式 (1) 为 :</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\mathbb{E}_{\xi_{k}}\left[F\left(w_{k+1}\right)\right]-F\left(w_{k}\right) \leq-\alpha_{k} \nabla F\left(w_{k}\right)^{T} \mathbb{E}_{\xi_{k}}\left[g\left(w_{k}, \xi_{k}\right)\right]+\frac{1}{2} \alpha_{k}^{2} L \mathbb{E}_{\xi_{k}}\left[\left\|g\left(w_{k}, \xi_{k}\right)\right\|_{2}^{2}\right]\tag{4}</script></blockquote>
+<p>我们可得：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\mathbb{E}_{\xi_{k}}\left[F\left(w_{k+1}\right)\right]-F\left(w_{k}\right) & \leq-\mu \bar{\alpha}\left\|\nabla F\left(w_{k}\right)\right\|_{2}^{2}+\frac{1}{2} \bar{\alpha}^{2} L\left(\mu_{G}^{2}\left\|\nabla F\left(w_{k}\right)\right\|_{2}^{2}+M \zeta^{k-1}\right) \\
+& \leq-\left(\mu-\frac{1}{2} \bar{\alpha} L \mu_{G}^{2}\right) \bar{\alpha}\left\|\nabla F\left(w_{k}\right)\right\|_{2}^{2}+\frac{1}{2} \bar{\alpha}^{2} L M \zeta^{k-1} \\
+& \leq-\frac{1}{2} \mu \bar{\alpha}\left\|\nabla F\left(w_{k}\right)\right\|_{2}^{2}+\frac{1}{2} \bar{\alpha}^{2} L M \zeta^{k-1} \\
+& \leq-\bar{\alpha} c \mu\left(F\left(w_{k}\right)-F^{*}\right)+\frac{1}{2} \bar{\alpha}^{2} L M \zeta^{k-1}
+\end{aligned}\tag{5}</script></blockquote>
+<p>因此两边减去 $F^*$ 有：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\mathbb E[F(w_{k+1})-F^*]\le (1-\bar{\alpha}c\mu)\mathbb E[F(w_k)-F^*]+\frac12\bar{\alpha}^2LM\zeta^{k-1}\tag{6}</script></blockquote>
+<p>显然当 $k=1$ 时，(2) 成立，假设当 $k$ 时成立，则</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\mathbb{E}\left[F\left(w_{k+1}\right)-F^{*}\right] & \leq(1-\bar{\alpha} c \mu) \omega \rho^{k-1}+\frac{1}{2} \bar{\alpha}^{2} L M \zeta^{k-1} \\
+&=\omega \rho^{k-1}\left(1-\bar{\alpha} c \mu+\frac{\bar{\alpha}^{2} L M}{2 \omega}\left(\frac{\zeta}{\rho}\right)^{k-1}\right) \\
+& \leq \omega \rho^{k-1}\left(1-\bar{\alpha} c \mu+\frac{\bar{\alpha}^{2} L M}{2 \omega}\right) \\
+& \leq \omega \rho^{k-1}\left(1-\bar{\alpha} c \mu+\frac{\bar{\alpha} c \mu}{2}\right) \\
+&=\omega \rho^{k-1}\left(1-\frac{\bar{\alpha} c \mu}{2}\right) \\
+& \leq \omega \rho^{k}
+\end{aligned}\tag{7}</script></blockquote>
+<p>证毕。</p>
+<p>可以实现方差缩减的方法主要有三大类，分别是动态采样法，梯度聚合法，迭代平均法。其中动态采样和迭代平均由于自身局限性，目前运用不广，下面只介绍梯度聚合法。</p>
+<h1 id="梯度聚合的方法"><a href="#梯度聚合的方法" class="headerlink" title="梯度聚合的方法"></a>梯度聚合的方法</h1><p>梯度聚合方法指通过存储历史梯度，在每次估计梯度时用历史梯度来做修正。下面介绍几种梯度聚合的方法。</p>
+<h2 id="SVRG算法"><a href="#SVRG算法" class="headerlink" title="SVRG算法"></a>SVRG算法</h2><p>SVRG算法 [2] 是 Stochastic Variance Reduced Gradient 的简写，其主要思想是，在第 $k$ 步迭代的时候先计算批量梯度，即 $\nabla R_n(w_k)=\frac{1}{n}\sum_{i=1}^n\nabla f_i(w_k)$, 然后初始化令 $\bar{w}_1=w_k$ , 开始内部的循环：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\bar{w}_{j+1}=\bar w_{j}-\alpha\bar{g}_j\tag{8}</script><script type="math/tex; mode=display">
+\bar{g}_j=\nabla f_{i_j}(\bar w_j)-(\nabla f_{i_j}(w_k)-\nabla R_n(w_k))\tag{9}</script></blockquote>
+<p>其中 $i_j\in\{1,\dots,n\}$ 是随机选取的。这样设计算法的原因是，对于任意的 $i_j\in\{1,\dots,n\}$ , $\nabla f_{i_j}(w_k)$ 的期望就是 $\nabla R_n(w_k)$，则 $\nabla f_{i_j}(w_k)-\nabla R_n(w_k)$ 可以视为梯度估计中的偏差，因此该算法在随机选取计算 $\bar{g}_j$ 的时候，除了计算$\nabla f_{i_j}(\bar{w}_j)$ ，还将对其偏差进行一个校正。总的来说，$\bar g_j$ 是 $\nabla R_n(\bar{w}_j)$ 的一个无偏估计量，并且相较于SGD算法，还有一个对偏差的矫正 $\nabla f_{i_j}(w_k)-\nabla R_n(w_k)$ , 使得其方差减小。这正是 SVRG 命名的原因。</p>
+<blockquote>
+<p>SVRG 算法的具体步骤：</p>
+<ol>
+<li><p>选择迭代初始值 $w_1$ ，迭代步长 $\alpha&gt;0$，和内部迭代数 $m$。</p>
+</li>
+<li><p>在任意的第 $k$ 步迭代时计算批量梯度 $\nabla R_n(w_k)$ ，并令 $\bar{w}_1=w_k$。</p>
+</li>
+<li><p>开始内循环迭代（总共迭代 $m$ 次）：</p>
+<p>a. 在第 $j$ 次迭代过程中 ($j=1,\dots,m$)，在 $\{1,\dots,n\}$ 中等概率的随机选取 $i_j$ 。</p>
+<p>b. 令 $\bar{g}_j=\nabla f_{i_j}(\bar w_j)-(\nabla f_{i_j}(w_k)-\nabla R_n(w_k))$.</p>
+<p>c. 令 $\bar{w}_{j+1}=\bar w_{j}-\alpha\bar{g}_j$.</p>
+</li>
+<li><p>决定 $w_{k+1}$, 有三种决定方式：</p>
+<p>(a). 令 $w_{k+1}=\bar{w}_{m+1}$.</p>
+<p>(b). 令 $w_{k+1}=\frac 1m\sum_{j=1}^m\bar w_{j+1}$.</p>
+<p>(c). 随机的选择 $j\in\{1,\dots,m\}$，令 $w_{k+1}=\bar w_{j}$.</p>
+</li>
+</ol>
+</blockquote>
+<p>下面给出其收敛性的证明：</p>
+<blockquote>
+<p>定理2：假设 $f_i(w)$ 是凸且可微的，并对于任意 $i=1,\dots,n$ , $\nabla f_i(w)$ 是Lipschitz连续的，即存在常数 $L$ 使得：</p>
+<script type="math/tex; mode=display">
+\|\nabla f_i(w)-\nabla f_i(w')\|_2\le L\|w-w'\|_2 ,\quad\forall (w,w')\in \mathbb R^d\tag{10}</script><p>并且假 $R_n(w)$ 是强凸的。则存在常数 $c&gt;0$ ，使得：</p>
+<script type="math/tex; mode=display">
+R_n(w)\ge R_n(w')+\nabla R_n(w)^T(w'-w)+\frac 12 c\|w'-w\|_2^2,\quad\forall (w',w)\in\mathbb R^d\tag{11}</script><p>令 $w^*=\arg\min_wR_n(w)$，取 $\alpha&lt;\frac 1{2L}$ , 假定 $m$ 充分大使得 :</p>
+<script type="math/tex; mode=display">
+\rho = \frac{1}{c\alpha(1-2L\alpha)m}+\frac{2L\alpha}{1-2L\alpha}<1\tag{12}</script><p>则 SVRG 算法在期望下有线性的收敛率，即：</p>
+<script type="math/tex; mode=display">
+\mathbb E[R_n(w_{k+1})-R_n(w^*)]\le \rho \mathbb E[R_n(w_k)-R_n(w^*)]\tag{13}</script></blockquote>
+<p>证明如下：</p>
+<p>由 $\nabla  f_i(w)$ 的Lipschitz连续性，容易得到 (见梯度下降法非强凸情况下的证明)：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+f_i(w^*)-f_i(w)-\nabla f_i(w^*)^T(w^*-w)\le-\frac 1{2L}\|\nabla f_i(w)-\nabla f_i(w^*)\|_2^2\tag{14}</script></blockquote>
+<p>对 $|\nabla f_i(w)-\nabla f_i(w^<em>)|_2^2$ 从 $i=1$ 到 $n$ 求算术平均，并利用 $\nabla R_n(w^</em>)$ 得：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\frac 1n\sum_{i=1}^n\|\nabla f_i(w)-\nabla f_i(w^*)\|_2^2\le 2L[R_n(w)-R_n(w^*)]\tag{15}</script></blockquote>
+<p>由于 $\bar g_j=\nabla f_{i_j}(\bar w_j)-(\nabla f_{i_j}(w_k)-\nabla R_n(w_k))$，我们对其关于 $\bar w_{j-1}$ 取条件期望得：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}\mathbb E_{\bar w_{j-1}}\|\bar g_j\|_2^2\le &2 \mathbb{E}_{\bar w_{j-1}}\left\|\nabla f_{i_{j}}\left(\bar w_{j-1}\right)-\nabla f_{i_{j}}\left(w^{*}\right)\right\|_{2}^{2}\\
+&\quad+2 \mathbb{E}_{\bar w_{j-1}}\left\|\left[\nabla f_{i_{j}}(w_k)-\nabla f_{i_{j}}\left(w^{*}\right)\right]-\nabla R_n(w_k)\right\|_{2}^{2} \\
+=&2 \mathbb{E}_{\bar w_{j-1}}\left\|\nabla f_{i_{j}}\left(\bar w_{j-1}\right)-\nabla f_{i_{j}}\left(w^{*}\right)\right\|_{2}^{2}+2 \mathbb{E}_{\bar w_{j-1}} \|\left[\nabla f_{i_{j}}(w_k)-\nabla f_{i_{j}}\left(w^{*}\right)\right] \\
+&\quad-\mathbb{E}_{\bar w_{j-1}}\left[\nabla f_{i_{j}}(w_k)-\nabla f_{i_{j}}\left(w^{*}\right)\right] \|_{2}^{2} \\
+\leq & 2 \mathbb{E}_{\bar w_{j-1}}\left\|\nabla f_{i_{j}}\left(\bar w_{j-1}\right)-\nabla f_{i_{j}}\left(w^{*}\right)\right\|_{2}^{2}+2 \mathbb{E}_{\bar w_{j-1}}\left\|\nabla f_{i_{j}}(w_k)-\nabla f_{i_{j}}\left(w^{*}\right)\right\|_{2}^{2}\\
+
+\leq & 4 L\left[R_n\left(\bar w_{j-1}\right)-R_n\left(w^{*}\right)+R_n(w_k)-R_n\left(w^{*}\right)\right]
+\end{aligned}\tag{16}</script></blockquote>
+<p>其中第一个不等式运用了不等式 $|a+b|_2^2\le2|a|_2^2+2|b|_2^2$，第二个不等式运用了 $\mathbb E|\xi-\mathbb E\xi|_2^2=\mathbb E|\xi|_2^2-|\mathbb E\xi|_2^2\le \mathbb E|\xi|_2^2$，最后一个不等式运用了 (15)。</p>
+<p>又因为 $\mathbb E_{\bar w_{j}}\bar g_j=\nabla R_n(\bar w_{j})$，而 $\bar{w}_{j+1}=\bar w_{j}-\alpha\bar{g}_j$，因此运用 (16) 和 $R_n(w)$ 的凸性可得：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+& \mathbb{E}_{\bar w_{j}}\left\|\bar w_{j+1}-w^{*}\right\|_{2}^{2} \\
+=&\left\|\bar w_{j}-w^{*}\right\|_{2}^{2}-2 \alpha\left(\bar w_{j}-w^{*}\right)^{T} \mathbb{E} _{\bar w_{j}}\bar g_{j}+\alpha^{2} \mathbb{E}_{\bar w_{j}}\left\|\bar g_{j}\right\|_{2}^{2} \\
+\leq &\left\|\bar w_{j}-w^{*}\right\|_{2}^{2}-2 \alpha\left(\bar w_{j}-w^{*}\right)^{T} \nabla R_n\left(\bar w_{j}\right)\\
+\quad&+4 L \alpha^{2}\left[R_n\left(\bar w_{j}\right)-R_n\left(w^{*}\right)+R_n(w_k)-R_n\left(w^{*}\right)\right] \\
+\leq &\left\|\bar w_{j}-w^{*}\right\|_{2}^{2}-2 \alpha\left[R_n\left(\bar w_{j}\right)-R_n\left(w^{*}\right)\right]\\
+\quad&+4 L \alpha^{2}\left[R_n\left(\bar w_{j}\right)-R_n\left(w^{*}\right)+R_n(w_k)-R_n\left(w^{*}\right)\right] \\
+=&\left\|\bar w_{j}-w^{*}\right\|_{2}^{2}-2 \alpha(1-2 L \alpha)\left[R_n\left(\bar w_{j}\right)-R_n\left(w^{*}\right)\right]+4 L \alpha^{2}\left[R_n(w_k)-R_n\left(w^{*}\right)\right]
+\end{aligned}\tag{17}</script></blockquote>
+<p>考虑固定 $k$，若对 $w_{k+1}$ 采用选择 (c) ，则对选择 (c) 的随机选取求期望，记期望为 $\mathbb E_{k}$，则有 $\mathbb E_k[R_n(w_{k+1})]=\frac 1n\sum_{j=1}^mR_n(\bar{w}_j)$。若选择 (b) 则 $R_n(w_{k+1})=R_n(\sum_{j=1}^m\bar w_j)\le \frac 1m\sum_{j=1}^mR_n(\bar{w}_j)$ ，其中不等式是因为 $R_n(w)$ 的凸性。</p>
+<p>下面记 $\mathbb E$ 对所有随机变量求期望。若考虑采用选择 (b) 或 (c)，则由 (17) 有：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\mathbb{E}\left\|\bar w_{m}-w^{*}\right\|_{2}^{2}\\
+\le&\mathbb E\left\|\bar w_{m-1}-w^{*}\right\|_{2}^{2}-2 \alpha(1-2 L \alpha)\mathbb E\left[R_n\left(\bar w_{m-1}\right)-R_n\left(w^{*}\right)\right]\\
+\quad&+4 L \alpha^{2}\mathbb E\left[R_n(w_k)-R_n\left(w^{*}\right)\right]\\
+\le&\mathbb E\|\bar w_0-w^*\|_2^2-2 \alpha(1-2 L \alpha)\sum_{j=1}^m\mathbb E\left[R_n\left(\bar w_{j}\right)-R_n\left(w^{*}\right)\right]\\
+\quad&+4 L m\alpha^{2}\mathbb E\left[R_n(w_k)-R_n\left(w^{*}\right)\right]
+\end{aligned}\tag{18}</script></blockquote>
+<p>又因为在选择 (b)(c) 下， $\sum_{j=1}^m\mathbb E\left[R_n\left(\bar w_{j}\right)-R_n\left(w^{*}\right)\right]\ge m\mathbb E\left[R_n\left( w_{k+1}\right)-R_n\left(w^{*}\right)\right]$ ，则</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\mathbb{E}\left\|\bar w_{m}-w^{*}\right\|_{2}^{2}+2 \alpha(1-2 L \alpha)m\mathbb E\left[R_n\left( w_{k+1}\right)-R_n\left(w^{*}\right)\right]\\
+\le&\mathbb E\|\bar w_0-w^*\|_2^2+4 L m\alpha^{2}\mathbb E\left[R_n(w_k)-R_n\left(w^{*}\right)\right]\\
+=&\mathbb E\|w_k-w^*\|_2^2+4 L m\alpha^{2}\mathbb E\left[R_n(w_k)-R_n\left(w^{*}\right)\right]\\
+\le&\frac{2}{c}\mathbb E\left[R_n(w_k)-R_n\left(w^{*}\right)\right]+4 L m\alpha^{2}\mathbb E\left[R_n(w_k)-R_n\left(w^{*}\right)\right]\\
+=&2(\frac 1c+2Lm\alpha^2)\mathbb E\left[R_n(w_k)-R_n\left(w^{*}\right)\right]
+\end{aligned}\tag{19}</script></blockquote>
+<p>因此我们有：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\mathbb E[R_n(w_{k+1})-R_n(w^*)]\le \left[\frac{1}{c\alpha(1-2L\alpha)m}+\frac{2L\alpha}{1-2L\alpha}\right] \mathbb E[R_n(w_k)-R_n(w^*)]\tag{20}</script></blockquote>
+<p>证毕。</p>
+<p>我们可以看到，对于每一次的外层迭代，总共需要计算 $n+2m$ 次梯度（一般在凸问题中 $m=2n$ , 在非凸问题中 $m=5n$），相较于随机梯度下降算法增加了大得多的计算量。甚至于每次迭代的计算量比批量梯度下降算法还大。SVRG算法的优点在于摒弃了对参数 $L,c$ 的依赖，仅需在实验中确定 $m,\alpha$ 的值即可。另一方面，可以考虑一个及其简单的情形 $L/c=n$ ，则对于批量梯度下降算法，给定误差 $\epsilon$，需要迭代 $n\log(1/\epsilon)$ 次，则总共需要计算 $n^2\log(1/\epsilon)$ 次梯度，而对于SVRG算法，我们可以取 $\alpha=0.1/L,m=O(n)$,得到 $\rho=1/2$ 。则总共只需要计算 $O(n\log(1/\epsilon))$ 次梯度。事实上，我们可以证明，SVRG需要计算 $O((n+\frac Lc)\log(\frac1\epsilon))$ 次梯度。</p>
+<p>关于 SVRG 算法有许多的变形，下面简单介绍几个：</p>
+<h3 id="SCSG-算法"><a href="#SCSG-算法" class="headerlink" title="SCSG 算法"></a>SCSG 算法</h3><p>SCSG算法 [9] 全称为 Stochastically Controlled Stochastic Gradient 算法。由于SVRG算法总共需要 $O((n+2m)T)$ 次的梯度计算，和 $O((n+2m)T)$ 次的数据读取。计算量和读取量都是相当大的。SCSG算法对其进行了改进。其算法的具体步骤为：</p>
+<blockquote>
+<ol>
+<li><p>选择迭代初始值 $w_1$ ，迭代步长 $\alpha&gt;0$，批量的大小 $B$ 。</p>
+</li>
+<li><p>生成概率分布 $\mathcal P$。</p>
+</li>
+<li><p>在任意的第 $k$ 步迭代时，从样本集中随机选取 $\mathcal I_k\subset\{1,2,\dots,n\}$ , 使得 $|\mathcal I_k|=B$。</p>
+</li>
+<li><p>计算小批量梯度 $\frac 1B\sum_{i\in\mathcal I_k}\nabla f_i(w_k)$ , 并令 $\bar w_1=w_k$。</p>
+</li>
+<li><p>按概率 $\mathcal P$ 生成 $N_k$。</p>
+</li>
+<li><p>开始内循环迭代（总共迭代 $N_k$ 次）：</p>
+<p>a. 在第 $j$ 次迭代过程中 $ (j=1,\dots,N_k)$，在 $\mathcal I_k$ 中等概率的随机选取 $i_j$ 。</p>
+<p>b. 令 $\bar{g}_j=\nabla f_{i_j}(\bar w_j)-(\nabla f_{i_j}(w_k)-\frac 1B\sum_{i\in\mathcal I_k}\nabla f_i(w_k))$.</p>
+<p>c. 令 $\bar{w}_{j+1}=\bar w_{j}-\alpha\bar{g}_j$.</p>
+</li>
+<li><p>令 $w_{k+1}=\bar{w}_{N_k}$.</p>
+</li>
+</ol>
+</blockquote>
+<p>其中 $\mathcal P$ 的生成方式如下所示：</p>
+<blockquote>
+<ol>
+<li><p>若强凸参数 $c$ 未知，则令 $\gamma=\frac{B-1}{B} $，$\mathcal P$ 为 $\mathcal P(\{k\})\propto \gamma^{k-1}$ 的几何分布。</p>
+</li>
+<li><p>若强凸参数 $c$ 已知：</p>
+<p>a. 若Lipschitz常数 $L$ 已知，则令 $\gamma=1-\alpha c,m=\lceil \frac {1}{2Lc\alpha^2}\rceil$;</p>
+<p>b. 若Lipschitz常数 $L$ 未知，则令 $\gamma=\sqrt{1-\alpha c},m=\lceil \log(\frac {1}{1-\gamma})/\log(\frac{\gamma}{1-\alpha c})\rceil$;</p>
+<p>则 $\mathcal P$ 为 $\{1,\dots,m\}$ 上的几何分布 $\mathcal P(\{k\})\propto (\gamma/(1-\alpha c))^{k-1}$。</p>
+</li>
+</ol>
+</blockquote>
+<h3 id="S2GD算法"><a href="#S2GD算法" class="headerlink" title="S2GD算法"></a>S2GD算法</h3><p>S2GD算法 [3] 全称为 Semi-Stochastic Gradient Descent 算法。该算法是对 SVRG 算法的一个推广。其算法具体步骤为：</p>
+<blockquote>
+<ol>
+<li><p>选择迭代初始值 $w_1$ ，迭代步长 $\alpha&gt;0$，最大内循环次数 $m$ , 和参数 $v\in[0,c]$ （$v $ 用于控制内层循环的迭代轮数。）</p>
+</li>
+<li><p>在任意的第 $k$ 步迭代时计算批量梯度 $\nabla R_n(w_k)$，并令 $\bar{w}_1=w_k$。</p>
+</li>
+<li><p>以概率分布 $(1-v\alpha)^{m-t}/\beta$ 选择 $t=1,2,\dots,m$，并令 $t_k=t$。其中 $\beta=\sum_{t=1}^m(1-v\alpha)^{m-t}$.</p>
+</li>
+<li><p>开始内循环迭代（总共迭代 $t_k$ 次）：</p>
+<p>a. 在第 $j$ 次迭代过程中 $(j=1,\dots,t_k)$，在 $\{1,\dots,n\}$ 中等概率的随机选取 $i_j$ 。</p>
+<p>b. 令 $\bar{g}_j=\nabla f_{i_j}(\bar w_j)-(\nabla f_{i_j}(w_k)-\nabla R_n(w_k))$.</p>
+<p>c. 令 $\bar{w}_{j+1}=\bar w_{j}-\alpha\bar{g}_j$.</p>
+</li>
+<li><p>令 $w_{k+1}=\bar w_{t_j}$.</p>
+</li>
+</ol>
+</blockquote>
+<p>与SVRG算法的区别在于，这里内循环的迭代次数有随机变量 $t_j$ 决定，当 $v=0$ 时，该算法退化为 SVRG算法。其收敛性定理类似于SVRG算法，只不过将 $\rho$ 的值变为 $\rho=\frac {(1-v\alpha)^m}{\beta c\alpha(1-2L\alpha)}+\frac{2(L-c)\alpha}{1-2L\alpha}$</p>
+<h2 id="SAG算法"><a href="#SAG算法" class="headerlink" title="SAG算法"></a>SAG算法</h2><p>SAG算法 [4] 是 Stochastic Average Gradient 的简写，主要思想是将所有样本点最近一次计算的梯度值保存下来，在每次迭代时仅计算一个随机样本的梯度值，但在迭代时却使用所有样本的梯度值。即：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+w_{k+1}=w_k-\alpha_k\frac 1n\sum_{i=1}^ny_i^k\tag{21}</script></blockquote>
+<p>若第 $k$ 次所选择更新的样本点为 $i_k$ , 则:</p>
+<blockquote>
+<script type="math/tex; mode=display">
+y_{i}^{k}=\left\{\begin{array}{ll}
+\nabla f_{i}\left(w_{k}\right) & \text { if } i=i_{k} \\
+y_{i}^{k-1} & \text { otherwise }
+\end{array}\right.\tag{22}</script></blockquote>
+<p>下面给出收敛性定理：</p>
+<blockquote>
+<p>定理3:同样的在定理2的假设情况下，即 $f_i(w)$ 凸可微，且 $\nabla f_i(w)$ 关于常数L是Lipschitz连续的，记 $\bar w_k=\frac 1k\sum_{i=0}^{k-1}w_i$, $\sigma^2=\frac 1n \sum_i|\nabla f_i(w^*)|_2^2$, 其中 $w^*$ 为最优值点，所我们取常数步长 $\alpha_k=\frac 1{16L}$，则SAG算法迭代式满足：</p>
+<script type="math/tex; mode=display">
+\mathbb E[R_n(\bar  w_k)]-R_n(w^*)\le \frac {32n}{k}C_0,\tag{23}</script><p>其中若 $y_i$ 的初始值取为 $y_i^0=0$, 则：</p>
+<script type="math/tex; mode=display">
+C_0=R_n(w_0)-R_n(w^*)+\frac{4L}n\|w_0-w^*\|_2^2+\frac{\sigma^2}{16L},\tag{24}</script><p>若 $y_i$ 的初始值取为 $y_i^0=\nabla f_i(w_0)-\nabla R_n(w_0)$, 则：</p>
+<script type="math/tex; mode=display">
+C_0=\frac 32 \left[R_n(w_0)-R_n(w^*)\right]+\frac{4L}{n}\|w_0-w^*\|_2^2.\tag{25}</script><p>更进一步，若函数 $R_n$ 是关于 $c$ 强凸的，则我们有：</p>
+<script type="math/tex; mode=display">
+\mathbb E[R_n(w_k)-R_n(w^*)]\le (1-\min\{\frac c{16L},\frac1{8n}\})^kC_0\tag{26}</script></blockquote>
+<p>上面定理的理论证明较为复杂，详见参考文献 [4] 。</p>
+<p>SAG算法的具体步骤为：</p>
+<blockquote>
+<ol>
+<li>初始化 $d=0$，$y_i=0$。</li>
+<li>在第 $k$ 步迭代时，从 $\{1,2,\dots,n\}$ 随机选择 $i$。</li>
+<li>计算 $d=d-y_i+\nabla f_i(w)$.</li>
+<li>储存 $y_i=\nabla f_i(w)$。</li>
+<li>则 $x_{k+1}=x_k-\frac{\alpha}{n}d$。</li>
+</ol>
+</blockquote>
+<h3 id="SAG算法的改进"><a href="#SAG算法的改进" class="headerlink" title="SAG算法的改进"></a>SAG算法的改进</h3><ol>
+<li><p>由于SAG算法需要存储每个样本点的梯度值，设有 $n$ 个样本点， $p$ 个参数，则对于 $y_i^k$ 的存储量为 $O(np)$，这在许多问题中是不能接受的，因此需要降低存储量。考虑一类特殊的函数 $f_i(w)$，假设 $f_i(w)$ 是关于 $w$ 的广义线性函数，即 $f_i(w)=f_i(x_i^Tw)$ , 则 $\nabla f_{i}(x_i^Tw)=x_i \nabla f_i(u_i)$ , 其中 $u_i=x_i^Tw$ , 因此我们只需存储 $\nabla f_i(u_i)$ ,存储量减少为 $O(n)$.</p>
+</li>
+<li><p>又若 $x_i$ 是稀疏的，则 $\nabla f_i(x_i^Tw)$ 也将是稀疏的，而在每次迭代过程中，总共需要计算 $O(p)$ 次，事实上，当 $x_i$ 在 $j$ 上为 $0$ 时，$d$ 在第 $j$ 个分量上是不变的，因此不必在该次单独的计算 $w_j$ 。例如假设连续 $l$ 次 迭代中 $x_{i_k}$ 的第 $k$ 个分量为 $0$ 。那么 $w_k^j = w_{k-l}^j-\frac{l\alpha} n\sum_{i=1}^n(y_i^k)_j$。这在大量样本为稀疏向量时会减少许多运算量。</p>
+</li>
+<li>在初始迭代的时候，若我们令 $y_i^0=0$ , 则由于最初的大量梯度为 $0$ 。则 $w$ 移动的步幅将非常小，因此可以将 $\frac 1nd$ 变为 $\frac{1}{m}d$ ，其中 $m$ 表示当前 $y_i$ 不为 $0$ 的个数。</li>
+<li>考虑在L2正则化的情况下，由于L2正则项为 $\lambda/2|w|_2^2$ , 则一阶偏导为 $\lambda w$ , 因此 $w_{k+1}=w_k-\alpha(\frac{1}{m}d+\lambda w)=(1-\alpha \lambda)w-\frac{\alpha}{m}d$ 。我们记 $w=\kappa z$，其中 $\kappa$ 为标量， $z$ 为向量。则每次迭代更新计算 $w$ 只用计算 $\kappa$ ，则可以将运算量降到 $O(1)$ （当 $\kappa$ 太小时，需要重新归一化，即令 $z=\kappa z$，再将 $\kappa$ 重新赋值为 $1$）</li>
+</ol>
+<p>我们用向量 $C$ 表示是否该样本点之前被使用过，用向量 $V$ 表示 $w$ 的第 $j$ 个分量，最近一次被更新的值，令 $S$ 表示每次迭代准时更新所需的累积和。则将上述1、2、3、4运用到SAG算法中，并作用于具有L2正则项的广义线性函数，即 $R_n(w)=\frac{\lambda}{2}|w|_2^2+\frac 1n\sum_{i=1}^nf_i(x_i^Tw)$中，可以得到以下算法：</p>
+<blockquote>
+<p>初始化，令 $d=0$, $y_i=0$, $z=w$ , $\kappa=1$ , $m=0$ , $C_i=0$ , $S_{-1}=0$ , $V_j=0$， 对任意 $i=1,2,\dots,n$ 和 $j=1,2,\dots,p$.</p>
+<p><strong>for</strong> $k =0,1,\dots$  <strong>do</strong></p>
+<p>​    从 $\{1,2,\dots,n\}$ 中随机选取样本 $i$</p>
+<p>​    <strong>if</strong> $C_i=0$ <strong>then</strong></p>
+<p>​        $m = m+1$  ，$C_i=1$</p>
+<p>​    <strong>end if</strong></p>
+<p>​    <strong>for</strong> $j$ 是 $x_i$ 中的非零分量 <strong>do</strong></p>
+<p>​        $z_j=z_j-(S_{k-1}-S_{V_j-1})d_j$ ， $V_j=k$</p>
+<p>​    <strong>end for</strong></p>
+<p>​    令 $J$ 是 $x_i$ 中的非零分量集合</p>
+<p>​    $d_J=d_J-x_{iJ}(y_i- f’_i(\kappa x^T_{iJ}z_J))$， $y_i=f_i’(\kappa x_{iJ}^Tz_J)$</p>
+<p>​    $\kappa=\kappa(1-\alpha\lambda)$ ， $S_k=S_{k-1}+\alpha/(\kappa m)$</p>
+<p><strong>end for</strong></p>
+<p><strong>for</strong> $j =1,2,\dots,p$ <strong>do</strong></p>
+<p>​    $w_j=\kappa(z_j-(S_{k-1}-S_{V_j-1})d_j)$</p>
+<p><strong>end for</strong></p>
+</blockquote>
+<ol>
+<li>在定理的证明当中，需要 $\alpha = \frac{1}{16L}$ , 实际上当取 $\alpha=\frac 1L$ 时，也总是收敛的，并且表现效果比 $\frac 1{16L}$ 好。</li>
+<li>由于 $L$ 通常是不知道的，因此可以使用回溯直线搜索来确定 $\alpha$。</li>
+</ol>
+<h2 id="SAGA算法"><a href="#SAGA算法" class="headerlink" title="SAGA算法"></a>SAGA算法</h2><p>SAGA算法 [5] 是在SAG算法的基础上进行的改进。记 $w_{[i]}$ 表示 $\nabla f_i(w)$ 计算出的最近的一次迭代，在SAG算法中，第 $k$ 步迭代的过程中，从 $1,2,\dots,n$ 中随机选择一个样本 $i$，则：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+w_{k+1}=w_k-\alpha \frac 1n\left(\nabla f_i(w_k)-\nabla f_i(w_{[j]})+\sum_{i=1}^n\nabla f_i(w_{[i]})\right)\tag{27}</script></blockquote>
+<p>而SAGA算法则是采取：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+w_{k+1}=w_k-\alpha\left(\nabla f_i(w_k)-\nabla f_i(w_{[i]})+\frac 1n \sum_{i=1}^n\nabla f_i(w_{[i]})\right)\tag{28}</script></blockquote>
+<p>类似于SVRG算法，$\nabla f_i(w_{[i]})$ 的期望就是 $\frac 1n \sum_{i=1}^n\nabla f_i(w_{[i]})$。则 $\left(\nabla f_i(w_k)-\nabla f_i(w_{[i]})+\frac 1n \sum_{i=1}^n\nabla f_i(w_{[i]})\right)$ 是 $R_n(w_k)$ 的无偏估计。则 $\nabla f_i(w_{[i]})-\frac 1n\sum_{i=1}^n\nabla f_i(w_{[i]})$ 可以视为第 $i$ 个样本与样本平均之间的偏差，因此 (28) 可以视为对其偏差进行一个校正。</p>
+<p>SAGA算法的具体步骤为：</p>
+<blockquote>
+<ol>
+<li>初始化 $w_1\in \mathbb R^p$ 和固定步长 $\alpha$.</li>
+<li>计算并存储 $\nabla f_i(w_i)$ 为 $\nabla f_i(w_{[i]})$.</li>
+<li>在第 $k$ 步迭代时，随机选取 $i\in\{1,2,\dots,n\}$。</li>
+<li>计算 $g_k = \left(\nabla f_i(w_k)-\nabla f_i(w_{[i]})+\frac 1n \sum_{i=1}^n\nabla f_i(w_{[i]})\right)$.</li>
+<li>迭代过程为 $w_{k+1}=w_k-\alpha g_k$</li>
+</ol>
+</blockquote>
+<p>下面给出收敛性定理：</p>
+<blockquote>
+<p>定理4：假设对任意的 $i=1,2,\dots,n$ ,  $f_i(w)$ 关于 $c$ 是强凸的且可微，且 $\nabla f_i(w)$ 关于常数 $L$ 是Lipschitz连续的，若取迭代步长为 $\alpha=\frac 1{2(cn+L)}$ , 则有以下的迭代结果：</p>
+<script type="math/tex; mode=display">
+\mathbb{E}\left[\left\|w_{k}-w^{*}\right\|_{2}^{2}\right]  \leq\left(1-\frac{c}{2(c n+L)}\right)^{k}\left(\left\|w_{1}-w^{*}\right\|_{2}^{2}+\frac{n D}{c n+L}\right) \tag{29}</script><p>其中：</p>
+<script type="math/tex; mode=display">
+D :=R_{n}\left(w_{1}\right)-\nabla R_{n}\left(w^{*}\right)^{T}\left(w_{1}-w^{*}\right)-R_{n}\left(w^{*}\right)</script></blockquote>
+<p>证明如下：</p>
+<p>定义Lyapunov函数 $T^k$为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+T^k:=&T(w_k,\{w_{[i]}^k\}_{i=1}^n)\\
+:=&\frac 1 n \sum_{i=1}^nf_i(w_{[i]}^k)-R_n(w^*)-\frac 1n \sum_{i=1}^n\nabla f_i(w^*)^T(w_{[i]}^k-w^*)+a\|w_k-w^*\|_2^2
+\end{aligned}\tag{30}</script></blockquote>
+<p>其中 $a$ 为待定常数， 记 $\mathbb E_{w_k}$ 表示在已知 $w_k$ 下的条件期望，则：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\mathbb E_{w_k} \left[\frac 1n\sum_{i=1}^nf_i(w_{[i]}^{k+1})\right]=\frac 1n R_n(w_k)+\left(1-\frac 1n\right)\frac 1n\sum_{i=1}^nf_i(w_{[i]}^k)\tag{31}</script><script type="math/tex; mode=display">
+\begin{aligned}
+&\mathbb E_{w_k}\left[-\frac 1n \sum_{i=1}^n\nabla f_i(w^*)^T(w_{[i]}^{k+1}-w^*) \right]\\
+=&-\frac 1n \nabla R_n(w^*)^T(w_k-w^*)-\left(1-\frac 1n\right)\frac 1n \sum_{i=1}^n\nabla f_i(w^*)^T(w_{[i]}^k-w^*)
+\end{aligned}\tag{32}</script></blockquote>
+<p>由于 $\mathbb E_{w_k}[w_{k+1}]=w_k-\alpha\nabla R_n(w_k)$，则：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\mathbb E_{w_k}\|w_{k+1}-w^*\|_2^2=\mathbb E_{w_k}\|w_k-w^*+w_{k+1}-w_k\|_2^2\\
+=&\|w_k-w^*\|_2^2+2\mathbb E_{w_k}\left[\left\langle w_{k+1}-w_k,w_k-w^*\right\rangle\right]+\mathbb E_{w_k} \|w_{k+1}-w_{k}\|_2^2\\
+=&\|w_k-w^*\|_2^2-2\alpha\nabla R_n(w_k)^T(w_k-w^*)+\mathbb E_{w_k} \|w_{k+1}-w_{k}\|_2^2
+\end{aligned}\tag{33}</script></blockquote>
+<p>显然 $\nabla R_n(w^*)=0$，由于对任意随机变量 $X$ , $\mathbb E[|X-\mathbb E[X]|_2^2]=\mathbb E[|X|_2^2]-|\mathbb E[X]|_2^2$ , 令 $X=\left[ \nabla f_i(w_{[i]}^k)-\nabla f_i(w^*)-\frac 1n\sum_{i=1}^n\nabla f_i(w_{[i]}^k)+\nabla R_n(w^*) \right]$ 则有：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+E_{w_k}[X]= \nabla R_n(w_k)-\nabla R_n(w^*)\tag{34}</script></blockquote>
+<p>因此利用不等式 $|x+y|_2^2\le(1+\beta^{-1})|x|_2^2+(1+\beta)|y|_2^2$ , 我们有：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\mathbb E_{w_k} \|w_{k+1}-w_{k}\|_2^2\\
+=&\mathbb E_{w_k} \|w_{k+1}-w_{k}+\alpha \nabla R_n(w^*)\|_2^2\\
+=&\mathbb E_{w_k} \left\|-\alpha\left(\nabla f_i(w_k)-\nabla f_i(w_{[i]}^k)+\frac 1n \sum_{i=1}^n\nabla f_i(w_{[i]}^k)\right)+\alpha\nabla R_n(w^*)\right\|_2^2\\
+=&\alpha^2\mathbb E_{w_k}\left\| \left[ \nabla f_i(w_{[i]}^k)-\nabla f_i(w^*)-\frac 1n\sum_{i=1}^n\nabla f_i(w_{[i]}^k)+\nabla R_n(w^*) \right]\right.\\
+\quad &-\left. \left[\nabla f_i(w_k)-\nabla f_i(w^*)-\nabla R_n(w_k)+\nabla R_n(w^*)\right]\right\|_2^2\\
+\quad&+\alpha^2\left\| \nabla R_n(w_k)-\nabla R_n(w^*)\right\|_2^2\\
+\le&\alpha^2(1+\beta^{-1})\mathbb E_{w_k}\left\| \nabla f_i(w_{[i]}^k)-\nabla f_i(w^*)-\frac 1n \sum_{i=1}^n\nabla f_i(w_{[i]}^k)+\nabla R_n(w^*)\right\|_2^2\\
+\quad&+\alpha^2(1+\beta)\mathbb E_{w_k}\left\| \nabla f_i(w_k)-\nabla f_i(w^*)- \nabla R_n(w_k)+\nabla R_n(w^*)\right\|_2^2\\
+\quad&+\alpha^2\|\nabla R_n(w_k)-\nabla R_n(w^*)\|\\
+\le &\alpha^2(1+\beta^{-1})\mathbb E_{w_k}\left\|\nabla f_i(w_{[i]}^k)-\nabla f_i(w^*)\right\|_2^2\\
+\quad&+\alpha^2(1+\beta)\mathbb E_{w_k}\|\nabla f_i(w_k)-\nabla f_i(w^*)\|_2^2-\alpha^2\beta\|\nabla R_n(w_k)-\nabla R_n(w^*)\|_2^2
+\end{aligned}\tag{35}</script></blockquote>
+<p>将 (35) 代入 (34) 得：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\mathbb E_{w_k}\|w_{k+1}-w^*\|_2^2\\
+=&\|w_k-w^*\|_2^2-2\alpha\nabla R_n(w_k)^T(w_k-w^*)+\mathbb E_{w_k} \|w_{k+1}-w_{k}\|_2^2\\
+\le&  \|w_k-w^*\|_2^2-2\alpha\nabla R_n(w_k)^T(w_k-w^*)\\
+\quad&+ \alpha^2(1+\beta^{-1})\mathbb E_{w_k}\left\|\nabla f_i(w_{[i]}^k)-\nabla f_i(w^*)\right\|_2^2\\
+\quad&+\alpha^2(1+\beta)\mathbb E_{w_k}\|\nabla f_i(w_k)-\nabla f_i(w^*)\|_2^2-\alpha^2\beta\|\nabla R_n(w_k)-\nabla R_n(w^*)\|_2^2
+\end{aligned}\tag{36}</script></blockquote>
+<p>下面分别考虑 (36) 中的 $\nabla R_n(w_k)^T(w_k-w^*)$ 和 $\mathbb E_{w_k}\left|\nabla f_i(w_{[i]}^k)-\nabla f_i(w^*)\right|_2^2$ 两项。</p>
+<p>首先考虑 $\nabla R_n(w_k)^T(w_k-w^*)$ ：</p>
+<p>由于 $f_i$ 关于 $c$ 强凸，且 $f_i$ 的梯度关于 $L$ Lipschitz连续，则令 $h(w)=f(w)-\frac c2|w|_2^2$ , 则 $\nabla h(w)=\nabla f(w) -cw$ , 即 $h(w)$ 的梯度关于常数 $L-c$ Lipschitz连续，由于凸性，可得对任意的 $w,\bar w$：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+h(w)\ge h(\bar w)+\nabla h(\bar w)^T(w-\bar w)+\frac 1{2(L-c)}\|\nabla h(w)-\nabla h(\bar w)\|_2^2.\tag{37}</script></blockquote>
+<p>因此令 $\bar w =w^*,w=w_k$ ，对所有 $f_i(w)$ 运用 (37) 式，并求平均有：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+ \nabla R_n(w_k)^T(w^*-w_k)\le &\frac{L-c}{L}[R_n(w^*)-R_n(w_k)]-\frac c2\|w^*-w_k\|_2^2\\
+\quad&-\frac{1}{2Ln}\sum_{i=1}^n\|\nabla f_i(w^*)-\nabla f_i(w_k)\|_2^2
+\end{aligned}\tag{38}</script></blockquote>
+<p>另一方面，对于 $\mathbb E_{w_k}\left|\nabla f_i(w_{[i]}^k)-\nabla f_i(w^*)\right|_2^2$ , 我们有：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\mathbb E_{w_k}\left\|\nabla f_i(w_{[i]}^k)-\nabla f_i(w^*)\right\|_2^2=\frac{1}{n}\sum_{i=1}^n\left\|\nabla f_i(w_{[i]}^k)-\nabla f_i(w^*)\right\|_2^2\tag{39}</script></blockquote>
+<p>利用 $\nabla  f_i(w)$ 的Lipschitz连续性，容易得到 (见梯度下降法非强凸情况下的证明) ，对任意的 $i=1,2,\dots,n$：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+f_i(w^*)-f_i(w_{[i]}^k)-\nabla f_i(w^*)^T(w^*-w_{[i]}^k)\le-\frac 1{2L}\|\nabla f_i(w_{[i]}^k)-\nabla f_i(w^*)\|_2^2\tag{40}</script></blockquote>
+<p>对所有 $i$ 求和取平均有：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\mathbb E_{w_k}\left\|\nabla f_i(w_{[i]}^k)-\nabla f_i(w^*)\right\|_2^2\\
+\le&2L\left[\frac 1n\sum_{i=1}^nf_i(w_{[i]})-R_n(w^*)-\frac 1n \sum_{i=1}^n\nabla f_i(w^*)^T(w_{[i]}^k-w^*)\right]
+\end{aligned}\tag{41}</script></blockquote>
+<p>将 (38)(41) 代入 (36) 可以得到：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\mathbb E_{w_k}\|w_{k+1}-w^*\|_2^2\\
+\le & (1-\alpha c)\|w_k-w^*\|_2^2+\left((1+\beta)\alpha^2-\frac{\alpha}{L}\right)\mathbb E_{w_k}\|\nabla f_i(w_k)-\nabla f_i(w^*)\|_2^2\\
+\quad&-\frac {2\alpha (L-c)}{L}[R_n(w^*)-R_n(w_k)]-\alpha^2\beta\|\nabla R_n(w_k)-\nabla R_n(w^*)\|_2^2\\
+\quad&+2(1+\beta^{-1})\alpha^2L\left[\frac 1n\sum_{i=1}^nf_i(w_{[i]})-R_n(w^*)-\frac 1n \sum_{i=1}^n\nabla f_i(w^*)^T(w_{[i]}^k-w^*)\right]
+\end{aligned}\tag{42}</script></blockquote>
+<p>结合 (30)(31)(32)(42) 我们可以得到：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\mathbb E_{w_k}[T^{k+1}]\\
+\le&\frac 1n R_n(w_k)+\left(1-\frac 1n\right)\frac 1n\sum_{i=1}^nf_i(w_{[i]}^k)-R_n(w^*)\\
+\quad&-\frac 1n \nabla R_n(w^*)^T(w_k-w^*)-\left(1-\frac 1n\right)\frac 1n \sum_{i=1}^n\nabla f_i(w^*)^T(w_{[i]}^k-w^*)\\
+\quad& +a(1-\alpha c)\|w_k-w^*\|_2^2+a\left((1+\beta)\alpha^2-\frac{\alpha}{L}\right)\mathbb E_{w_k}\|\nabla f_i(w_k)-\nabla f_i(w^*)\|_2^2\\
+\quad&-\frac {2a\alpha (L-c)}{L}[R_n(w^*)-R_n(w_k)]-a\alpha^2\beta\|\nabla R_n(w_k)-\nabla R_n(w^*)\|_2^2\\
+\quad&+2a(1+\beta^{-1})\alpha^2L\left[\frac 1n\sum_{i=1}^nf_i(w_{[i]})-R_n(w^*)-\frac 1n \sum_{i=1}^n\nabla f_i(w^*)^T(w_{[i]}^k-w^*)\right]
+\end{aligned}\tag{43}</script></blockquote>
+<p>利用 $R_n$ 的强凸性，有：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+-\|\nabla R_n(w_k)-\nabla R_n(w^*)\|_2^2\le-2c[R_n(w_k)-R_n(w^*)]\tag{44}</script></blockquote>
+<p>因此，对任意的 $\kappa&gt;0$ ，我们有:</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\mathbb E_{w_k}[T^{k+1}]-T^k\\
+\le&-\frac 1\kappa T^k+\left(\frac 1n-\frac{2a\alpha(L-c)}{L}-2a\alpha^2c\beta\right)\left[R_n(w_k)-R_n(w^*)\right]\\
+\quad &+\left(\frac 1\kappa +2(1+\beta^{-1})a\alpha^2L-\frac 1n\right)\left[\frac 1n\sum_{i=1}^nf_i(w_{[i]})-R_n(w^*)\right.\\
+&\left.-\frac 1n \sum_{i=1}^n\nabla f_i(w^*)^T(w_{[i]}^k-w^*)\right]
++\left(\frac 1\kappa-\alpha c\right)a\|w_k-w^*\|_2^2\\
+\quad&+\left((1+\beta)\alpha-\frac 1La\alpha \right)\mathbb E_{w_k}\|\nabla f_i(w_k)-\nabla f_i(w^*)\|_2^2
+\end{aligned}\tag{45}</script></blockquote>
+<p>由 (41)(44) 可知，$\left[R_n(w_k)-R_n(w^*)\right]&gt;0$ , $\left[\frac 1n\sum_{i=1}^nf_i(w_{[i]})-R_n(w^*)-\frac 1n \sum_{i=1}^n\nabla f_i(w^*)^T(w_{[i]}^k-w^*)\right]$.</p>
+<p>因此，若取 $\kappa=\frac 1{\alpha c},\alpha = \frac{1}{2(cn+L)},c= \frac{1}{2\alpha(1-\alpha c)n}$ , 则可以保证 (45) 的所有系数为正，因此：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\mathbb E_{w_k}[T^{k+1}]\le \left(1-\frac 1\kappa\right) T^k\tag{46}</script></blockquote>
+<p>则：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\mathbb{E}\left[\left\|w_{k}-w^{*}\right\|_{2}^{2}\right]  \leq\left(1-\frac{c}{2(c n+L)}\right)^{k}\left(\left\|w_{1}-w^{*}\right\|_{2}^{2}+\frac{n D}{c n+L}\right)</script></blockquote>
+<p>其中：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+D :=R_{n}\left(w_{1}\right)-\nabla R_{n}\left(w^{*}\right)^{T}\left(w_{1}-w^{*}\right)-R_{n}\left(w^{*}\right)</script></blockquote>
+<p>证毕。</p>
+<p>下面再来解释 SVRG、SAG、SAGA算法方差减小的原因，假设我们想要利用蒙特卡洛采样来估计 $\mathbb EX$，我们可以通过计算另一个与 $X$ 有高相关性的随机变量 $Y$ 的期望 $\mathbb E Y$，如果我们定义 $\theta_\alpha:=\alpha(X-Y)+\mathbb EY$ 来估计 $\mathbb EX$，其中 $\alpha\in[0,1]$，则 $\theta_\alpha$  的方差表示为 $\operatorname{Var}(\theta_\alpha)=\alpha^2[\operatorname {Var}(X)+\operatorname{Var(Y)}-2\operatorname{Cov}(X,Y)]$ , 因此当 $X$ 和 $Y$ 高度相关时，或者 $\alpha$ 较小时，能减小方差，但只有 $\alpha=1$ 时，为无偏估计，我们考虑 SVRG算法和SAGA算法都是无偏估计，并且 $X$ 和 $Y$ 均表示同一个样本点，在不同位置的偏导数，因此可以视为高度的相关性。所以能减小方差，而SAG算法则不是无偏的估计，它的 $\alpha=\frac 1n$ ，因此它的方差是SAGA算法的 $\frac 1{n^2}$ 倍，但是由于它不是无偏估计，因此其理论证明也更为复杂。</p>
+<hr>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p>[1] Bottou, Léon, Frank E. Curtis, and Jorge Nocedal. “Optimization methods for large-scale machine learning.” <em>Siam Review</em> 60.2 (2018): 223-311.</p>
+<p>[2] Johnson, Rie, and Tong Zhang. “Accelerating stochastic gradient descent using predictive variance reduction.” <em>Advances in neural information processing systems</em>. 2013.</p>
+<p>[3] Konečný, Jakub, and Peter Richtárik. “Semi-stochastic gradient descent methods.” <em>arXiv preprint arXiv:1312.1666</em> (2013).</p>
+<p>[4] Schmidt, Mark, Nicolas Le Roux, and Francis Bach. “Minimizing finite sums with the stochastic average gradient.” <em>Mathematical Programming</em> 162.1-2 (2017): 83-112.</p>
+<p>[5] Defazio, Aaron, Francis Bach, and Simon Lacoste-Julien. “SAGA: A fast incremental gradient method with support for non-strongly convex composite objectives.” <em>Advances in neural information processing systems</em>. 2014.</p>
+<p>[6] Xiao, Lin, and Tong Zhang. “A proximal stochastic gradient method with progressive variance reduction.” <em>SIAM Journal on Optimization</em> 24.4 (2014): 2057-2075.</p>
+<p>[7] Nitanda, Atsushi. “Stochastic proximal gradient descent with acceleration techniques.” <em>Advances in Neural Information Processing Systems</em>. 2014.</p>
+<p>[8] Harikandeh, Reza Babanezhad, et al. “Stop wasting my gradients: Practical svrg.” <em>Advances in Neural Information Processing Systems</em>. 2015.</p>
+<p>[9] Lei, Lihua, and Michael Jordan. “Less than a single pass: Stochastically controlled stochastic gradient.” <em>Artificial Intelligence and Statistics</em>. 2017.</p>
+
+        </div>
+        
+            <div style="text-align:center;color: rgb(125,125,125);font-size:14px;">
+               -------------本文结束 感谢您的阅读-------------
+            </div>
+        
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>文章作者:</span>
+                        <span>会飞的猪</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>文章链接:</span>
+                        <span><a href="http://shellyandliu.github.io/2020/05/18/%E5%9F%BA%E4%BA%8E%E6%96%B9%E5%B7%AE%E7%BC%A9%E5%87%8F%E7%9A%84%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/">http://shellyandliu.github.io/2020/05/18/%E5%9F%BA%E4%BA%8E%E6%96%B9%E5%B7%AE%E7%BC%A9%E5%87%8F%E7%9A%84%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>版权声明:</span>
+                        <span>本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC-BY-NC-4.0</a> ， 转载请注明来自 会飞的猪！</span>
+                    </p>
+                
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>标签:</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95/"> <i class="iconfont icon-tags"></i> 优化方法</a>
+                    
+                        <a href="/tags/%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/"> <i class="iconfont icon-tags"></i> 随机梯度下降</a>
+                    
+                        <a href="/tags/SVRG/"> <i class="iconfont icon-tags"></i> SVRG</a>
+                    
+                        <a href="/tags/SAG/"> <i class="iconfont icon-tags"></i> SAG</a>
+                    
+                        <a href="/tags/%E6%96%B9%E5%B7%AE%E7%BC%A9%E5%87%8F/"> <i class="iconfont icon-tags"></i> 方差缩减</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">返回</a>
+                <span> /  </span>
+                <a href="/">首页</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2020/05/14/%E7%BA%BF%E6%80%A7%E5%88%A4%E5%88%AB%E5%88%86%E6%9E%90/">线性判别分析（LDA）</a>
+            
+        </section>
+        <div class="post-content">
+            <section style="font-size: 20px;font-weight: 700;margin-bottom: 10px;margin-top: 20px;">
+                <i class="iconfont icon-comments"></i>
+                <span>
+                    评论
+                </span>
+            </section>
+        </div>
+        
+            <section id="comments" class="comments">
+              <style>
+                .comments{margin:0px;padding:10px;background:#fff}
+                @media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#fff}}
+              </style>
+              <div class="valine_comment"></div>
+<!--����js����</body>֮ǰ���뼴��-->
+<!--Leancloud ������:-->
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<!--Valine �ĺ��Ĵ����-->
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+      el: '.valine_comment',
+      app_id: 'bCvyxhtL2V59mmqAp81lAGob-gzGzoHsz#Leancloud应用的appId',
+      app_key: 'J4zVKQfUjhToGJwBfLcoOHOv',
+      placeholder: '欢迎大家评论交流~',
+      notify: 'true',
+      verify: 'true',
+    });
+</script>
+            </section>
+        
+        
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 会飞的猪 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

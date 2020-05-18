@@ -321,8 +321,9 @@ f(x^{(k)})-f(x^*)&\le \nabla f(x^{(k)})^Td_k-\frac 1{2L}\|\nabla f(x^{(k)})\|_2^
 <p>再一次在 (2) 中代入 $x=x^{(k+1)},y=x^{(k)}$ ，</p>
 <blockquote>
 <script type="math/tex; mode=display">
-\begin{aligned}f(x^{(k+1)})-f(x^{(k)})&\le \nabla f(x^{(k+1)})^T(-\frac 1L\nabla f(x^{(k)}))-\frac 1{2L}\|\nabla f(x^{(k+1)})-\nabla f(x^{(k)})\|_2^2\\
-&=-\frac {1}{2L}(\|\nabla f(x^{(k+1)})\|_2^2+\|\nabla f(x^{(k)})\|_2^2)
+\begin{aligned}f(x^{(k+1)})-f(x^{(k)})\le &\nabla f(x^{(k+1)})^T(-\frac 1L\nabla f(x^{(k)}))\\
+\quad&-\frac 1{2L}\|\nabla f(x^{(k+1)})-\nabla f(x^{(k)})\|_2^2\\
+=&-\frac {1}{2L}(\|\nabla f(x^{(k+1)})\|_2^2+\|\nabla f(x^{(k)})\|_2^2)
 \end{aligned}\tag{10}</script></blockquote>
 <p>令 $\delta_k=f(x^{(k)})-f(x^*)$, 结合 (9)(10) 可以得到：</p>
 <blockquote>
@@ -452,13 +453,11 @@ f(x-t\nabla f(x))-p^*\le (1-\min\{2m\alpha,2\beta\alpha m/M\})(f(x)-p^*)\tag{22}
                 <span class="tag">
                     
                     
-                        <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"> <i class="iconfont icon-tags"></i> 机器学习</a>
-                    
-                        <a href="/tags/%E7%BB%9F%E8%AE%A1/"> <i class="iconfont icon-tags"></i> 统计</a>
-                    
                         <a href="/tags/%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95/"> <i class="iconfont icon-tags"></i> 优化方法</a>
                     
                         <a href="/tags/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/"> <i class="iconfont icon-tags"></i> 梯度下降</a>
+                    
+                        <a href="/tags/%E7%BA%BF%E6%90%9C%E7%B4%A2/"> <i class="iconfont icon-tags"></i> 线搜索</a>
                     
                         
                 </span>

@@ -256,20 +256,31 @@
         <div class="post-content">
             <h2 id="Lasso-回归"><a href="#Lasso-回归" class="headerlink" title="Lasso 回归"></a>Lasso 回归</h2><p>LASSO回归相当于将岭回归的2范数换成了1范数，用拉格朗日对偶形式表示为：</p>
 <blockquote>
-<p>$\min _{\beta}\left\{\frac{1}{2 N}\left|y-X \beta\right|_{1}\right\},|\beta|_{1} \leq t$</p>
-</blockquote>
+<script type="math/tex; mode=display">
+\min _{\beta}\left\{\frac{1}{2 N}\left\|y-X \beta\right\|_{1}\right\},\|\beta\|_{1} \leq t</script></blockquote>
 <p>得到的解称为<strong>LASSO估计</strong>。对应的原始的优化形式中的 $\lambda$ 称为<strong>收缩算子</strong>。</p>
 <p>相较于岭回归，LASSO回归的优势在于，它能够使有些变量迅速的趋于0，因此可以用作<strong>变量选择</strong>，下面作解释：</p>
 <p>设 $\hat{\beta}$ 为普通最小二乘得到的参数估计,则</p>
 <blockquote>
-<p>$L(\beta)=\frac 1 {2N}|Y-X\beta|_2^2+\lambda|\beta|_1=\frac 1 {2N}|Y-X\hat{\beta}+X\hat{\beta}-X\beta|_2^2+\lambda|\beta|_1 =L(\hat{\beta})+\frac 1{2N}|X(\hat{\beta}-\beta)|_2^2+|\lambda|_1$</p>
-<p>$=L(\hat{\beta})+\frac 1{2N}(\hat{\beta}-\beta)’X’X(\hat{\beta}-\beta)+\lambda|\beta|_1$</p>
-</blockquote>
-<p>则 $\min_{\beta}L(\beta)=\min_{\beta}\{\frac 1{2N}\}(\hat{\beta}-\beta)’X’X(\hat{\beta}-\beta)+\lambda|\beta|_1$，不妨设$X’X$为对角矩阵 $diag(\lambda_1,\dots,\lambda_p)$，可以通过主成分分析得到，则</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+L(\beta)=&\frac 1 {2N}\|Y-X\beta\|_2^2+\lambda\|\beta\|_1\\
+=&\frac 1 {2N}\|Y-X\hat{\beta}+X\hat{\beta}-X\beta\|_2^2+\lambda\|\beta\|_1 \\
+=&L(\hat{\beta})+\frac 1{2N}\|X(\hat{\beta}-\beta)\|_2^2+\|\lambda\|_1\\
+=&L(\hat{\beta})+\frac 1{2N}(\hat{\beta}-\beta)'X'X(\hat{\beta}-\beta)+\lambda\|\beta\|_1
+\end{aligned}</script></blockquote>
+<p>则可以得到：</p>
 <blockquote>
-<p>$\min_{\beta}L(\beta)=\min_{\beta_i}\frac1 {2N}\sum_{i=1}^p(\lambda_i(\hat{\beta}_i-\beta_i)^2+\lambda|\beta_i|)$</p>
-</blockquote>
-<p>则可以解的：$\beta_{i}=\operatorname{sign}\left(\hat{\beta}_{i}\right) \max \left\{\left|\hat{\beta}_{i}\right|-\frac{\lambda}{\lambda_i}, 0\right\}$</p>
+<script type="math/tex; mode=display">
+\min_{\beta}L(\beta)=\min_{\beta}\{\frac 1{2N}\}(\hat{\beta}-\beta)'X'X(\hat{\beta}-\beta)+\lambda\|\beta\|_1</script></blockquote>
+<p>不妨设$X’X$为对角矩阵 $diag(\lambda_1,\dots,\lambda_p)$，可以通过主成分分析得到，则</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\min_{\beta}L(\beta)=\min_{\beta_i}\frac1 {2N}\sum_{i=1}^p(\lambda_i(\hat{\beta}_i-\beta_i)^2+\lambda|\beta_i|)</script></blockquote>
+<p>则可以解的：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\beta_{i}=\operatorname{sign}\left(\hat{\beta}_{i}\right) \max \left\{\left|\hat{\beta}_{i}\right|-\frac{\lambda}{\lambda_i}, 0\right\}</script></blockquote>
 <p>当 $\hat{\beta}_i &gt;0 $ 时：</p>
 <ol>
 <li><p>当 $\hat{\beta}_i\le \frac{\lambda}{\lambda_i}$，此时目标中 $\beta_i$ 的最优值为 $\beta_i=0$</p>
@@ -288,12 +299,12 @@
 <p>若设 $\partial f(x)$ 为 $f$ 在点 $x$ 处的次微分，则由定义可知 $g(x^{(k)})\in \partial f(x^{(k)})$</p>
 <p>次梯度方法的迭代更新形式为：</p>
 <blockquote>
-<p>$x^{k+1}=x^{k}-\alpha_k\nabla g(x^kk)$</p>
-</blockquote>
+<script type="math/tex; mode=display">
+x^{k+1}=x^{k}-\alpha_k\nabla g(x^kk)</script></blockquote>
 <p>由于次梯度方向并不一定总是函数值下降的方向，因此很自然的在每一次迭代后，都取曾今最小的函数值：</p>
 <blockquote>
-<p>$f^{(k)}_{best}=\min\{f^{k-1}_{best},f(x^{(k)}\}$</p>
-</blockquote>
+<script type="math/tex; mode=display">
+f^{(k)}_{best}=\min\{f^{k-1}_{best},f(x^{(k)}\}</script></blockquote>
 <p>下面给出几种常用的步长选择方式：</p>
 <blockquote>
 <p>(1).  <em>Constant step size:</em> $\alpha_k=\alpha$ 是一个正常数。</p>
@@ -302,10 +313,11 @@
 <p>(4).  <em>diminishing step size rules:</em> $\alpha_k\ge0,\quad\lim_{k\to\infty}\alpha_k=0,\quad\sum_{k=1}^{\infty}\alpha_k=\infty$, 一个典型的例子是 $\alpha_k=a/\sqrt{k}$, 其中 $a&gt;0$.</p>
 <p>(5).  <em>Nonsummable diminishing step lengths:</em> $\alpha_k=\frac{\gamma_k}{|g^{(k)}|_2}$, 其中 $\gamma_k\ge0,\quad\lim_{k\to\infty}\gamma_k=0,\quad\sum_{k=1}^{\infty}\gamma_k=\infty$.</p>
 </blockquote>
-<p>设 $x^{*}$ 为 $f$ 的极小值点；设迭代的初始点 $x^{(1)}$ 与极小值点 $x^{*}$ 之间满足：$|x^{(1)}-x^{*}|_2\le R$,  $R$ 为常数；设 $f$ 满足 Lipschitz 条件：</p>
+<p>给出下列假设：</p>
 <blockquote>
-<p>对任意的 $u,v$ , 有 $|f(u)-f(v)|\le G|u-v|_2$</p>
-</blockquote>
+<p>假设1：设 $x^{*}$ 为 $f$ 的极小值点；设迭代的初始点 $x^{(1)}$ 与极小值点 $x^{*}$ 之间满足：$|x^{(1)}-x^{*}|_2\le R$,  $R$ 为常数；设 $f$ 满足 Lipschitz 条件：</p>
+<script type="math/tex; mode=display">
+|f(u)-f(v)|\le G\|u-v\|_2,\quad\forall u,v</script></blockquote>
 <p>下面给出上述步长的收敛性结果：</p>
 <blockquote>
 <p>定理1：<em>Constant step size:</em> $f_{\mathrm{best}}^{(k)}-f^{*} \leq \frac{R^{2}+G^{2} \alpha^{2} k}{2 \alpha k}$, 当 $k\to\infty$ 时, 收敛于 $G^2\alpha/2$.</p>
@@ -316,20 +328,25 @@
 </blockquote>
 <p>下面给出证明：</p>
 <p>由于 $f$ 是 Lipschitz 连续的，因此有 $|g|_2\le G$ , 则有：</p>
+<blockquote>
 <script type="math/tex; mode=display">
-\begin{aligned}\left\|x^{(k+1)}-x^{\star}\right\|_{2}^{2} &=\left\|x^{(k)}-\alpha_{k} g^{(k)}-x^{\star}\right\|_{2}^{2} \\ &=\left\|x^{(k)}-x^{\star}\right\|_{2}^{2}-2 \alpha_{k} g^{(k) T}\left(x^{(k)}-x^{\star}\right)+\alpha_{k}^{2}\left\|g^{(k)}\right\|_{2}^{2} \\ & \leq\left\|x^{(k)}-x^{\star}\right\|_{2}^{2}-2 \alpha_{k}\left(f\left(x^{(k)}\right)-f^{\star}\right)+\alpha_{k}^{2}\left\|g^{(k)}\right\|_{2}^{2} \end{aligned}</script><p>因此有：</p>
+\begin{aligned}\left\|x^{(k+1)}-x^{\star}\right\|_{2}^{2} &=\left\|x^{(k)}-\alpha_{k} g^{(k)}-x^{\star}\right\|_{2}^{2} \\ &=\left\|x^{(k)}-x^{\star}\right\|_{2}^{2}-2 \alpha_{k} g^{(k) T}\left(x^{(k)}-x^{\star}\right)+\alpha_{k}^{2}\left\|g^{(k)}\right\|_{2}^{2} \\ & \leq\left\|x^{(k)}-x^{\star}\right\|_{2}^{2}-2 \alpha_{k}\left(f\left(x^{(k)}\right)-f^{\star}\right)+\alpha_{k}^{2}\left\|g^{(k)}\right\|_{2}^{2} \end{aligned}</script></blockquote>
+<p>因此有：</p>
 <blockquote>
-<p>$\left|x^{(k+1)}-x^{\star}\right|_{2}^{2} \leq\left|x^{(1)}-x^{\star}\right|_{2}^{2}-2 \sum_{i=1}^{k} \alpha_{i}\left(f\left(x^{(i)}\right)-f^{\star}\right)+\sum_{i=1}^{k} \alpha_{i}^{2}\left|g^{(i)}\right|_{2}^{2}$</p>
-</blockquote>
-<p>由于 $|x^{(1)}-x^{*}|_2\le R$, $|x^{(k+1)}-x^{*}|_2^2\ge0$,则有</p>
+<script type="math/tex; mode=display">
+\left\|x^{(k+1)}-x^{\star}\right\|_{2}^{2} \leq\left\|x^{(1)}-x^{\star}\right\|_{2}^{2}-2 \sum_{i=1}^{k} \alpha_{i}\left(f\left(x^{(i)}\right)-f^{\star}\right)+\sum_{i=1}^{k} \alpha_{i}^{2}\left\|g^{(i)}\right\|_{2}^{2}</script></blockquote>
+<p>由于 $|x^{(1)}-x^{*}|_2\le R$ , $|x^{(k+1)}-x^{*}|_2^2\ge0$ , 则有:</p>
 <blockquote>
-<p>$2\sum_{i=1}^{k} \alpha_{i}\left(f\left(x^{(i)}\right)-f^{\star}\right)\le R^2+\sum_{i=1}^{k} \alpha_{i}^{2}\left|g^{(i)}\right|_{2}^{2}$</p>
-</blockquote>
-<p>又因为 $\sum_{i=1}^{k} \alpha_{i}\left(f\left(x^{(i)}\right)-f^{\star}\right) \geq\left(\sum_{i=1}^{k} \alpha_{i}\right) \min _{i=1, \ldots, k}\left(f\left(x^{(i)}\right)-f^{\star}\right)=\left(\sum_{i=1}^{k} \alpha_{i}\right)\left(f_{\mathrm{best}}^{(k)}-f^{\star}\right)$:</p>
+<script type="math/tex; mode=display">
+2\sum_{i=1}^{k} \alpha_{i}\left(f\left(x^{(i)}\right)-f^{\star}\right)\le R^2+\sum_{i=1}^{k} \alpha_{i}^{2}\left\|g^{(i)}\right\|_{2}^{2}</script></blockquote>
+<p>又因为:</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\sum_{i=1}^{k} \alpha_{i}\left(f\left(x^{(i)}\right)-f^{\star}\right) \geq\left(\sum_{i=1}^{k} \alpha_{i}\right) \min _{i=1, \ldots, k}\left(f\left(x^{(i)}\right)-f^{\star}\right)=\left(\sum_{i=1}^{k} \alpha_{i}\right)\left(f_{\mathrm{best}}^{(k)}-f^{\star}\right)</script></blockquote>
 <p>因此：</p>
 <blockquote>
-<p>$f_{\text {best }}^{(k)}-f^{\star}=\min _{i=1, \ldots, k} f\left(x^{(i)}\right)-f^{\star} \leq \frac{R^{2}+\sum_{i=1}^{k} \alpha_{i}^{2}\left|g^{(i)}\right|_{2}^{2}}{2 \sum_{i=1}^{k} \alpha_{i}}\le\frac{R^{2}+G^2\sum_{i=1}^{k} \alpha_{i}^{2}}{2 \sum_{i=1}^{k} \alpha_{i}}$</p>
-</blockquote>
+<script type="math/tex; mode=display">
+f_{\text {best }}^{(k)}-f^{\star}=\min _{i=1, \ldots, k} f\left(x^{(i)}\right)-f^{\star} \leq \frac{R^{2}+\sum_{i=1}^{k} \alpha_{i}^{2}\left\|g^{(i)}\right\|_{2}^{2}}{2 \sum_{i=1}^{k} \alpha_{i}}\le\frac{R^{2}+G^2\sum_{i=1}^{k} \alpha_{i}^{2}}{2 \sum_{i=1}^{k} \alpha_{i}}</script></blockquote>
 <p>所以定理1，2，3，5显然可得.</p>
 <p>定理4：对于任意的 $\epsilon&gt;0$,存在整数 $N_1$使得 $\alpha_i\le \epsilon/G^2$, 对任意的 $i&gt;N_1$ 成立。同样的也存在整数 $N_2$， 使得 $\sum_{i=1}^{N_2}\ge\frac 1{\epsilon}\left(R^2+G^2\sum_{i=1}^{N_1}\alpha_i^2\right)$, 由于 $\sum_{i=1}^{\infty}\alpha_i=\infty,$ 令 $N=\max\{N_1,N_2\}$，则对于 $k&gt;N$, 我们有:</p>
 <blockquote>
@@ -352,91 +369,134 @@
 <p>收敛性结果：见文献 [7]</p>
 <h4 id="坐标轴下降法求解-Lasso-回归"><a href="#坐标轴下降法求解-Lasso-回归" class="headerlink" title="坐标轴下降法求解 Lasso 回归"></a>坐标轴下降法求解 Lasso 回归</h4><p>Lasso回归的损失函数为：</p>
 <blockquote>
-<p>$L(\beta)=\frac{1}{2n}\left(|y-X\beta|_2^2+\lambda|\beta|_1\right)=\frac{1}{2n}\left(\sum_{i=1}^n(y_i-x_i\beta)^2+\sum_{j=1}^p|\beta_j|\right)$</p>
-<p>$=\frac{1}{2n}\left(\sum_{i=1}^n(y_i-\sum_{j=1}^px_ij\beta_j)^2+\sum_{j=1}^p|\beta_j|\right)$</p>
-</blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+L(\beta)=&\frac{1}{2n}\left(\|y-X\beta\|_2^2+\lambda\|\beta\|_1\right)\\
+=&\frac{1}{2n}\left(\sum_{i=1}^n(y_i-x_i\beta)^2+\sum_{j=1}^p|\beta_j|\right)\\
+=&\frac{1}{2n}\left(\sum_{i=1}^n(y_i-\sum_{j=1}^px_ij\beta_j)^2+\sum_{j=1}^p|\beta_j|\right)
+\end{aligned}</script></blockquote>
 <p>因此对第 $k$ 个变量做优化，求偏导得：</p>
+<blockquote>
 <script type="math/tex; mode=display">
 \begin{aligned}\frac{\partial L}{\partial \beta_{k}}&=\sum_{i=1}^{n}-2 x_{i k}\left(y_{i}-\sum_{j=1}^{p} x_{i j} \beta_{j}\right)+\left\{\begin{array}{cc}\lambda & \beta_{k}>0 \\{[-\lambda, \lambda]} & \beta_{k}=0 \\-\lambda & \beta_{k}<0
 \end{array}\right.\\&=\sum_{i=1}^{n}-2 x_{i k}\left(y_{i}-\sum_{j \neq k}^{p} x_{i j} \beta_{j}-x_{i k} \beta_{k}\right)+\left\{\begin{array}{cc}\lambda & \beta_{k}>0 \\{[-\lambda, \lambda]} & \beta_{k}=0 \\-\lambda & \beta_{k}<0
 \end{array}\right.  \\&=-2 \sum_{i=1}^{n} x_{i k}\left(y_{i}-\sum_{j \neq k}^{p} x_{i j} \beta_{j}\right)+2 \beta_{k} \sum_{i=1}^{n} x_{i k}^{2}+ \left\{\begin{array}{cc}\lambda & \beta_{k}>0 \\{[-\lambda, \lambda]} & \beta_{k}=0 \\-\lambda & \beta_{k}<0
 \end{array}\right.\\&=-p_{k}+m_{k} \beta_{k}+\left\{\begin{array}{cc}\lambda & \beta_{k}>0 \\{[-\lambda, \lambda]} & \beta_{k}=0 \\-\lambda & \beta_{k}<0
-\end{array}\right.\end{aligned}</script><p>令其偏导为 $0$, 可以得到:</p>
+\end{array}\right.\end{aligned}</script></blockquote>
+<p>令其偏导为 $0$, 可以得到:</p>
 <blockquote>
 <script type="math/tex; mode=display">
 \beta_{k}^{*}=\left\{\begin{array}{ll}-\frac{1}{m_{k}}\left(p_{k}-\lambda\right) & p_{k}>\lambda \\ -\frac{1}{m_{k}}\left(p_{k}+\lambda\right) & p_{k}<-\lambda \\ 0 & -\lambda \leq p_{k} \leq \lambda\end{array}\right.</script></blockquote>
 <h3 id="近端梯度下降法"><a href="#近端梯度下降法" class="headerlink" title="近端梯度下降法"></a>近端梯度下降法</h3><h4 id="算法与收敛性-1"><a href="#算法与收敛性-1" class="headerlink" title="算法与收敛性"></a>算法与收敛性</h4><p>设 $f(x)$ 表示为： $f(x)=g(x)+h(x)$, 其中 $g(x)$ 是一个凸的可微函数， $h(x)$ 是一个凸得非可微函数</p>
 <p>首先，若 $f(x)$ 可微时，梯度下降公式 $x^{(k)}=x^{(k-1)}-t\nabla f(x^{(k-1)}) $ 可以通过下列公式导出:</p>
 <blockquote>
-<p>$x^{k}=\underset{x}{\arg \min } f\left(x^{k-1}\right)+\nabla f\left(x^{k-1}\right)^{\top}\left(x-x^{k-1}\right)+\frac{1}{2 t}\left|x-x^{k-1}\right|_{2}^{2}$</p>
-</blockquote>
+<script type="math/tex; mode=display">
+x^{k}=\underset{x}{\arg \min } f\left(x^{k-1}\right)+\nabla f\left(x^{k-1}\right)^{\top}\left(x-x^{k-1}\right)+\frac{1}{2 t}\left\|x-x^{k-1}\right\|_{2}^{2}</script></blockquote>
 <p>现在 $h(x)$ 不可微 ，仍按照上述方法，可以得到：</p>
 <blockquote>
 <script type="math/tex; mode=display">
 \begin{aligned} x^{k} &=\underset{x}{\arg \min } g\left(x^{k-1}\right)+\nabla g\left(x^{k-1}\right)^{\top}\left(x-x^{k-1}\right)+\frac{1}{2 t}\left\|x-x^{k-1}\right\|_{2}^{2}+h(x) \\ &=\underset{x}{\arg \min } \frac{1}{2 t}\left\|x-\left(x^{k-1}-t \nabla g\left(x^{k-1}\right)\right)\right\|_{2}^{2}+h(x) \end{aligned}</script></blockquote>
 <p>定义近端算子：</p>
 <blockquote>
-<p>$prox_{h,t}(x)=\underset{z}{\arg \min } \frac{1}{2 t}\left|x-z\right|_{2}^{2}+h(z)$</p>
-</blockquote>
-<p>所以迭代关系式为 $x^{(k)}=prox_{h,t}(x^{(k-1)}-t\nabla g(x^{(k-1)}) )$ .</p>
+<script type="math/tex; mode=display">
+prox_{h,t}(x)=\underset{z}{\arg \min } \frac{1}{2 t}\left\|x-z\right\|_{2}^{2}+h(z)</script></blockquote>
+<p>所以迭代关系式为:</p>
+<blockquote>
+<script type="math/tex; mode=display">
+x^{(k)}=prox_{h,t}(x^{(k-1)}-t\nabla g(x^{(k-1)}) )</script></blockquote>
 <p>下面证明迭代得收敛性：</p>
-<p>设 $f$ 关于初始点 $x^{(0)}$ 的下水平集为 $S=\{x\in dom f|f(x)\le f(x^{(0)})$, 则 $S$ 为闭集。定义 $G_t(x)=\frac 1t (x-prox_{h,t}(x-t\nabla g(x)))$。</p>
-<p>由于 $g(x)$ 是凸函数，则存在常数 $M$，使得 $\nabla^2f(x)\le MI$, 所以有 :</p>
+<p>设 $f$ 关于初始点 $x^{(0)}$ 的下水平集为 $S=\{x\in dom f|f(x)\le f(x^{(0)})$, 则 $S$ 为闭集。定义 $G_t(x)=\frac 1t (x-prox_{h,t}(x-t\nabla g(x)))$。由于 $g(x)$ 是凸函数，则存在常数 $M$，使得 $\nabla^2f(x)\le MI$, 所以有 :</p>
 <blockquote>
-<p>$g(y)\le g(x)+\nabla g(x)^T(y-x)+\frac M2|y-x|^2_2$, 对任意 $x,y$ 成立。</p>
-</blockquote>
-<p>令 $y=x-tG_t(x)$, 且 $0&lt;t\le1/$M, 有 $g(x-tG_t(x))\le g(x)+t\nabla g(x)^TG_t(x)+\frac t2|G_t(x)|^2_2$</p>
-<p>利用函数 $g,h$ 的凸性，即 $g(z)-g(x)\ge\nabla g(x)^T(z-x),h(z)-h(x)\ge \partial h(x)^T(z-x)$, 所以可以得到：</p>
+<script type="math/tex; mode=display">
+g(y)\le g(x)+\nabla g(x)^T(y-x)+\frac M2\|y-x\|^2_2 ,\quad\forall x,y</script></blockquote>
+<p>令 $y=x-tG_t(x)$, 且 $0&lt;t\le1/$M, 有:</p>
 <blockquote>
-<p>$f(x-tG_t(x))\le g(x)+t\nabla g(x)^TG_t(x)+\frac t2|G_t(x)|^2_2+h(x-tG_t(x))$</p>
-<p>$\le g(z)-\nabla g(x)^T(z-x)g(x)+t\nabla g(x)^TG_t(x)+\frac t2|G_t(x)|^2_2+h(z)-\partial h(x-tG_t(x))^T(z-(x-tG_t(x)))$</p>
-</blockquote>
+<script type="math/tex; mode=display">
+g(x-tG_t(x))\le g(x)+t\nabla g(x)^TG_t(x)+\frac t2\|G_t(x)\|^2_2</script></blockquote>
+<p>利用函数 $g,h$ 的凸性，即:</p>
+<blockquote>
+<script type="math/tex; mode=display">
+g(z)-g(x)\ge\nabla g(x)^T(z-x),h(z)-h(x)\ge \partial h(x)^T(z-x)</script></blockquote>
+<p> 所以可以得到：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+f(x-tG_t(x))\le& g(x)+t\nabla g(x)^TG_t(x)+\frac t2\|G_t(x)\|^2_2+h(x-tG_t(x))\\
+\le& g(z)-\nabla g(x)^T(z-x)g(x)+t\nabla g(x)^TG_t(x)\\
+\quad&+\frac t2\|G_t(x)\|^2_2+h(z)-\partial h(x-tG_t(x))^T(z-(x-tG_t(x)))
+\end{aligned}</script></blockquote>
 <p>由次梯度的定义 $G_t(x)-\nabla g(x)\in \partial h(x-tG_t(x))$ 。因此：</p>
 <blockquote>
-<p>$f(x-tG_t(x))\le g(z)+h(z)+G_t(x)^T(x-z)-\frac t2|G_t(x)|_2^2=f(z)+G_t(x)^T(x-z)-\frac t2|G_t(x)|^2_2$</p>
-</blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+f(x-tG_t(x))\le &g(z)+h(z)+G_t(x)^T(x-z)-\frac t2\|G_t(x)\|_2^2\\
+=&f(z)+G_t(x)^T(x-z)-\frac t2\|G_t(x)\|^2_2
+\end{aligned}</script></blockquote>
 <p>由于 $G_t(x)$ 定义，取 $x=x^{(k-1)}$ ,  $x^{(k)}=x^{(k-1)}-tG_t(x^{(k-1)})$,  $z=x^{(k-1)}$:</p>
 <blockquote>
-<p>$f(x^{(k)})\le f(x^{(k-1)})-\frac t2|G_t(x^{(k-1)})|^2_2$</p>
-</blockquote>
+<script type="math/tex; mode=display">
+f(x^{(k)})\le f(x^{(k-1)})-\frac t2\|G_t(x^{(k-1)})\|^2_2</script></blockquote>
 <p>则可知这是一个下降的方法。</p>
 <p>又令 $z=x^*$, 为极小值点，则可以得到：</p>
 <blockquote>
-<p>$f(x^{(k)})-f(x^{*})\le G_t(x^{(k-1)})^T(x^{(k-1)}-x^{*})-\frac t2|G_t(x^{(k-1)})|_2^2=\frac 1{2t}\left(|x^{(k-1)}-x^{*}|_2^2-|x^{(k-1)}-x^*-tG_t(x^{(k-1)})|^2_2\right)$</p>
-<p>$=\frac 1{2t}\left(|x^{(k-1)}-x^{*}|_2^2-|x^{(k)}-x^{*}|_2^2\right)$</p>
-</blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}f(x^{(k)})-f(x^{*})\le &G_t(x^{(k-1)})^T(x^{(k-1)}-x^{*})-\frac t2\|G_t(x^{(k-1)})\|_2^2\\
+=&\frac 1{2t}\left(\|x^{(k-1)}-x^{*}\|_2^2-\|x^{(k-1)}-x^*-tG_t(x^{(k-1)})\|^2_2\right)\\
+=&\frac 1{2t}\left(\|x^{(k-1)}-x^{*}\|_2^2-\|x^{(k)}-x^{*}\|_2^2\right)
+\end{aligned}</script></blockquote>
 <p>因为 $f(x^{(k)})-f(x^{*})\ge0$,所以 $|x^{(k-1)}-x^{*}|_2^2\ge|x^{(k)}-x^{*}|_2^2$, 即迭代使得 $x,f(x)$ 均不断向着最优值靠近。</p>
 <blockquote>
-<p>$f(x^{(k)})-f(x^{*})\le \frac 1k\sum_{i=1}^kf(x^{(i)})-f(x^{*})\le\frac 1{2tk}\left(|x^{(0)}-x^{*}|^2_2-|x^{(k)}-x^{*}|_2^2\right)\le\frac 1{2tk}\left(|x^{(0)}-x^{*}|_2^2\right)$</p>
-</blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}f(x^{(k)})-f(x^{*})\le &\frac 1k\sum_{i=1}^kf(x^{(i)})-f(x^{*})\\
+\le&\frac 1{2tk}\left(\|x^{(0)}-x^{*}\|^2_2-\|x^{(k)}-x^{*}\|_2^2\right)\\
+\le&\frac 1{2tk}\left(\|x^{(0)}-x^{*}\|_2^2\right)
+\end{aligned}</script></blockquote>
 <p>收敛性证毕，并且得到收敛速度为 $O(1/k)$</p>
 <h4 id="近端梯度下降法求解-Lasso-回归"><a href="#近端梯度下降法求解-Lasso-回归" class="headerlink" title="近端梯度下降法求解 Lasso 回归"></a>近端梯度下降法求解 Lasso 回归</h4><p>在Lasso回归中 $g(\beta)=|y-X\beta|_2^2, h(\beta)=\lambda|\beta|_1=\lambda\sum_{j=1}^p|\beta_j|$。因此</p>
 <blockquote>
-<p>$\beta^k=prox_{h,t}(\beta^{(k-1)}-t\nabla g(\beta^{(k-1)}) )=prox_{h,t}(\beta^{(k-1)}+tX^Ty-tX^TX\beta^{(k-1)})$</p>
+<script type="math/tex; mode=display">
+\beta^k=prox_{h,t}(\beta^{(k-1)}-t\nabla g(\beta^{(k-1)}) )=prox_{h,t}(\beta^{(k-1)}+tX^Ty-tX^TX\beta^{(k-1)})</script></blockquote>
 <p>其中 $h(\beta)=\lambda\sum_{j=1}^p|\beta_j|$</p>
-</blockquote>
 <p>该迭代公式通常也被称为<strong>迭代软阈值算法</strong></p>
 <p>下面对其进行求解，令 $z^{(k-1)}=\beta^{(k-1)}+tX^Ty-tX^TX\beta^{(k-1)}$, 因此</p>
 <blockquote>
-<p>$\beta^{(k)}=\arg\min_{\beta}\frac 1{2t}|\beta-z^{(k-1)}|_2^2+\lambda\sum_{j=1}^p|\beta_j|$</p>
-</blockquote>
-<p>则可以解的：</p>
 <script type="math/tex; mode=display">
-\beta^{(k)}_{i}=\left\{\begin{array}{ll}z^{(k-1)}_{i}-\lambda t, & \lambda t<z^{(k-1)}_{i} \\ 0, & \left|z^{(k-1)}_{i}\right| \leqslant \lambda t\\ z^{(k-1)}_{i}+\lambda t, & z^{(k-1)}_{i}<-\lambda t\end{array}\right.</script><h3 id="最小角回归方法"><a href="#最小角回归方法" class="headerlink" title="最小角回归方法"></a>最小角回归方法</h3><p>最小角回归是一种变量选择方法，是由前向选择算法所演化而来的。</p>
+\beta^{(k)}=\arg\min_{\beta}\frac 1{2t}\|\beta-z^{(k-1)}\|_2^2+\lambda\sum_{j=1}^p|\beta_j|</script></blockquote>
+<p>则可以解的：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\beta^{(k)}_{i}=\left\{\begin{array}{ll}z^{(k-1)}_{i}-\lambda t, & \lambda t<z^{(k-1)}_{i} \\ 0, & \left|z^{(k-1)}_{i}\right| \leqslant \lambda t\\ z^{(k-1)}_{i}+\lambda t, & z^{(k-1)}_{i}<-\lambda t\end{array}\right.</script></blockquote>
+<h3 id="最小角回归方法"><a href="#最小角回归方法" class="headerlink" title="最小角回归方法"></a>最小角回归方法</h3><p>最小角回归是一种变量选择方法，是由前向选择算法所演化而来的。</p>
 <h4 id="Forward-Selection-算法"><a href="#Forward-Selection-算法" class="headerlink" title="Forward Selection 算法"></a>Forward Selection 算法</h4><p> 在这里考虑选择标准为：每一步都选择能最小化残差变量。</p>
 <p>下面说明在每一步中选择最小化残差向量的特征等价于选择与上一步残差最为相关的特征：</p>
 <p>设候选集中已有 $k$ 个特征，不妨将 $X$ 的前 $k$ 列就设为候选集中的特征。则可将划分成两部分： $X=[X_1\quad X_2]$, $X_1$ 为候选集中的特征，对应的划分 $Q$ ,$R$ 。由 $QR$ 分解可知， $\hat{y}=Q_1Q_1^Ty$, 残差 $r=\hat{y}-y=(I-Q_1Q_1^T)y$, 设第 $k+1$ 个添加的特征为 $x_{k+1}$,则：</p>
 <blockquote>
-<p>$z_{k+1}=x_{k+1}-\sum_{i=1}^k\gamma_{i(k+1)}x_i$</p>
-<p>其中：$\hat{\gamma}_{i(k+1)}=\langle z_i,x_{k+1}\rangle/\langle z_i,z_i\rangle, i=1,\cdots,k$</p>
-</blockquote>
-<p>则 $z_{k+1}=(I-Q_1Q_1^T)x_{k+1}$, 令 $Q_1^{*}=[Q_1\quad \frac{z_{k+1}}{|z_{k+1}|^2}]=[Q_1\quad q]$, 则 $\hat{y}^{*}=Q_1^{*}(Q_1^{*})^Ty=Q_1Q_1^Ty+qq^Ty=Q_1Q_1^Ty+(q^Ty)q$, 因此残差为：</p>
+<script type="math/tex; mode=display">
+z_{k+1}=x_{k+1}-\sum_{i=1}^k\gamma_{i(k+1)}x_i</script></blockquote>
+<p>其中：</p>
 <blockquote>
-<p>$r^{*}=\hat{y}^{*}-y=r+(q^Ty)q$</p>
-</blockquote>
-<p>则 $|r^*|^2=r^Tr+2(q^Ty)r^Tq+(q^Ty)^2$</p>
-<p>所以最小化 $|r^*|^2$ 等价于最小化 $q^Tyr^Tq$,  经过简单的计算 $r^Tq=\frac{y^T(I-Q_1Q_1^T)x_{k+1}}{|z_{k+1}|^2}=q^Ty$.</p>
-<p>因此等价于最小化 $|r^Tq|^2=\frac{|r^Tq|}{|z_{k+1}|^2}=\frac{|r^Tq|}{|q|^2}$ .</p>
+<script type="math/tex; mode=display">
+\hat{\gamma}_{i(k+1)}=\langle z_i,x_{k+1}\rangle/\langle z_i,z_i\rangle, i=1,\cdots,k</script></blockquote>
+<p>则:</p>
+<blockquote>
+<script type="math/tex; mode=display">
+z_{k+1}=(I-Q_1Q_1^T)x_{k+1},</script></blockquote>
+<p>令 $Q_1^{*}=[Q_1\quad \frac{z_{k+1}}{|z_{k+1}|^2}]=[Q_1\quad q]$, 则:</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\hat{y}^{*}=Q_1^{*}(Q_1^{*})^Ty=Q_1Q_1^Ty+qq^Ty=Q_1Q_1^Ty+(q^Ty)q</script></blockquote>
+<p>因此残差为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+r^{*}=\hat{y}^{*}-y=r+(q^Ty)q</script></blockquote>
+<p>即我们有：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\|r^*\|^2=r^Tr+2(q^Ty)r^Tq+(q^Ty)^2</script></blockquote>
+<p>所以最小化 $|r^*|^2$ 等价于最小化 $q^Tyr^Tq$,  经过简单的计算 $r^Tq=\frac{y^T(I-Q_1Q_1^T)x_{k+1}}{|z_{k+1}|^2}=q^Ty$。因此等价于最小化:</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\|r^Tq\|^2=\frac{|r^Tq|}{\|z_{k+1}\|^2}=\frac{|r^Tq|}{\|q\|^2}.</script></blockquote>
 <p>综上所述算法的具体步骤为：</p>
 <blockquote>
 <p>(1).  对于中心化的 $p$ 个特征，分别计算与 $y$ 之间的相关系数，选择最为相关的特征 $k$ 加入候选集, 即 $k=\arg\max_j\frac{|x_j^Ty|}{|x_j|^2}$。</p>
@@ -463,18 +523,20 @@
 <p>下面理论推导迭代方向和补偿选取，特征的选取。</p>
 <p>先证残差假设已经进行了第 $k$ 次特征选择，当前候选集包含特征 $x_1,x_2,\cdots,x_k$, 当前残差为 $r_k$, 假设 $x_j,j=1,\cdots,k$ 与 $r_k$ 之间的相关性一样，即 $\frac{|\langle x_j,r_k\rangle|}{|x_j|\cdot|r_k|}=\lambda,j=1,\cdots,p$, 由步骤三: 移动方向为联合最小二乘系数方向，设前 $k$ 个特征构成的特征矩阵为 $X_1$ , $X_1$ 关于 $r_k$ 的最小二乘系数为 $\hat{\beta}$, 即当前参数的移动方向为 $\hat{\beta}$, 设移动步长为 $\alpha$ . 令 $u(\alpha)=\alpha X_1\hat{\beta}$ ，则 $r_{k+1}=r_k-u(\alpha)$。</p>
 <blockquote>
-<p>$\frac{|\langle x_j,r_k-u(\alpha)\rangle|}{|x_j|\cdot|r_k-u(\alpha)|}=\frac{1}{|r_k-u(\alpha)|}\cdot\frac{|\langle x_j,\alpha r_k+(1-\alpha)r_k-u(\alpha)\rangle|}{|x_j|}$</p>
-<p>$=\frac{1}{|r_k-u(\alpha)|}\cdot\frac{|\langle x_j,\alpha(r_k-X_1\hat{\beta})+(1-\alpha)r_k\rangle |}{|x_j|}$</p>
-<p>$=\frac{(1-\alpha)\lambda|r_k|}{|r_k-u(\alpha)|}$</p>
-</blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\frac{|\langle x_j,r_k-u(\alpha)\rangle|}{\|x_j\|\cdot\|r_k-u(\alpha)\|}=&\frac{1}{\|r_k-u(\alpha)\|}\cdot\frac{|\langle x_j,\alpha r_k+(1-\alpha)r_k-u(\alpha)\rangle|}{\|x_j\|}\\
+=&\frac{1}{\|r_k-u(\alpha)\|}\cdot\frac{|\langle x_j,\alpha(r_k-X_1\hat{\beta})+(1-\alpha)r_k\rangle |}{\|x_j\|}\\
+=&\frac{(1-\alpha)\lambda\|r_k\|}{\|r_k-u(\alpha)\|}
+\end{aligned}</script></blockquote>
 <p>其中倒数第二个等式是由于 $\langle x_j,\alpha(r_k-X_1\hat{\beta})\rangle=x_j^T(r_k-X\hat{\beta})=0$.</p>
 <p>即对任意 $j,l=1,\cdots,k, $ 有 $\frac{|\langle x_j,r_k-u(\alpha)\rangle|}{|x_j|\cdot|r_k-u(\alpha)|}=\frac{|\langle x_l,r_k-u(\alpha)\rangle|}{|x_l|\cdot|r_k-u(\alpha)|}$，即相关性相同。</p>
 <p>由于 $\hat{\beta}=(X_1^TX_1)^{-1}X_1^Tr_k$，因此 $u(\alpha)=\alpha X_1(X_1^TX_1)^{-1}X_1^Tr_k$，则 $X_1^Tu(\alpha)=X_1^Tr_k=\lambda\mathbf{1}$ . 即每次特征选择后，候选集里的所有特征与残差的相关性相等，也就是说 $u(\alpha)$ 为对角线方向，这也是为什么称为最小角回归的原因。</p>
 <p>下面计算步长 $\alpha$ :</p>
 <p>仍考虑候选集有 $k$ 个特征，令$\mathcal{A}={1,\cdots,k},$ 由于任意候选集里的特征与残差的相关系数相等，设为 $\lambda$, 则有 $\frac{|\langle x_j,r_{k+1}\rangle|}{|x_j|\cdot|r_{k+1}|}=\frac{(1-\alpha)\lambda|r_k|}{|r_{k+1}|}$,对任意 $j=1,\cdots,p$, 由于 $x_j$ 经过中心标准化，则 $|x_j|=1$，所以 $\max_{j\in\mathcal{A}^c}|\langle x_j,r_{k}-u(\alpha)\rangle |=(1-\alpha)\lambda|r_k|$, 因此$|corr(x_j,r_k)-\alpha corr(x_j,X_1\hat{\beta})|=(1-\alpha)\lambda$, 记 $C_j=corr(x_j,r_k),D_j=corr(x_j,X_1\hat{\beta})$, 则可以解的：</p>
 <blockquote>
-<p>$\alpha=\min _{j \in A^{c}}^{+}\left\{\frac{\lambda-C_{j}}{\lambda-D_{j}}, \frac{\lambda+C_{j}}{\lambda+D_{j}}\right\}$</p>
-</blockquote>
+<script type="math/tex; mode=display">
+\alpha=\min _{j \in A^{c}}^{+}\left\{\frac{\lambda-C_{j}}{\lambda-D_{j}}, \frac{\lambda+C_{j}}{\lambda+D_{j}}\right\}</script></blockquote>
 <p>若令 $|\langle x_j,r_k\rangle|=\lambda|r_k|=\hat{C}$, $|\langle x_j,r_k\rangle|=C_j$, $|\langle x_j,X_1\hat{\beta}\rangle|=D_j,$ 则可以得到和文献 [8] 中一致的表达方式。</p>
 <hr>
 <p>最小角回归和Lasso的关系有空再补。</p>
@@ -522,13 +584,13 @@
                 <span class="tag">
                     
                     
-                        <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"> <i class="iconfont icon-tags"></i> 机器学习</a>
+                        <a href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/"> <i class="iconfont icon-tags"></i> 线性模型</a>
                     
-                        <a href="/tags/%E7%BB%9F%E8%AE%A1/"> <i class="iconfont icon-tags"></i> 统计</a>
+                        <a href="/tags/%E5%9B%9E%E5%BD%92/"> <i class="iconfont icon-tags"></i> 回归</a>
                     
-                        <a href="/tags/%E4%BC%98%E5%8C%96/"> <i class="iconfont icon-tags"></i> 优化</a>
+                        <a href="/tags/Lasso/"> <i class="iconfont icon-tags"></i> Lasso</a>
                     
-                        <a href="/tags/%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/"> <i class="iconfont icon-tags"></i> 线性回归</a>
+                        <a href="/tags/%E6%9C%80%E5%B0%8F%E8%A7%92%E5%9B%9E%E5%BD%92/"> <i class="iconfont icon-tags"></i> 最小角回归</a>
                     
                         
                 </span>

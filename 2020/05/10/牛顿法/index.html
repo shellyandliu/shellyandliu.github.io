@@ -332,8 +332,9 @@ f\left(x^{(k)}\right)-f^{*} \leq\left\{\begin{array}{ll}
 <blockquote>
 <script type="math/tex; mode=display">
 \begin{aligned}
-f\left(x-t (\nabla^2f(x))^{-1}\nabla f(x)\right) & \leqslant f(x)+t \nabla f(x)^{T} (\nabla^2f(x))^{-1}\nabla f(x)+\frac{M\left\|(\nabla^2f(x))^{-1}\nabla f(x)\right\|_{2}^{2}}{2} t^{2} \\
-& \leqslant f(x)-t \lambda(x)^{2}+\frac{M}{2 m} t^{2} \lambda(x)^{2}
+&f\left(x-t (\nabla^2f(x))^{-1}\nabla f(x)\right)\\
+ \leqslant& f(x)+t \nabla f(x)^{T} (\nabla^2f(x))^{-1}\nabla f(x)+\frac{M\left\|(\nabla^2f(x))^{-1}\nabla f(x)\right\|_{2}^{2}}{2} t^{2} \\
+\leqslant& f(x)-t \lambda(x)^{2}+\frac{M}{2 m} t^{2} \lambda(x)^{2}
 \end{aligned}\tag{7}</script></blockquote>
 <p>由于步长$\hat{t}=m/M$ 满足：</p>
 <blockquote>
@@ -552,7 +553,10 @@ H_{k+1}=\min_H\|H-H_k\|\tag{37}</script></blockquote>
 <p>由于 $\partial E/\partial E_{ij} = e_ie_j^T$ , 则：</p>
 <blockquote>
 <script type="math/tex; mode=display">
-\partial\mathcal L/\partial E_{ij}=\frac 14 (tr(We_ie_j^TWE)+tr(WE^TWe_ie_j^T))+tr(\Lambda(e_je_i^T-e_ie_j^T))-\lambda^TWe_ie_j^Tq_k=0\tag{39}</script></blockquote>
+\begin{aligned}\partial\mathcal L/\partial E_{ij}=&\frac 14 (tr(We_ie_j^TWE)+tr(WE^TWe_ie_j^T))\\
+\quad&+tr(\Lambda(e_je_i^T-e_ie_j^T))-\lambda^TWe_ie_j^Tq_k\\
+=&0
+\end{aligned}\tag{39}</script></blockquote>
 <p>运用对称性和秩的交换性：</p>
 <blockquote>
 <script type="math/tex; mode=display">
@@ -617,13 +621,7 @@ E=q_kp_k^T+p_k\lambda^T\tag{42}</script></blockquote>
                 <span class="tag">
                     
                     
-                        <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"> <i class="iconfont icon-tags"></i> 机器学习</a>
-                    
-                        <a href="/tags/%E7%BB%9F%E8%AE%A1/"> <i class="iconfont icon-tags"></i> 统计</a>
-                    
                         <a href="/tags/%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95/"> <i class="iconfont icon-tags"></i> 优化方法</a>
-                    
-                        <a href="/tags/%E4%BA%8C%E9%98%B6%E6%94%B6%E6%95%9B/"> <i class="iconfont icon-tags"></i> 二阶收敛</a>
                     
                         <a href="/tags/%E7%89%9B%E9%A1%BF%E6%B3%95/"> <i class="iconfont icon-tags"></i> 牛顿法</a>
                     

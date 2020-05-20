@@ -236,14 +236,14 @@
                             <span class="post-meta-item-icon">
                               <i class="fa fa-keyboard-o"></i>
                               <span class="post-meta-item-text">  字数统计: </span>
-                              <span class="post-count"><a href="#">4.9k字</a></span>
+                              <span class="post-count"><a href="#">5.5k字</a></span>
                             </span>
                         </span>
                         <span class="post-time">
                             <span class="post-meta-item-icon">
                             <i class="fa fa-hourglass-half"></i>
                             <span class="post-meta-item-text">  阅读时长: </span>
-                            <span class="post-count"><a href="#">23分</a></span>
+                            <span class="post-count"><a href="#">26分</a></span>
                             </span>
                         </span>
                     
@@ -515,7 +515,7 @@ B_{k+1}=B_k+\frac{q_kq_k^T}{q_k^Tp_k}-\frac{B_kp_kp_k^TB_k}{p_k^TB_kp_k}\tag{33}
 <p>对 $B_{k+1}$ 两次运用 Sherman-Morrison 公式，$\left[A+ab^{T}\right]^{-1}=A^{-1}-\frac{A^{-1}ab^{T} A^{-1}}{1+b^{T} A^{-1} a}$ ，可以得到：</p>
 <blockquote>
 <script type="math/tex; mode=display">
-H_{k+1}^{\mathrm{BFGS}}=H_{k}+\left(\frac{1+q_{k}^{T} H_{k} q_{k}}{q_{k}^{T} q_{k}}\right) \frac{p_{k} p_{k}^{T}}{p_{k}^{T} q_{k}}-\frac{p_{k}q_{k}^{T}H_{k}+H_{k}q_{k} q_{k}^{T}}{q_{k}^{T} p_{k}}\tag{34}</script></blockquote>
+H_{k+1}^{\mathrm{BFGS}}=H_{k}+\left(1+\frac{q_{k}^{T} H_{k} q_{k}}{q_{k}^{T} q_{k}}\right) \frac{p_{k} p_{k}^{T}}{p_{k}^{T} q_{k}}-\frac{p_{k}q_{k}^{T}H_{k}+H_{k}q_{k} q_{k}^{T}}{q_{k}^{T} p_{k}}\tag{34}</script></blockquote>
 <h3 id="Boryden-类算法"><a href="#Boryden-类算法" class="headerlink" title="Boryden 类算法"></a>Boryden 类算法</h3><p>我们记 $H_{k+1}^{\text{DFP}}$ 为 DFP 算法的迭代公式得到的，记 $H_{k+1}^{\text{BFGS}}$ 为 DFP 算法的迭代公式得到的。由于它们都满足 (22) 式。则它们的线性组合满足，我们将</p>
 <blockquote>
 <script type="math/tex; mode=display">
@@ -579,6 +579,39 @@ E=q_kp_k^T+p_k\lambda^T\tag{42}</script></blockquote>
 \lambda=\frac{(H_kq_k-\frac12p_k(q_k^TH_kq_k/p_k^Tq_k))}{p_k^Tq_k}\tag{44}</script></blockquote>
 <p>将 (44) 代入 (42) 就得到 BFGS 得表达式。证毕。</p>
 <p>同样的，若将 $H_k$ 用 $B_k$ 替代，则将得到 DFP 方法。</p>
+<h3 id="L-BFGS方法"><a href="#L-BFGS方法" class="headerlink" title="L-BFGS方法"></a>L-BFGS方法</h3><p>我们再来看 BFGS 算法，$H$ 的迭代关系为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+H_{k+1}^{\mathrm{BFGS}}=H_{k}+\left(1+\frac{q_{k}^{T} H_{k} q_{k}}{q_{k}^{T} q_{k}}\right) \frac{p_{k} p_{k}^{T}}{p_{k}^{T} q_{k}}-\frac{p_{k}q_{k}^{T}H_{k}+H_{k}q_{k} q_{k}^{T}}{q_{k}^{T} p_{k}}\tag{45}</script></blockquote>
+<p>显然，在每次迭代需要存储 $H_k$ 用于下一次迭代，即需要存储 $O(n^2)$ 的数据，并且从 (45) 可以看出，每次迭代需要 $O(n^2)$ 的运算量。这在 $n$ 较大时仍是难以接受的。因此在大规模的问题中，还需进行优化。</p>
+<p>可以将 (45) 改写为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+H_{k+1}^{\mathrm{BFGS}}=\left(I-\frac{p_kq_k^T}{p_k^Tq_k}\right)H_{k}\left(I-\frac{p_kq_k^T}{p_k^Tq_k}\right)^T+ \frac{p_{k} p_{k}^{T}}{p_{k}^{T} q_{k}}  \tag{46}</script></blockquote>
+<p>令 $\rho_k = \frac{1}{p_k^Tq_k}$ , $V_k=I-\rho_kp_kq_k^T$, 则：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+H_{k+1}=V_k^TH_kV_k+\rho_kp_kp_k^T</script></blockquote>
+<p>依次往前递推可以得到由 $H_0$ 和 $p_k,q_k$ 所构成的表达式，这样运行下去的计算量和内存占用量也是相当的高。L-BFGS算法考虑的是进行截断，即我们不从 $H_0$ 开始迭代计算 $H_{k}$ 而是从第 $k-m$ 步开始计算，其中 $m$ 远小于 $n$。</p>
+<p>则我们可以将 $H_k$ 写为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}H_{k}=&\left(V_{k-1}^{T} \cdots V_{k-m}^{T}\right) H_{k-m}\left(V_{k-m} \cdots V_{k-1}\right) \\&+\rho_{k-m}\left(V_{k-1}^{T} \cdots V_{k-m+1}^{T}\right) p_{k-m} p_{k-m}^{T}\left(V_{k-m+1} \cdots V_{k-1}\right) \\&+\rho_{k-m+1}\left(V_{k-1}^{T} \cdots V_{k-m+2}^{T}\right) p_{k-m+1} p_{k-m+1}^{T}\left(V_{k-m+2} \cdots V_{k-1}\right) \\&+\cdots \\&+\rho_{k-1} p_{k-1} p_{k-1}^{T}\end{aligned}\tag{47}</script></blockquote>
+<p>其中，我们需要近似 $H_{k-m}$，通常我们可以选择：$H_{k-m}=\gamma I,$ 其中 $\gamma=\frac{q_k^Tp_k}{q_k^Tq_k}$。即 $\gamma$ 可以表示为近似特征值。</p>
+<blockquote>
+<p>$s=\nabla f_k;$</p>
+<p><strong>for</strong> $i=k-1,k-2,\cdots,k-m$</p>
+<p>​    $\alpha_i=\rho_ip_i^Ts$; </p>
+<p>​    $s=s-\alpha_iq_i$;</p>
+<p><strong>end for</strong></p>
+<p>$r=H_{k-m}s$;</p>
+<p><strong>for</strong> $i=k-m,k-m+1,\cdots,k-1$</p>
+<p>​    $\beta = \rho_iq_i^Tr;$</p>
+<p>​    $r=r+p_i(\alpha_i-\beta);$</p>
+<p><strong>end for</strong></p>
+<p><strong>stop</strong> with $H_k\nabla f_k=r$</p>
+</blockquote>
+<p>在该算法中，总共进行了 $4mn$ 次乘法 ，内存方面只需要保存最近 $m$ 次迭代的 $p_k,q_k$，共 $2mn$ 个数，因此大大节约内存和运算量。</p>
 <hr>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p>[1] Nocedal, Jorge, and Stephen Wright. <em>Numerical optimization</em>. Springer Science &amp; Business Media, 2006.</p>
 <p>[2] Boyd, Stephen, Stephen P. Boyd, and Lieven Vandenberghe. <em>Convex optimization</em>. Cambridge university press, 2004.</p>

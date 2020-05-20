@@ -601,13 +601,13 @@ H_{k+1}=V_k^TH_kV_k+\rho_kp_kp_k^T</script></blockquote>
 <blockquote>
 <p>$s=\nabla f_k;$</p>
 <p><strong>for</strong> $i=k-1,k-2,\cdots,k-m$</p>
-<p>​    $\alpha_i=\rho_ip_i^Ts$; </p>
-<p>​    $s=s-\alpha_iq_i$;</p>
+<p>$\quad \alpha_i=\rho_ip_i^Ts$; </p>
+<p>$\quad s=s-\alpha_iq_i$;</p>
 <p><strong>end for</strong></p>
-<p>$r=H_{k-m}s$;</p>
+<p>$ r=H_{k-m}s$;</p>
 <p><strong>for</strong> $i=k-m,k-m+1,\cdots,k-1$</p>
-<p>​    $\beta = \rho_iq_i^Tr;$</p>
-<p>​    $r=r+p_i(\alpha_i-\beta);$</p>
+<p>$\quad\beta = \rho_iq_i^Tr;$</p>
+<p>$\quad r=r+p_i(\alpha_i-\beta);$</p>
 <p><strong>end for</strong></p>
 <p><strong>stop</strong> with $H_k\nabla f_k=r$</p>
 </blockquote>

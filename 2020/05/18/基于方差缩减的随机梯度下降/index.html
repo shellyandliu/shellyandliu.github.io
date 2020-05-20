@@ -492,19 +492,19 @@ C_0=\frac 32 \left[R_n(w_0)-R_n(w^*)\right]+\frac{4L}{n}\|w_0-w^*\|_2^2.\tag{25}
 <blockquote>
 <p>初始化，令 $d=0$, $y_i=0$, $z=w$ , $\kappa=1$ , $m=0$ , $C_i=0$ , $S_{-1}=0$ , $V_j=0$， 对任意 $i=1,2,\dots,n$ 和 $j=1,2,\dots,p$.</p>
 <p><strong>for</strong> $k =0,1,\dots$  <strong>do</strong></p>
-<p>​    从 $\{1,2,\dots,n\}$ 中随机选取样本 $i$</p>
-<p>​    <strong>if</strong> $C_i=0$ <strong>then</strong></p>
-<p>​        $m = m+1$  ，$C_i=1$</p>
-<p>​    <strong>end if</strong></p>
-<p>​    <strong>for</strong> $j$ 是 $x_i$ 中的非零分量 <strong>do</strong></p>
-<p>​        $z_j=z_j-(S_{k-1}-S_{V_j-1})d_j$ ， $V_j=k$</p>
-<p>​    <strong>end for</strong></p>
-<p>​    令 $J$ 是 $x_i$ 中的非零分量集合</p>
-<p>​    $d_J=d_J-x_{iJ}(y_i- f’_i(\kappa x^T_{iJ}z_J))$， $y_i=f_i’(\kappa x_{iJ}^Tz_J)$</p>
-<p>​    $\kappa=\kappa(1-\alpha\lambda)$ ， $S_k=S_{k-1}+\alpha/(\kappa m)$</p>
+<p>$\quad$从 $\{1,2,\dots,n\}$ 中随机选取样本 $i$</p>
+<p>$\quad$<strong>if</strong> $C_i=0$ <strong>then</strong></p>
+<p>$\quad\quad m = m+1$  ，$C_i=1$</p>
+<p>$\quad$<strong>end if</strong></p>
+<p>$\quad$<strong>for</strong> $j$ 是 $x_i$ 中的非零分量 <strong>do</strong></p>
+<p>$\quad\quad z_j=z_j-(S_{k-1}-S_{V_j-1})d_j$ ， $V_j=k$</p>
+<p>$\quad$<strong>end for</strong></p>
+<p>$\quad$令 $J$ 是 $x_i$ 中的非零分量集合</p>
+<p>$\quad d_J=d_J-x_{iJ}(y_i- f’_i(\kappa x^T_{iJ}z_J))$， $y_i=f_i’(\kappa x_{iJ}^Tz_J)$</p>
+<p>$\quad \kappa=\kappa(1-\alpha\lambda)$ ， $S_k=S_{k-1}+\alpha/(\kappa m)$</p>
 <p><strong>end for</strong></p>
 <p><strong>for</strong> $j =1,2,\dots,p$ <strong>do</strong></p>
-<p>​    $w_j=\kappa(z_j-(S_{k-1}-S_{V_j-1})d_j)$</p>
+<p>$\quad w_j=\kappa(z_j-(S_{k-1}-S_{V_j-1})d_j)$</p>
 <p><strong>end for</strong></p>
 </blockquote>
 <ol>

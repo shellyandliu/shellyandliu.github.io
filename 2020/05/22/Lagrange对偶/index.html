@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="会飞的猪">
+
+
+
+
+
+<link rel="stylesheet" href="/fonts/iconfont_new/iconfont.css">
+
+
+<title>Lagrange对偶原理 | 会飞的猪</title>
+
+
+
+    <link rel="icon" href="/image/longmao.jpg">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+            <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+        
+    
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">会飞的猪</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">文章</a>
+                
+                    <a class="menu-item" href="/categories">分类</a>
+                
+                    <a class="menu-item" href="/tags">标签</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">会飞的猪</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">文章</a>
+                
+                    <a class="menu-item" href="/categories">分类</a>
+                
+                    <a class="menu-item" href="/tags">标签</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">展开目录</a>
+        <a onclick="go_top()">回到顶部</a>
+        <a onclick="go_bottom()">到达底部</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Lagrange对偶原理</h1>
+            
+                <div class="post-meta">
+                    
+                        作者: <a itemprop="author" rel="author" href="/">会飞的猪</a>
+                    
+
+                    
+                        <span class="post-time">
+                        时间: <a href="#">五月 22, 2020&nbsp;&nbsp;19:55:52</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    类别:
+                            
+                                <a href="/categories/%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95/">-优化方法</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                            <span class="post-meta-item-icon">
+                              <i class="fa fa-keyboard-o"></i>
+                              <span class="post-meta-item-text">  字数统计: </span>
+                              <span class="post-count"><a href="#">843字</a></span>
+                            </span>
+                        </span>
+                        <span class="post-time">
+                            <span class="post-meta-item-icon">
+                            <i class="fa fa-hourglass-half"></i>
+                            <span class="post-meta-item-text">  阅读时长: </span>
+                            <span class="post-count"><a href="#">3分</a></span>
+                            </span>
+                        </span>
+                    
+
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="凸优化问题"><a href="#凸优化问题" class="headerlink" title="凸优化问题"></a>凸优化问题</h1><p>保准的凸优化问题为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\min_x f_0(x)\\
+&\ s.t.f_i(x)\le 0,\quad i=1,2\dots,m\\
+&\ \ \ \ \quad h_i(x)=0,\quad i=1,2\dots,p
+\end{aligned}\tag{1}</script></blockquote>
+<p>设 $\operatorname{dom}f$ 表示函数 $f$ 的定义域，该问题的定义域 $\mathcal D=\bigcap_{i=1}^m\operatorname{dom} f_i\cap\bigcap_{i=1}^p\operatorname{dom}h_i$ 是非空开集。函数 $f_0,f_1,\dots,f_m,h_1,\dots,h_p$ 都是连续可微的函数。定义问题 (1) 的Lagrange函数为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+L(x,\lambda,v)=f_0(x)+\sum_{i=1}^m\lambda_i f_i(x)+\sum_{i=1}^pv_ih_i(x)\tag{2}</script></blockquote>
+<p>其中 $\lambda_i\ge0,v_i$ 分别是不等式约束和等式约束的Lagrange乘子，相应的 $\lambda=[\lambda_1,\dots,\lambda_m]^T$ 和 $v=[v_1,\dots,v_p]^T$ 称为对偶变量或Lagrange乘子向量。</p>
+<p>下面定义Lagrange函数：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+g(\lambda,v)=\inf_{x\in\mathcal D}L(x,\lambda,v)\tag{3}</script></blockquote>
+<p>由于对偶函数是一簇关于 $(\lambda,v)$ 的放射函数的逐点下确界，所以即使原问题 (1) 不是凸的，对偶函数也是凹函数。</p>
+<p>下面定义Lagrange对偶问题为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}&\max_{\lambda,v} g(\lambda,v)\\
+&\ s.t. \lambda\ge0
+\end{aligned}
+\tag{4}</script></blockquote>
+<p>由于对偶函数是一簇关于 $(\lambda,v)$ 的放射函数的逐点下确界，所以即使原问题 (1) 不是凸的，对偶函数也是凹函数。</p>
+<h1 id="弱对偶性"><a href="#弱对偶性" class="headerlink" title="弱对偶性"></a>弱对偶性</h1><p>设原问题的最优值为 $p^*$ , 对偶问题的最优值为 $d^*$. 则我们有：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+d^*\le p^*\tag{5}</script></blockquote>
+<p>对于原问题的任意一个可行点 $\bar x$ , 即 $f_i(\bar x )\le 0$ 且 $h_i(\bar x )=0$。 由于 $\lambda\ge 0$ , 则我们有：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\sum_{i=1}^m\lambda_i f_i(\bar x )+\sum_{i=1}^pv_ih_i(\bar x )\le 0\tag{6}</script></blockquote>
+<p>因此：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+g(\lambda,v)=\inf_{x\in \mathcal D}L(x,\lambda ,v)\le L(\bar x,\lambda,v)\le f_0(\bar x)\tag{7}</script></blockquote>
+<p>所以有 $d^*\le p^*$。</p>
+<h1 id="强对偶性"><a href="#强对偶性" class="headerlink" title="强对偶性"></a>强对偶性</h1><p>若等式 $d^*=p^*$ 成立，则称强对偶性成立。一般而言强对偶性不成立，若原问题 (1) 是凸函数，即如下形式：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\min_x f_0(x)\\
+&\ s.t.f_i(x)\le 0,\quad i=1,2\dots,m\\
+&\ \ \ \ \quad Ax=b,
+\end{aligned}\tag{8}</script></blockquote>
+<p>其中函数 $f_0,\dots,f_m$ 为凸函数。下面给出强凸性成立的必要条件：</p>
+<p>记 $\operatorname{aff}C$ 为 $C$ 中所有点的放射组合组成的仿射包：</p>
+<p>$\operatorname {aff}C=\{\theta_1x_1+\cdots+\theta_kx_k|x_1,\cdots,x_k\in C,\theta_1+\cdots+\theta_k=1\}$</p>
+<p>定义集合的相对内部为 $\operatorname {aff}C$ 的内部，记为 $\operatorname{relint}C$，即 $\operatorname{relint}C=\{x\in C|B(x,r)\cap \operatorname{aff}C\subseteq C$ 对于某些 $r&gt;0 \}$，其中 $B(x,r)=\{y|||y-x||\le r\}$</p>
+<blockquote>
+<p>Slater条件：存在一点 $x\in \operatorname{relint}\mathcal D$ 使得：$f_i(x)&lt;0,i=1,\cdots,m,\quad Ax=b$.</p>
+</blockquote>
+<p>满足上述条件的点有时称为严格可行。</p>
+<blockquote>
+<p>Slater定理：当Slater条件成立，且原问题为凸问题时，强对偶性成立。</p>
+</blockquote>
+<p>显然当不等式约束均为仿射函数时，Slater条件自动成立。</p>
+<p>下面给出Slater定理的证明，参照参考文献 [1] 。</p>
+<p>为简化证明，附加两个假设条件：</p>
+<ol>
+<li>$\mathcal D$ 的内点集不为空集，即 $\operatorname{relint}\mathcal D=\operatorname{int}\mathcal D$。</li>
+<li>$\operatorname {rank}A=p$。</li>
+</ol>
+<p>假设最优值 $p^*$ 有限，定义集合 $\mathcal A$ 和 $\mathcal B$ 为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{array}{c}
+\mathcal{A}=\left\{(u, v, t) | \exists x \in \mathcal{D}, f_{i}(x) \leqslant u_{i}, i=1, \cdots, m\right. \\
+\left.h_{i}(x)=v_{i}, i=1, \cdots, p, f_{0}(x) \leqslant t\right\}
+\end{array}\tag{9}</script><script type="math/tex; mode=display">
+\mathcal{B}=\left\{(0,0, s) \in \mathbf{R}^{m} \times \mathbf{R}^{p} \times \mathbf{R} | s<p^{\star}\right\}\tag{10}</script></blockquote>
+<p>则我们显然易证 $\mathcal A$ 和 $\mathcal B$ 均为凸集。下说明 $\mathcal A$ 和 $\mathcal B$ 不相交：</p>
+<p>若存在 $(u,v,t)\in\mathcal A\cap\mathcal B$，因为 $(u,v,t)\in\mathcal B$，则 $u=0,v=0$ , 且 $t&lt;p^*$，又因为 $(u,v,t)\in\mathcal A$，所以存在 $x$ 使得 $f_i(x)\le 0,i=1,\cdots,m,AX-b=0$ ，以及 $f_0(x)\le t&lt;p^*$，这与 $p^*$ 为原问题的最优值矛盾。</p>
+<p>又根据凸集分离定理，存在 $(\tilde{\lambda},\tilde{v},\mu)\neq0$ 和 $\alpha$ 满足：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{array}{l}
+(u, v, t) \in \mathcal{A} \Longrightarrow \tilde{\lambda}^{T} u+\tilde{\nu}^{T} v+\mu t \geqslant \alpha\ \\
+(u, v, t) \in \mathcal{B} \Longrightarrow \tilde{\lambda}^{T} u+\tilde{\nu}^{T} v+\mu t \leqslant \alpha
+\end{array}\tag{11}</script></blockquote>
+<p>由于当 $u,t$ 趋向无穷大时也属于 $\mathcal A$， 所以根据 (11) 的第一个式子，我们有：$\tilde{\lambda}\ge0,\mu\ge 0$ ，否则 $\tilde{\lambda}^{T} u+\mu t$ 在 $\mathcal A$ 上无下界。而对于 (11) 的第二个式子，意味着对所有 $t&lt;p^*$，$\mu t\le\alpha$，即 $\mu p^*\le \alpha$，因此对于任意 $x\in\mathcal D$，下面式子成立：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\sum_{i=1}^m\tilde{\lambda}_if_i(x)+\tilde{v}^T(Ax-b)+\mu f_0(x)\ge \alpha\ge\mu p^*\tag{12}</script></blockquote>
+<p>若 $\mu&gt;0$，则我们有，对任意 $x\in\mathcal D$，</p>
+<blockquote>
+<script type="math/tex; mode=display">
+L(x,\tilde{\lambda}/\mu,\tilde{v}/\mu)\ge p^*\tag{13}</script></blockquote>
+<p>对 $x$ 求极小可得： $g(\lambda,v)\ge p^*$。由弱对偶性，所以有 $g(\lambda,v)=p^*$。</p>
+<p>若 $\mu=0$，则根据 (12) 有，对任意 $x\in\mathcal D$，</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\sum_{i=1}^m\tilde{\lambda}_if_i(x)+\tilde{v}^T(Ax-b)\ge 0\tag{14}</script></blockquote>
+<p>由于存在满足Slater条件的点 $\bar x$，则：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\sum_{i=1}^m\tilde{\lambda}_if_i(\bar x)\ge 0,\quad f_i(\bar x)<0,\quad\tilde{v}^T(Ax-b)\ge0\tag{15}</script></blockquote>
+<p>由于 $\tilde{\lambda}_i\ge0$，因此有 $\tilde{\lambda}=0$，又因为 $(\tilde{\lambda},\tilde{v},\mu)\neq0$，且 $\tilde{\lambda}=0,\mu=0$，所以 $\tilde{v}\neq=0$，因此对任意 $x\in\mathcal D$ 有 $\tilde{v}^T(Ax-b)\ge0$，因为 $\bar{x}\in\operatorname{int}\mathcal D$，因此除了 $A^T\tilde{v} $ 的情况，总存在 $\mathcal D$ 中的点使得 $\tilde{v}^T(Ax-b)&lt;0$。而因为 $\operatorname{rank}A=p$，所以矛盾。</p>
+<h1 id="最优性条件（KKT条件）"><a href="#最优性条件（KKT条件）" class="headerlink" title="最优性条件（KKT条件）"></a>最优性条件（KKT条件）</h1><blockquote>
+<p>定理1：记 $x^*$ 和 $(\lambda^*,v^*)$ 分别是原问题 (1) 和对偶问题 (4) 的一对最优解，假设强对偶性成立，则以下结论成立：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+f_i(x^*)&\le 0,\quad i=1,\cdots,m\tag{16.1}\\
+h_i(x^*)&=0,\quad i=1,\cdots,p\tag{16.2}\\
+\lambda_i^*&\ge0,\quad i=1,\cdots,m\tag{16.3}\\
+\lambda_i^*f_i(x^*)&=0,\quad i=1,\cdots,m\tag{16.4}\\
+\nabla f_0(x^*)+\sum_{i=1}^m\lambda_i^*\nabla f_i(x^*)+\sum_{i=1}^pv_i^*\nabla h_i(x^*)&=0\tag{16.5}
+\end{align}</script><p>(16.1)-(16.5) 式称为 KKT 条件。</p>
+<p>反之，若问题 (1) 式凸优化问题，则 KKT 条件不仅是必要条件还是充分条件。</p>
+</blockquote>
+<p>下面证明之：</p>
+<p>由于强对偶性可知：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+f_0(x^*)&=g(\lambda^*,v^*)\\
+&=\min_{x\in\mathcal D}\left(f_0(x)+\sum_{i=1}^m\lambda_i^*f_i(x)+\sum_{i=1}^pv_i^*h_i(x)\right)\\
+&\le f_0(x^*)+\sum_{i=1}^m\lambda^*_i f_i(x^*)+\sum_{i=1}^pv_i^*h_i(x^*)\\
+&\le f_0(x^*)
+\end{aligned}\tag{17}</script></blockquote>
+<p>因此不等式取等号，即:</p>
+<blockquote>
+<script type="math/tex; mode=display">
+f_0(x^*)+\sum_{i=1}^m\lambda^*_i f_i(x^*)+\sum_{i=1}^pv_i^*h_i(x^*)=f_0(x^*)\tag{18}</script></blockquote>
+<p>因为 $h_i(x^*)=0$，所以有 :</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\sum_{i=1}^m\lambda^*_i f_i(x^*)=0\tag{19}</script></blockquote>
+<p>又因为 $\lambda_i^*\ge0,f_i(x^*)\le0$，所以 $\forall i,\lambda_i^*f_i(x^*)\le0$，即有：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\lambda_i^*f_i(x^*)=0,\quad i=1,\cdots,m\tag{20}</script></blockquote>
+<p>即式 (16.4) 成立。</p>
+<p>又由于 (16.1)(16.2) 是原问题 (1) 的不等式约束和等式约束，最优解当然应该满足。而 (16.3) 又是对偶问题 (4) 的不等式约束，所以也自然满足。</p>
+<p>又因为由 (17) 可以得到：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\min_{x\in\mathcal D}\left(f_0(x)+\sum_{i=1}^m\lambda_i^*f_i(x)+\sum_{i=1}^pv_i^*h_i(x)\right)= f_0(x^*)+\sum_{i=1}^m\lambda^*_i f_i(x^*)+\sum_{i=1}^pv_i^*h_i(x^*)\\</script></blockquote>
+<p>即 $x^*$ 为 $L(x,\lambda^*,v^*)$ 的最小值点，因此，$L(x,\lambda^*,v^*)$ 的梯度必须为 $0$（定义域为开集）。</p>
+<p>反之，若 (16.1)(16.2) 成立，则保证了 $x^*$ 为可行解。(16.3) 成立保证了 $(\lambda^*,v^*)$ 为对偶问题的可行解。</p>
+<p>若 (16.5) 成立，即 $L(x,\lambda^*,v^*)$ 在 $x^*$ 处的梯度为 $0$ 。因为 $L(x,\lambda^*,v^*)$ 是可微凸函数，所以 $x^*$ 是最小值点。所以：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+g(\lambda^*,v^*)=L(x^*,\lambda^*,v^*)=f_0(x^*)</script></blockquote>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p>[1] Boyd, Stephen, Stephen P. Boyd, and Lieven Vandenberghe. <em>Convex optimization</em>. Cambridge university press, 2004.</p>
+<p>[2] 李航. 统计学习方法. 清华大学出版社，2019</p>
+
+        </div>
+        
+            <div style="text-align:center;color: rgb(125,125,125);font-size:14px;">
+               -------------本文结束 感谢您的阅读-------------
+            </div>
+        
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>文章作者:</span>
+                        <span>会飞的猪</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>文章链接:</span>
+                        <span><a href="http://shellyandliu.github.io/2020/05/22/Lagrange%E5%AF%B9%E5%81%B6/">http://shellyandliu.github.io/2020/05/22/Lagrange%E5%AF%B9%E5%81%B6/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>版权声明:</span>
+                        <span>本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC-BY-NC-4.0</a> ， 转载请注明来自 会飞的猪！</span>
+                    </p>
+                
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>标签:</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95/"> <i class="iconfont icon-tags"></i> 优化方法</a>
+                    
+                        <a href="/tags/%E5%AF%B9%E5%81%B6%E5%8E%9F%E7%90%86/"> <i class="iconfont icon-tags"></i> 对偶原理</a>
+                    
+                        <a href="/tags/KKT%E6%9D%A1%E4%BB%B6%EF%BC%8CLagrange/"> <i class="iconfont icon-tags"></i> KKT条件，Lagrange</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">返回</a>
+                <span> /  </span>
+                <a href="/">首页</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2020/05/18/%E5%9F%BA%E4%BA%8E%E6%96%B9%E5%B7%AE%E7%BC%A9%E5%87%8F%E7%9A%84%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/">具有方差缩减的随机梯度下降法</a>
+            
+        </section>
+        <div class="post-content">
+            <section style="font-size: 20px;font-weight: 700;margin-bottom: 10px;margin-top: 20px;">
+                <i class="iconfont icon-comments"></i>
+                <span>
+                    评论
+                </span>
+            </section>
+        </div>
+        
+            <section id="comments" class="comments">
+              <style>
+                .comments{margin:0px;padding:10px;background:#fff}
+                @media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#fff}}
+              </style>
+              <div class="valine_comment"></div>
+<!--����js����</body>֮ǰ���뼴��-->
+<!--Leancloud ������:-->
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<!--Valine �ĺ��Ĵ����-->
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+      el: '.valine_comment',
+      app_id: 'bCvyxhtL2V59mmqAp81lAGob-gzGzoHsz#Leancloud应用的appId',
+      app_key: 'J4zVKQfUjhToGJwBfLcoOHOv',
+      placeholder: '欢迎大家评论交流~',
+      notify: 'true',
+      verify: 'true',
+    });
+</script>
+            </section>
+        
+        
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 会飞的猪 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

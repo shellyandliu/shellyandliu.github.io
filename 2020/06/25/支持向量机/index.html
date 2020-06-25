@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="会飞的猪">
+
+
+
+
+
+<link rel="stylesheet" href="/fonts/iconfont_new/iconfont.css">
+
+
+<title>支持向量机 | 会飞的猪</title>
+
+
+
+    <link rel="icon" href="/image/longmao.jpg">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+            <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+        
+    
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">会飞的猪</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">文章</a>
+                
+                    <a class="menu-item" href="/categories">分类</a>
+                
+                    <a class="menu-item" href="/tags">标签</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">会飞的猪</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">文章</a>
+                
+                    <a class="menu-item" href="/categories">分类</a>
+                
+                    <a class="menu-item" href="/tags">标签</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">展开目录</a>
+        <a onclick="go_top()">回到顶部</a>
+        <a onclick="go_bottom()">到达底部</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">支持向量机</h1>
+            
+                <div class="post-meta">
+                    
+                        作者: <a itemprop="author" rel="author" href="/">会飞的猪</a>
+                    
+
+                    
+                        <span class="post-time">
+                        时间: <a href="#">六月 25, 2020&nbsp;&nbsp;17:34:34</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    类别:
+                            
+                                <a href="/categories/%E7%BA%BF%E6%80%A7%E5%88%86%E7%B1%BB%E6%A8%A1%E5%9E%8B/">-线性分类模型</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                            <span class="post-meta-item-icon">
+                              <i class="fa fa-keyboard-o"></i>
+                              <span class="post-meta-item-text">  字数统计: </span>
+                              <span class="post-count"><a href="#">2.9k字</a></span>
+                            </span>
+                        </span>
+                        <span class="post-time">
+                            <span class="post-meta-item-icon">
+                            <i class="fa fa-hourglass-half"></i>
+                            <span class="post-meta-item-text">  阅读时长: </span>
+                            <span class="post-count"><a href="#">12分</a></span>
+                            </span>
+                        </span>
+                    
+
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="线性可分支持向量机"><a href="#线性可分支持向量机" class="headerlink" title="线性可分支持向量机"></a>线性可分支持向量机</h1><h2 id="最大间隔法"><a href="#最大间隔法" class="headerlink" title="最大间隔法"></a>最大间隔法</h2><p>给定一特征空间上的训练数据集：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+T=\{(x_1,y_1),(x_2,y_2),\cdots,(x_n,y_n)\}</script></blockquote>
+<p>其中 $x_i\in \mathbb R^k$ 为 $n$ 个样本点，对应的类标签为 $y_i\in\{-1,1\}$，其中若 $y_i=1$ 称 $x_i$ 为正类，若 $y_i=-1$ 称 $x_i$ 为负类。</p>
+<p>假设训练数据集是线性可分的，即存在一个超平面 $w^Tx+b=0$ 可以将两类数据完全分隔开。</p>
+<p>分类的任务是：从数据集中，训练得到一个超平面 $w^Tx+b=0$ ，使得能够正确的将两类数据划分到超平面两侧，然后根据该超平面对新数据进行分类，采用如下的决策函数：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+f(x)=\operatorname{sign}(w^Tx+b)</script></blockquote>
+<p>显然对于线性可分的数据集，对应的可分离数据点的超平面有无数个，我们的目的是找一个相对最优的超平面。支持向量机所采用的是间隔最大化的原理来选取超平面。</p>
+<p>从直观上讲，最优的分类超平面应该使得对新数据的分类错误率尽可能的小，即希望训练数据集中的样本离超平面尽可能的远，因此可以用间隔大小来衡量超平面的好坏。下面给出函数间隔和几何间隔的定义：</p>
+<blockquote>
+<p>定义1：对于给定的训练数据集 $T$ 和超平面 $w^Tx+b=0$ ，定义超平面关于点 $(x_i,y_i)$ 的函数间隔为：</p>
+<script type="math/tex; mode=display">
+\hat{\gamma}_i=y_i(w^Tx_i+b)\tag{1}</script><p>数据集 $T$ 到超平面的函数间隔定义为所有样本的函数间隔的最小值</p>
+<script type="math/tex; mode=display">
+\hat{\gamma}=\min_{i=1,\cdots,n}\hat{\gamma}_i\tag{2}</script><p>定义超平面关于点 $(x_i,y_i)$ 的几何间隔为：</p>
+<script type="math/tex; mode=display">
+\gamma_i=y_i\left(\frac{w^T}{\|w\|}x_i+\frac{b}{\|w\|}\right)\tag{3}</script><p>数据集 $T$ 到超平面的几何间隔定义为所有样本的几何间隔的最小值</p>
+<script type="math/tex; mode=display">
+\gamma=\min_{i=1,\cdots,n}\gamma_i\tag{4}</script></blockquote>
+<p>若采用函数间隔来作为优化目标，虽然可以将分类预测的正确性和确信度完整的表示，但是当等比例的改变 $w,b$ 时，所得到的超平面不变，因此不能得到唯一的超平面的表达式。因此选择几何间隔来定义，显然函数间隔和几何间隔有以下关系：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\gamma=\frac{\hat{\gamma}}{\|w\|}\tag{5}</script></blockquote>
+<p>下面定义最优化问题：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\max_{w,b}\gamma\\
+&s.t.\quad y_i\left(\frac{w^T}{\|w\|}x_i+\frac{b}{\|w\|}\right)\ge\gamma,\quad i=1,2,\cdots,n
+\end{aligned}\tag{6}</script></blockquote>
+<p>由于式子 (5) ，可以得到问题 (6) 等价于</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\max_{w,b}\frac{\hat \gamma}{\|w\|}\\
+&s.t.\quad y_i\left(w^Tx_i+b\right)\ge\hat\gamma,\quad i=1,2,\cdots,n
+\end{aligned}\tag{7}</script></blockquote>
+<p>注意到，同时缩放 $w,b$ 并不会改变优化问题，则可以令 $\hat{\gamma}=1$ ($w,b$ 也将乘以 $\frac{1}{\hat{\gamma}}$，但不会改变超平面的方程。)，又因为最小化 $\frac{1}{|w|}$ 和最大化 $\frac 12|w|^2$ 等价，因此问题 (6) 等价于：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\min_{w,b}\frac 12 \|w\|^2\\
+&s.t.\quad y_i\left(w^Tx_i+b\right)-1\ge0,\quad i=1,2,\cdots,n
+\end{aligned}\tag{8}</script></blockquote>
+<p>这是一个凸二次规划问题。</p>
+<blockquote>
+<p>定义：在线性可分的情况下，训练数据集的样本点中与分离超平面距离最近的样本点的实例称为<strong>支持向量</strong>，则支持向量则是使 (8) 的不等约束等号成立的点。我们称两个支持向量所在的超平面($w^Tx+b=\pm1$)之间的距离为<strong>间隔</strong>，则间隔依赖于超平面的法向量 $w$ ，等于 $\frac2{|w|}$ 。支持向量所在的超平面称为<strong>间隔边界</strong>。</p>
+</blockquote>
+<p>实际上，采用支持向量机方法的时候，仅有支持向量在确定分离超平面中起着决定性作用，间隔边界以外的其他实例点不起作用，这与Logistic回归不一样，Logistic回归会将所有点按照到分离超平面的距离分配一个代价。</p>
+<h2 id="对偶问题"><a href="#对偶问题" class="headerlink" title="对偶问题"></a>对偶问题</h2><p>首先给出问题 (8) 的Lagrange函数：引入Lagrange乘子 $\alpha_i\ge0,i=1,\cdots,n$，则Lagrange函数为</p>
+<blockquote>
+<script type="math/tex; mode=display">
+L(w,b,\alpha)=\frac12\|w\|^2-\sum_{i=1}^n\alpha_i y_i(w^Tx_i+b)+\sum_{i=1}^n\alpha_i\tag{9}</script></blockquote>
+<p>因此问题 (8) 的对偶问题为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}&
+\max_\alpha\min_{w,b}L(w,b,\alpha)\\
+&\alpha_i\ge0,\quad i=1,2,\cdots,n
+\end{aligned}\tag{10}</script></blockquote>
+<p>下面求 $\min_{w,b}L(w,b,\alpha)$:</p>
+<p>令 $L(w,b,\alpha) $ 关于 $w,b$ 的一阶偏导为 $0$ 得：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\nabla_wL(w,b,\alpha)=w-\sum_{i=1}^n\alpha_iy_ix_i=0\\
+&\nabla _bL(w,b,\alpha)=-\sum_{i=1}^n\alpha_iy_i=0
+\end{aligned}</script></blockquote>
+<p>则</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}&w=\sum_{i=1}^n\alpha_iy_ix_i\\
+&\sum_{i=1}^n\alpha_iy_i=0\end{aligned}\tag{11}</script></blockquote>
+<p>将 (11) 代入 (9) 即可得：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\min_{w,b}L(w,b,\alpha)=-\frac 12 \sum_{i=1}^n\sum_{j=1}^n\alpha_i\alpha_jy_iy_j(x_i^Tx_j)+\sum_{i=1}^n\alpha_i\tag{12}</script></blockquote>
+<p>将对偶问题关于 $\alpha$ 取极大转化为取极小（添加负号），可得对偶问题</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}&\min_{\alpha}\quad\frac 12 \sum_{i=1}^n\sum_{j=1}^n\alpha_i\alpha_jy_iy_j(x_i^Tx_j)-\sum_{i=1}^n\alpha_i\\
+&s.t.\quad\sum_{i=1}^n\alpha_iy_i=0\\
+&\qquad\quad \alpha_i\ge0,\quad i=1,2,\cdots,n
+\end{aligned}\tag{13}</script></blockquote>
+<p>显然问题 (8) 是凸二次优化问题，且满足Slater条件，则强对偶性成立。对偶问题 (11) 得解为原问题 (8) 的解。</p>
+<p>设 $\alpha^*=(\alpha_1^*,\alpha_2^*,\cdots,\alpha_n^*)$ 为对偶问题 (13) 的解，$w^*,b^*$ 为原问题 (8) 的解则由最优性条件 (KKT条件) 可以得到下面结果：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{align}
+&\nabla _wL(w^*,b^*,\alpha^*)=w^*-\sum_{i=1}^n\alpha_i^*y_ix_i=0\tag{14.1}\\
+&\nabla _bL(w^*,b^*,\alpha^*)=-\sum_{i=1}^n\alpha_i^*y_i=0\tag{14.2}\\
+&\alpha_i^*(y_i((w^*)^Tx_i+b^*)-1)=0,\quad i=1,2,\cdots,n\tag{14.3}\\
+&y_i((w^*)^Tx_i+b^*)-1\ge0,\quad i=1,2,\cdots,n\tag{14.4}\\
+&\alpha_i\ge0,\quad i=1,2,\cdots,n\tag{14.5}
+\end{align}</script></blockquote>
+<p>由 (14.1) 得：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+w^*=\sum_{i=1}^n\alpha_i^*y_ix_i\tag{15}</script></blockquote>
+<p>且由 (14.1) 可得至少存在一个 $j$ ，使得 $\alpha_j^*&gt;0$ 。因此对于此 $j$ ，由 (14.3) 有</p>
+<blockquote>
+<script type="math/tex; mode=display">
+y_j((w^*)^Tx_j+b^*)-1=0\tag{16}</script></blockquote>
+<p>将 (15) 代入 (16) 得：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+b^*=y_j-\sum_{i=1}^n\alpha_i^*y_i(x_i^Tx_j)\tag{17}</script></blockquote>
+<h1 id="线性不可分支持向量机"><a href="#线性不可分支持向量机" class="headerlink" title="线性不可分支持向量机"></a>线性不可分支持向量机</h1><h2 id="软间隔最大化"><a href="#软间隔最大化" class="headerlink" title="软间隔最大化"></a>软间隔最大化</h2><p>当训练数据集是线性不可分时，上述最大间隔法将不能使用，因为上述方法得不等约束不能都实现，为此通过给函数间隔加上松弛变量 $\xi_i$ 来实现，这时约束条件变为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{align}&y_i\left(w^Tx_i+b\right)\ge1-\xi_i,\quad i=1,2,\cdots,n\\
+&\xi_i\ge0,\quad i=1,2,\cdots,n
+\end{align}</script></blockquote>
+<p>相应的，需要在原目标函数加上一个惩罚项，不然 $\xi_i$ 将可以取尽可能得大，使得约束成立，且让目标函数变得足够小。目标函数为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\frac 12 \|w\|^2+C\sum_{i=1}^n\xi_i</script></blockquote>
+<p>$C&gt;0$ 称为惩罚参数，$C$ 值越大，对误分点的惩罚越大。</p>
+<p>因此给出下列的最优化问题：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\min_{w,b,\xi }\quad\frac 12 \|w\|^2+C\sum_{i=1}^n\xi_i\\
+&s.t.\quad y_i\left(w^Tx_i+b\right)\ge1-\xi_i,\quad i=1,2,\cdots,n\\
+&\quad \qquad\xi_i\ge0,\quad i=1,2,\cdots,n
+\end{aligned}\tag{18}</script></blockquote>
+<p>显然当 $\xi_i&gt;1$ 时，$x_i$ 就为误分类点，因此对于惩罚项 $C\sum_{i=1}^n\xi_i$ 也可以理解为误分类点个数的上界。</p>
+<h2 id="对偶问题-1"><a href="#对偶问题-1" class="headerlink" title="对偶问题"></a>对偶问题</h2><p>同样的，类似线性可分支持向量机对偶问题的推导，原问题 (18) 的Lagrange函数为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+L(w,b,\xi,\alpha,\mu)=\frac12\|w\|^2+C\sum_{i=1}^n\xi_i-\sum_{i=1}^n\alpha_i( y_i(w^Tx_i+b)-1+\xi_i)-\sum_{i=1}^n\mu_i\xi_i\tag{19}</script></blockquote>
+<p>因此</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\min_{w,b,\xi}L(w,b,\xi,\alpha,\mu)=-\frac 12\sum_{i=1}^n\sum_{j=1}^n\alpha_i\alpha_jy_iy_j(x_i^Tx_j)+\sum_{i=1}^n\alpha_i\tag{20}</script></blockquote>
+<p>所以对偶问题为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{align}
+&\max_\alpha \quad -\frac 12\sum_{i=1}^n\sum_{j=1}^n\alpha_i\alpha_jy_iy_j(x_i^Tx_j)+\sum_{i=1}^n\alpha_i\tag{21.1}\\
+&s.t.\quad\  \sum_{i=1}^n\alpha_iy_i=0\tag{21.2}\\
+&\qquad\quad C-\alpha_i-\mu_i=0\tag{21.3}\\
+&\qquad\quad \alpha_i\ge 0\tag{21.4}\\
+&\qquad\quad \mu_i\ge 0,\quad i=1,2,\cdots ,n\tag{21.5}
+\end{align}</script></blockquote>
+<p>可以将条件 (21.3)-(21.5) 合并起来，写成：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+0\le \alpha_i\le C\tag {21.6}</script></blockquote>
+<p>同样的，对偶问题的解满足KKT条件，KKT条件可以表示为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{align}
+&y_{i}\left(w^{T} x_{i}+b\right)-1+\xi_{i}  \geq 0, i=1, \ldots, n \tag{22.1}\\
+&\xi_{i}  \geq 0, i=1, \ldots, n\tag{22.2}\\
+&\alpha_{i}  \geq 0, i=1, \ldots, n \tag{22.3}\\
+&\mu_{i} \geq 0, i=1, \ldots, n \tag{22.4}\\
+&\alpha_i[y_{i}\left(w^{T} x_{i}+b\right)-1+\xi_{i}]  = 0, i=1, \ldots, n \tag{22.5}\\
+&\mu_i\xi_i=0,i=1, \ldots, n \tag{22.6}\\
+&\frac{\partial L}{\partial w}=w-\sum_{i=1}^{N} \alpha_{i} y_{i} x_{i} =\mathbf{0}\tag{22.7} \\
+&\frac{\partial L}{\partial \xi}=C \cdot \mathbf{1}-\alpha-\mu =\mathbf{0} \tag{22.8}\\
+&\frac{\partial L}{\partial b}=\sum_{i=1}^{n} \alpha_{i} y_{i} =0\tag{22.9}
+\end{align}</script></blockquote>
+<p>设对偶问题 (21.1)(21.2)(21.6) 的解为 $\alpha^*=(\alpha_1^*,\alpha_2^*,\cdots ,\alpha_n^*)$，则由KKT条件显然易得 $w$ 的解是唯一的，且等于</p>
+<blockquote>
+<script type="math/tex; mode=display">
+w^*=\sum_{i=1}^n\alpha_i^*y_ix_i\tag{23}</script></blockquote>
+<p>但 $b$ 的解并不一定唯一。事实上，当存在 $j\in\{1,2,\cdots,n\}$ 使得 $0&lt;\alpha_j&lt;C$ 时， $b$ 存在唯一的解：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+b^*=y_j-\sum_{i=1}^ny_i\alpha_i^*(x_i^Tx_j)\tag{24}</script></blockquote>
+<p>当不存在 $j$ 使得 $0&lt;\alpha_j&lt;C$ 时，$b$ 的解不唯一。存在一个上下界 $\underline {b},\bar{b}$ , 使得对任意 $b\in(\underline {b},\bar{b})$，都将满足条件。[3]</p>
+<p>在线性不可分的情形下，将支持向量定义为 $\alpha_i&gt;0$ 的样本点。利用KKT条件，可以将样本点分为三类讨论：</p>
+<ol>
+<li><p>若 $\alpha_i=0$ ，则可以由 (22.5)(22.6)(22.8) 得 $\xi_i=0,y_i({w^*}^Tx_i+b^*)\ge1$ 。即样本 $(x_i,y_i)$ 到分离超平面的函数间隔不小于1。</p>
+</li>
+<li><p>若 $0&lt;\alpha_i&lt;C$，由 (22.5)(22.6)(22.8) 得 $\xi_i=0,y_i({w^*}^Tx_i+b^*)=1$ 。即样本 $(x_i,y_i)$ 到分离超平面的函数间隔等于1。样本位于间隔边界上。</p>
+</li>
+<li><p>若 $\alpha_i=C$，由 (22.5)(22.6)(22.8) 得 $\xi_i\ge0,y_i({w^*}^Tx_i+b^*)\le1$ 。即样本 $(x_i,y_i)$ 到分离超平面的函数间隔小于等于1。在这种情况下对 $\xi_i$ 进行分类，可以得到：</p>
+<p>​    (1). 当 $\xi_i=0$ ， $y_i(w^{*T}x_i+b^*)=1$，对应样本在间隔边界上。</p>
+<p>​    (2). 当 $0&lt;\xi_i&lt;1$ ，$0&lt;y_i(w^{*T}x_i+b^*)&lt;1$ ，对应样本在分离超平面和间隔边界之间。</p>
+<p>​    (3). 当 $\xi_i=1$，$y_i(w^{*T}x_i+b^*)=0$，对应分离超平面上的样本。</p>
+<p>​    (4). 当 $\xi_i&gt;1$ ，$y_i(w^{*T}x_i+b^*)&lt;0$ ，对应误分类的样本。</p>
+</li>
+</ol>
+<p>通过对偶问题求解 SVM 的原因[1]：</p>
+<ol>
+<li>通常来说，SVM的对偶问题更容易求解。若样本数为 $n$ ，每个样本 $x$ 为 $m$ 维，则SVM原问题的变量 $w,b,\xi$ 分别为 $m$ 维，$ 1$ 维，和 $n$ 维，有 $2n$个不等式约束；而对偶问题的变量 $\alpha $ 为 $n$ 维，有 $2n$ 个不等式约束和 $1$ 个等式约束。</li>
+<li>便于引入核函数。</li>
+</ol>
+<h2 id="合页损失函数"><a href="#合页损失函数" class="headerlink" title="合页损失函数"></a>合页损失函数</h2><p>对于线性不可分的支持向量机，我们可以换种思路来给出优化目标[2]，由于数据线性不可分，对于任意的超平面，总会存在误分类的点，不妨允许某些样本不满足约束条件 $y_i(w^Tx_i+b)\ge1$。当最大化间隔的同时也应该使误分类点尽可能的少，于是优化目标可以写为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\min_{w,b}\frac 12 \|w\|_2^2+C\sum_{i=1}^nl(y_i(w^Tx_i+b)-1)\tag{25}</script></blockquote>
+<p>其中 $l(z)$ 为 0/1 损失函数，即：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+l(z)=\left\{\begin{array}{ll}
+1, & z<0 \\
+0, & else 
+\end{array}\right.</script></blockquote>
+<p>但是由于 $l$ 非凸非连续，因此一般将其替换为一些性质较好的函数，若将其替换为合页损失函数：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\max\{0,1-y_i(w^Tx_i+b)\}\tag{26}</script></blockquote>
+<p>则优化问题变为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\min_{w,b}\frac12\|w\|_2^2+C\sum_{i=1}^n\max\{0,1-y_i(w^Tx_i+b)\}\tag{27}</script></blockquote>
+<p>可以证明问题 (27) 和问题 (18) 是等价的[1]。</p>
+<p>另一方面，若我们将 $l$ 替换为对数率损失函数 $l(z)=\log(1+\exp(-z))$。则问题将变成逻辑回归模型。由于合页损失函数在 $z&gt;0$ 的时候等于 $0$ ，因此使得其解与样本点之间具有稀疏性，而对数率损失函数是光滑的单调递减函数，因此训练结果将依赖于更多的样本。而对于其中的 $|w|^2_2$ ，则可以看作正则化项。</p>
+<h1 id="非线性支持向量机和核函数"><a href="#非线性支持向量机和核函数" class="headerlink" title="非线性支持向量机和核函数"></a>非线性支持向量机和核函数</h1><p>对于非线性的问题，一般的做法通过做一变换将原空间中的数据映射到一个新空间中，然后在新空间中利用线性问题的处理方法进行处理。因此该方法的一个核心任务是如何将原空间的数据映射到新空间中。通过观察线性支持向量机的对偶问题我们可以看到，无论是线性可分还是线性不可分的情形下，对偶问题都仅与输入数据 $x_i$ 和 $x_j$ 的内积有关，因此，定义下列核函数：</p>
+<blockquote>
+<p>定义[1]：设 $\mathcal X$ 是输入空间， $\mathcal H$ 是特征空间（希尔伯特空间），若存在从 $\mathcal X$ 到 $\mathcal H$ 的映射 $\phi(x):\mathcal X\to \mathcal H$ ，使得对所有 $x,z\in\mathcal X$，函数 $K(x,z)$ 满足条件：</p>
+<script type="math/tex; mode=display">
+K(x,z)=\phi(x)^T\phi(z)\tag{28}</script><p>则称函数 $K(x,z)$ 为核函数。该定义下的核函数也通常称为正定核函数。</p>
+</blockquote>
+<p>下面给出正定核的充要条件：</p>
+<blockquote>
+<p>定理[1]：设 $K:\mathcal X\times\mathcal X\to \mathbb R$ 是对称函数，则 $K(x,z)$ 为正定核函数的充要条件是对任意 $x_i\in\mathcal X,i=1,2,\cdots,m$，$K(x,z)$ 对应的Gram矩阵：</p>
+<script type="math/tex; mode=display">
+K=[K(x_i,x_j)]_{m\times m}</script><p>是半正定矩阵。</p>
+</blockquote>
+<p>下面介绍一些常用的核函数：</p>
+<blockquote>
+<ol>
+<li>多项式核函数：$K(x,z)=(x^Tz+1)^p$.</li>
+<li>高斯核函数：$K(x,z)=\exp\left(-\frac{|x-z|^2}{2\sigma^2}\right)$.</li>
+<li>Sigmoid核函数：$K(x,z)=\tanh\left(\beta x^T_ix_j+\theta\right)$.</li>
+</ol>
+</blockquote>
+<h1 id="序列最小最优化算法（SMO算法）"><a href="#序列最小最优化算法（SMO算法）" class="headerlink" title="序列最小最优化算法（SMO算法）"></a>序列最小最优化算法（SMO算法）</h1><p>考虑如下软间隔最大化的对偶问题：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{align}
+&\min_\alpha \quad \frac 12\sum_{i=1}^n\sum_{j=1}^n\alpha_i\alpha_jy_iy_jK(x_i,x_j)-\sum_{i=1}^n\alpha_i\tag{29.1}\\
+&s.t.\quad\  \sum_{i=1}^n\alpha_iy_i=0\tag{29.2}\\
+&\qquad\quad 0\le \alpha_i\le C,\quad i=1,2,\cdots,n\tag{29.3}
+\end{align}</script></blockquote>
+<p>该问题为凸二次规划问题，具有全局最优解，我们可以利用常用的凸优化算法进行求解。但是当样本数量巨大时，传统的优化算法的计算量将过于巨大，而SMO算法可以高效的解决这个问题。</p>
+<p>SMO算法的核心想法是将这样一个较大的二次规划问题分解成一些小的二次规划问题。对这些小的二次规划问题采用解析方式进行求解。在对子二次规划问题求解时，需要逐渐满足KKT条件的成立。这样不断进行下去，最终使得KKT条件完全成立，得到全局解。</p>
+<p>下面推导对偶问题的KKT条件：</p>
+<p>首先，设对偶问题的Lagrange函数为</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}L(\alpha,\lambda,\mu,v)&=\frac 12 \sum_{i=1}^n\sum_{j=1}^ny_iy_jK(x_i,x_j)\alpha_i\alpha_j-\sum_{i=1}^n\alpha_i-\sum_{i=1}^n\lambda_i\alpha_i\\&\qquad+\sum_{i=1}^n\mu_i(\alpha_i-C)+v\sum_{i=1}^ny_i\alpha_i\end{aligned}\tag{30}</script></blockquote>
+<p>其中 $\lambda_i,\mu_i,i=1,2,\cdots,n$ 为不等式约束 (29.3) 的Lagrange乘子，而 $v$ 为等式约束 (29.2) 的Lagrange乘子。</p>
+<p>记 $g(x_i)=\sum_{j=1}^ny_j\alpha_jK(x_j,x_i)+v$. 对 $\alpha_i$ 求偏导可得：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}\frac{\partial L}{\partial \alpha_i}&=\sum_{i=1}^ny_iy_jK(x_i,x_j)\alpha_j-1-\lambda_i+\mu_i+vy_i\\
+&=y_ig(x_i)-1-\lambda_i+\mu_i
+\end{aligned}\tag{31}</script></blockquote>
+<p>因此KKT条件为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{align}
+&0\le \alpha_i\le C,i=1,2,\cdots,n\tag{32.1}\\
+&\sum_{i=1}^ny_i\alpha_i=0\tag{32.2}\\
+&\lambda_i\ge0,i=1,2,\cdots,n\tag{32.3}\\
+&\mu_i\ge 0,i=1,2,\cdots,n\tag{32.4}\\
+&\lambda_i\alpha_i=0,i=1,2,\cdots,n\tag{32.5}\\
+&\mu_i(\alpha_i-C)=0,i=1,2,\cdots,n\tag{32.6}\\
+&y_ig(x_i)-1-\lambda_i+\mu_i=0,i=1,2,\cdots,n\tag{32.7}\\
+\end{align}</script></blockquote>
+<p>显然由上述KKT条件我们可以推得：</p>
+<ol>
+<li>若 $\alpha_i=0$，则由 (32.3)(32.6)(32.7) 可以推出 $y_ig(x_i)\ge1$. 逆推不一定成立。</li>
+<li>若 $0&lt;\alpha_i&lt;C$ ，则由 (32.5)(32.6)(32.7) 可以推出 $y_ig(x_i)=1$.逆推也成立。</li>
+<li>若 $\alpha_i=C$，则由 (32.5)(32.6)(32.7) 可以推出 $y_ig(x_i)&lt;1$.逆推不一定成立。</li>
+</ol>
+<p>因此，我们可以将上述总结为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{align}
+\alpha_i=0\Leftrightarrow y_ig(x_i)\ge1\tag{33.1}\\
+0<\alpha_i<C\Leftrightarrow y_ig(x_i)=1\tag{33.2}\\
+\alpha_i=C\Leftrightarrow y_ig(x_i)<1\tag{33.3}
+\end{align}</script></blockquote>
+<p>注：正如上面叙述，(33.1) 和 (33.3) 的逆推不一定成立。但由于该条件是用于在SMO算法中选择合适的 $\alpha_i$ 进行迭代。因此即使逆推不成立时，我们仍可以选择对应的 $\alpha_i$（只不过是无效选择）进行计算。</p>
+<p>由于我们的最终目的是找到满足KKT条件 (32.1)-(32.7) 的参数 $\alpha_i$。因此在拆分为子问题的过程中需要尽量往满足KKT条件的方向去调整。由于需要满足KKT条件 (32.2) 。因此至少得选择两个变量同时调整，使得条件 (32.2) 恒满足。下面仅考虑具有两个变量的二次规划问题。不失一般性，记子问题的两个变量为 $\alpha_1,\alpha_2$，其他变量视为常数，记 $K_{ij}\triangleq K(x_i,x_j)$ 。则优化问题为</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{align}\min_{\alpha_1,\alpha_2}\quad W(\alpha_1,\alpha_2)&=\frac12 K_{11}\alpha_1^2+\frac12 K_{22}\alpha_2^2+y_1y_2K_{12}\alpha_1\alpha_2-(\alpha_1+\alpha_2)\\
+&\qquad+y_1\alpha_1\sum_{i=3}^ny_i\alpha_iK_{i1}+y_2\alpha_2\sum_{i=3}^ny_i\alpha_iK_{i2}\tag{34.1}\\
+s.t.\quad& \alpha_1y_1+\alpha_2y_2=-\sum_{i=3}^ny_i\alpha_i\tag{34.2}\\
+\qquad&0\le\alpha_i\le C,\quad i=1,2,\cdots,n \tag{34.3}
+\end{align}</script></blockquote>
+<p>下面给出SMO算法的计算过程：</p>
+<blockquote>
+<ol>
+<li>取初始值 $\alpha^{(0)}=0$，令 $k=0$。</li>
+<li>选择优化变量 $\alpha_1^{(k)},\alpha_2^{(k)}$，解析求解两个变量的最优化问题 (32.1)-(32.3)，求得最优解 $\alpha_1^{(k+1)},\alpha_2^{(k+1)}$，更新 $\alpha$ 为 $\alpha^{k+1}$;</li>
+<li>若在精度 $\epsilon$ 范围内满足停机条件 (32.1)(32.2)(33) 则转到第四步，否则，令 $k=k+1$，转到第二步；</li>
+<li>取 $\hat{\alpha}=\alpha^{(k+1)}$。</li>
+</ol>
+</blockquote>
+<p>注：第三步精度 $\epsilon$ 范围内指的是检查：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\alpha_{i}=0 & \Rightarrow & y_{i} g(x_i) & \geq 1-\varepsilon \\
+0<\alpha_{i}<C & \Rightarrow & 1-\varepsilon \leq & y_{i} g(x_i) \leq 1+\varepsilon \\
+\alpha_{i}=C & \Rightarrow & y_{i} g(x_i)& \leq 1+\varepsilon
+\end{aligned}\tag{35}</script></blockquote>
+<p>因为 $y_ig(x_i)-1=y_iE_i$，因此可以将 (33) 转化为验证 ：当 $\alpha_i&lt;C$ 是否 $y_iE_i\ge-\epsilon$；当 $\alpha_i=C$ 是否 $y_iE_i\le \epsilon$。</p>
+<p>一般情况下，$\epsilon$ 取值为 $10^{-2}$ 或 $10^{-3}$。并且在文献[4]中还指出，在计算 $\alpha_2$ 时，若 $\alpha_2<10^{-8}$，令 $\alpha_2=0$，若 $\alpha_2>C-10^{-8}$，令 $\alpha_2=C$。</p>
+<p>下面我们分别介绍SMO算法中最重要的几步，分别是两个变量的二次规划问题如何求解，变量的选择方式，如何计算阈值 $b$ 和差值 $E_i$。</p>
+<h2 id="两个变量的二次规划问题"><a href="#两个变量的二次规划问题" class="headerlink" title="两个变量的二次规划问题"></a>两个变量的二次规划问题</h2><p>我们记上一次优化后得到的变量为 $\alpha_i^{old}$，则 (34.2) 可以表示为 </p>
+<blockquote>
+<script type="math/tex; mode=display">
+\alpha_1y_1+\alpha_2y_2=\alpha_1^{old}y_1+\alpha_2^{old}y_2\triangleq\varsigma\tag{36}</script></blockquote>
+<p>对于这个二次规划问题，我们可以分3个步骤进行计算。</p>
+<h3 id="单变量的无约束优化问题"><a href="#单变量的无约束优化问题" class="headerlink" title="单变量的无约束优化问题"></a>单变量的无约束优化问题</h3><p>首先，忽略掉不等约束 (34.3) 将等式约束问题 (34.1)(34.2) 转换成单变量的无约束问题。 </p>
+<p>由 (36) 式和 $y_i^2=1$ 有 $\alpha_1=y_1(\varsigma-y_2\alpha_2)$，代入目标函数得：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+W(\alpha_2)&=\frac12 K_{11}(\varsigma-y_2\alpha_2)^2+\frac12 K_{22}\alpha_2^2+y_2K_{12}(\varsigma-y_2\alpha_2)\alpha_2-y_1(\varsigma-y_2\alpha_2)\\&\qquad-y_2+(\varsigma-y_2\alpha_2)\sum_{i=3}^ny_i\alpha_iK_{i1}+y_2\alpha_2\sum_{i=3}^ny_i\alpha_iK_{i2}\\
+\end{aligned}\tag{37}</script></blockquote>
+<p>令其偏导等于 $0$ 得</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}&(K_{11}+K_{22}-2K_{12})\alpha_2\\=&y_2K_{11}\varsigma-y_2K_{12}\varsigma+y_2\sum_{i=3}^ny_i\alpha_iK_{i1}-y_2\sum_{i=3}^ny_i\alpha_iK_{i2}-y_1y_2+1\end{aligned}\tag{38}</script></blockquote>
+<p>由 $g(x_i)$ 的定义可以得到</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\sum_{i=3}^ny_i\alpha_i^{old}K_{i1}=g(x_1)^{old}-b^{old}-y_1K_{11}\alpha_1^{old}-y_2K_{21}\alpha_2^{old}\\
+\sum_{i=3}^ny_i\alpha_i^{old}K_{i2}=g(x_2)^{old}-b^{old}-y_1K_{12}\alpha_1^{old}-y_2K_{22}\alpha_2^{old}\\</script></blockquote>
+<p>因此 (38) 可以变为</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}&(K_{11}+K_{22}-2K_{12})\alpha_2\\=&(K_{11}+K_{22}-2K_{12})\alpha_2^{old}+y_2(g(x_1)^{old}-y_1)-y_2(g(x_2)^{old}-y_2)
+\end{aligned}\tag{39}</script></blockquote>
+<p>记 $\eta = K_{11}+K_{22}-2K_{12}$，$E_i=g(x_i)-y_i$，当 $\eta&gt;0$ 时</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\alpha_2^{unclipped} = \alpha_2^{old}+\frac{y_2(E_1-E_2)}{\eta}\tag{40}</script></blockquote>
+<p>事实上 $\eta $ 仍可能小于等于 $0$ ，当 $K$ 不是正定核时， $\eta$ 可能取负值，即使 $K$ 满足正定核条件，仍可能两个样本点 $(x_1,y_1),(x_2,y_2)$ 完全一样时取 $0$。无论是何种情况，函数 (37) 将不再为强凸函数，因此，最优值只能再边界取，我们稍后进行讨论。</p>
+<h3 id="修剪后的-alpha-2"><a href="#修剪后的-alpha-2" class="headerlink" title="修剪后的 $\alpha_2$"></a>修剪后的 $\alpha_2$</h3><p>现在我们考虑不等约束 (34.3) ，由式 (36) 和 $y_1^2=1$可得</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\alpha_1=\alpha_1^{old}+y_1y_2(\alpha_2^{old}-\alpha_2)\tag{41}</script></blockquote>
+<ol>
+<li><p>当 $y_1=y_2$ 时， $y_1y_2=1$，因此 $\alpha_1=\alpha_1^{old}+\alpha_2^{old}-\alpha_2$，所以可以由 $0\le \alpha_1\le C,0\le \alpha_2\le C$ 可以推出 </p>
+<blockquote>
+<script type="math/tex; mode=display">
+\max(0,\alpha_1^{old}+\alpha_2^{old}-C)\le\alpha_2\le \min(C,\alpha_1^{old}+\alpha_2^{old})\tag{42}</script></blockquote>
+<p>此时令 $L=\max(0,\alpha_1^{old}+\alpha_2^{old}-C),H=\min(C,\alpha_1^{old}+\alpha_2^{old})$</p>
+</li>
+<li><p>当 $y_1\ne y_2$ 时， $y_1y_2=-1$，因此 $\alpha_1=\alpha_1^{old}-\alpha_2^{old}+\alpha_2$，所以可以由 $0\le \alpha_1\le C,0\le \alpha_2\le C$ 可以推出 </p>
+<blockquote>
+<script type="math/tex; mode=display">
+\max(0,\alpha_2^{old}-\alpha_1^{old})\le\alpha_2\le \min(C,\alpha_2^{old}-\alpha_1^{old}+C)\tag{43}</script></blockquote>
+<p>此时令 $L=\max(0,\alpha_2^{old}-\alpha_1^{old}),H=\min(C,\alpha_2^{old}-\alpha_1^{old}+C)$</p>
+</li>
+</ol>
+<p>结合二次函数的性质，可以得到经修剪得 $\alpha_2$ 的值</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\alpha_{2}^{n e w}=\left\{\begin{aligned}
+&H, & \text { if } \alpha_{2}^{\text {unclipped }} \geq H \\
+&\alpha_{2}^{\text {unclipped }}, & \text { if } L<\alpha_{2}^{\text {unclipped }}<H \\
+&L, & \text { if } \alpha_{2}^{\text {unclipped }} \leq L
+\end{aligned}\right.\tag{44}</script></blockquote>
+<p>若出现 $\eta\le0$ 的情况，则函数 (37) 将变为凹函数 ($\eta&lt;0$) 或者线性函数 ($\eta=0$) 。</p>
+<ol>
+<li><p>若 $\eta=0$ ，则</p>
+<blockquote>
+<p>$\frac {\partial W}{\partial \alpha_2}=y_2(g(x_1)^{old}-y_1)-y_2(g(x_2)^{old}-y_2)=y_2(E_1-E_2)$</p>
+</blockquote>
+<p>当 $y_2(E_1-E_2)\ge 0$ 时，取 $\alpha_2^{new}=L$；当 $y_2(E_1-E_2)&lt;0$ ，取 $\alpha_2^{new}=H$</p>
+</li>
+<li><p>若 $\eta&lt;0$，则若 $ \alpha_2^{old}+\frac{y_2(E_1-E_2)}{\eta}&lt;\frac{H-L}{2}$ ，取 $\alpha_2^{new}=H$，若 $ \alpha_2^{old}+\frac{y_2(E_1-E_2)}{\eta}\ge\frac{H-L}{2}$，取 $\alpha_2^{new}=L$</p>
+</li>
+</ol>
+<h3 id="计算-alpha-1-new"><a href="#计算-alpha-1-new" class="headerlink" title="计算 $\alpha_1^{new}$"></a>计算 $\alpha_1^{new}$</h3><p>由 (41) 式计算</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\alpha_1^{new}=\alpha_1^{old}+y_1y_2(\alpha_2^{old}-\alpha_2^{new})\tag{45}</script></blockquote>
+<h2 id="变量的选择方法"><a href="#变量的选择方法" class="headerlink" title="变量的选择方法"></a>变量的选择方法</h2><p>SMO算法在每步都将选择两个变量，其中至少有一个变量违背KKT条件。由于约束 (32.1)(32.2) 在每次计算二次规划问题过程中就已经满足，因此只需选择违背条件 (33.1)(33.2)(33.3) 的变量进行优化即可。根据Osuna的理论[6]，每一步优化都会使目标函数值减小，因此可以保证算法的收敛性。</p>
+<p>为了加快收敛，SMO算法一般采取如下的启发式方法来选择变量。首先选择第一个变量，构成外层循环，然后再确定第二个变量，构成内层循环。</p>
+<h3 id="第一个变量的选择方法"><a href="#第一个变量的选择方法" class="headerlink" title="第一个变量的选择方法"></a>第一个变量的选择方法</h3><blockquote>
+<ol>
+<li>遍历训练集，选择违反KKT条件的样本作为第一个变量。</li>
+<li>在遍历训练集一次后，遍历 $0&lt;\alpha_i&lt;C$ 的样本，同样选择违反KKT条件的样本作为第一个变量。</li>
+<li>反复执行步骤2的选择方法，直到所有 $0&lt;\alpha_i&lt;C$ 的样本都符合KKT条件。</li>
+<li>不断交替重复步骤1、2、3：遍历整个训练集一次，然后遍历 $0&lt;\alpha_i&lt;C$ 的样本多次，交替进行。</li>
+<li>直到整个训练集的样本都满足KKT条件 ，循环终止。</li>
+</ol>
+</blockquote>
+<p>这个启发式的选择规则把主要的计算时间都花在了 $0&lt;\alpha_i&lt;C$ 的样本上，这是因为由于支持向量机的稀疏性，最终绝大多数的 $\alpha_i$ 都将留在边界上，即 $\alpha_i\in\{0,C\}$。因此边界上的样本很有可能继续留在边界上，非边界上的样本可能会随着其他样本的优化而移动。另一方面，在优化 $0&lt;\alpha_i&lt;C$ 的样本的同时，随着 $g(x_i)$ 的不断更新和第二个变量的选择，边界上的样本可能又会重新违反KKT条件。因此需要交替就行优化。</p>
+<h3 id="第二个变量的选择方法"><a href="#第二个变量的选择方法" class="headerlink" title="第二个变量的选择方法"></a>第二个变量的选择方法</h3><p>第二个变量选择的标准是希望能使 $\alpha_2$ 有足够大的变化。由 (40) 式可知，$\alpha_2^{new}$ 的大小依赖于 $\frac{y_2(E_1-E_2)}{\eta}$ 的值。而 $\eta$ 的值与核函数相关，计算核函数是十分耗时间的。因此SMO算法采用了一种简单的处理，即使用 $E_1-E_2$ 来近似步长。即寻找使 $|E_1-E_2|$ 最大化的样本 $(x_2,y_2)$ 作为第二个变量。但当样本数量巨大时，选择使 $|E_1-E_2|$ 最大的样本的运算量仍是巨大的。因此考虑：当 $E_1$ 为正时，选择最小的 $E_i$ 作为 $E_2$；当 $E_1$ 为负时，选择最大的 $E_i$ 作为 $E_2$。而为了节省时间，将所有 $E_i$ 的值提前保存在一个列表中。</p>
+<p>然而经过上述处理，仍可能存在极端的情况无法得到正的步长，(如$x_1=x_2$时，$\eta=0$)。此时的处理方法是：</p>
+<p>​    (a). 随机选择起点遍历 $0&lt;\alpha_i&lt;C$ 的样本子集，寻找能产生正步长的样本作为第二个优化的样本；</p>
+<p>​    (b). 如果 (a) 仍得不到正步长，那么随机选择起点遍历整个训练集，寻找能产生正步长的样本作为第二个优化的样本；</p>
+<p>注：这里随机选择起点是为了不让算法偏向于(bias)训练集前面的样本。</p>
+<p>​    (c). 在极端退化的情况下，(a)(b)都得不到正步长，那么就跳过选定的第一个优化变量，重新选择第一个优化变量，算法继续。</p>
+<p>注：该小节内容主要参考[4][7]</p>
+<h2 id="阈值-b-的更新"><a href="#阈值-b-的更新" class="headerlink" title="阈值 $b$ 的更新"></a>阈值 $b$ 的更新</h2><p>首先来推导阈值 $b$ 的选取，使得满足KKT条件，下面根据 $\alpha_1^{new}$ 和 $\alpha_2^{new} $ 的取值来分类讨论。</p>
+<h3 id="存在-alpha-1-new-或-alpha-2-new-属于-0-C"><a href="#存在-alpha-1-new-或-alpha-2-new-属于-0-C" class="headerlink" title="存在 $\alpha_1^{new}$ 或 $\alpha_2^{new}$ 属于 $(0,C)$"></a>存在 $\alpha_1^{new}$ 或 $\alpha_2^{new}$ 属于 $(0,C)$</h3><p>在这种情况下，我们继续分以下三种情况讨论：</p>
+<ol>
+<li><p>当 $\alpha_1^{new}\in(0,C),\alpha_2^{new}\in\{0,C\}$：</p>
+<p>由于 $\alpha_1^{new}\in(0,C),\alpha_2^{new}\in\{0,C\}$ ，此时由KKT条件 (33.2) 可得：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\sum_{i=1}^n\alpha_iy_iK_{i1}+b=y_1\tag{46}</script></blockquote>
+<p>因此</p>
+<blockquote>
+<script type="math/tex; mode=display">
+b^{new}_1=y_1-\sum_{i=3}^n\alpha_i^{old}y_iK_{i1}-\alpha_1^{new}y_1K_{11}-\alpha_2^{new}y_2K_{21}\tag{47}</script></blockquote>
+<p>由 $E_i$ 定义可知</p>
+<blockquote>
+<script type="math/tex; mode=display">
+E_1^{old}=g(x_1)^{old}-y_1=\sum_{i=1}^n\alpha_i^{old}y_iK_{i1}+b^{old}-y_1\tag{48}</script></blockquote>
+<p>代入 (47) 可得</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}b_1^{new}=&-E_1^{old}+\alpha_1^{old}y_1K_{11}+\alpha_2^{old}y_2K_{21}+b^{old}-\alpha_1^{new}y_1K_{11}-\alpha_2^{new}y_2K_{21}\\
+=&-E_1^{old}-y_1K_{11}(\alpha_1^{new}-\alpha_1^{old})-y_2K_{21}(\alpha_2^{new}-\alpha_2^{old})+b^{old}
+\end{aligned}
+\tag{49}</script></blockquote>
+<p>因此当 $b^{new}=b_1^{new}$ 时 $(x_1,y_1)$ 将满足KKT条件，而又因为 $\alpha_2^{new}\in \{0,C\}$ ，则 $b_2^{new }$ 要么比 $b_1^{new}$ 大，要么比 $b_1^{new}$ 小。而我们注意到，式 (33.1)(33.3) 都是可以取等的，因此 $b_1^{new }$一定能使 $(x_2,y_2)$ 满足KKT条件。</p>
+</li>
+<li><p>当 $\alpha_2^{new}\in(0,C),\alpha_1^{new}\in\{0,C\}$：</p>
+<p>类似于情形1的分析， $b^{new}=b_2^{new}=-E_2^{old}-y_1K_{12}(\alpha_1^{new}-\alpha_1^{old})-y_2K_{22}(\alpha_2^{new}-\alpha_2^{old})+b^{old}$.</p>
+</li>
+<li><p>当 $\alpha_2^{new}\in(0,C),\alpha_1^{new}\in(0,C)$：</p>
+<p>则由上面分析可得 :</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}b_1^{new}=&-E_1^{old}-y_1K_{11}(\alpha_1^{new}-\alpha_1^{old})-y_2K_{21}(\alpha_2^{new}-\alpha_2^{old})+b^{old}\\
+b_2^{new}=&-E_2^{old}-y_1K_{12}(\alpha_1^{new}-\alpha_1^{old})-y_2K_{22}(\alpha_2^{new}-\alpha_2^{old})+b^{old}
+\end{aligned}
+\tag{50}</script></blockquote>
+<p>下面证明 $b_1^{new}=b_2^{new }$：</p>
+<p>由于 (45) 式可知：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\alpha_1^{new}-\alpha_1^{old}=y_1y_2(\alpha_2^{new}-\alpha_2^{old})</script></blockquote>
+<p>又由 (40) 可知</p>
+<blockquote>
+<script type="math/tex; mode=display">
+E_{1}^{old}-E_2^{old}=y_2(K_{11}+K_{22}-2K_{12})(\alpha_2^{unclipped}-\alpha_2^{old})</script></blockquote>
+<p>因此</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}b_1^{new}=&-E_1^{old}-y_1K_{11}(\alpha_1^{new}-\alpha_1^{old})-y_2K_{21}(\alpha_2^{new}-\alpha_2^{old})+b^{old}\\
+=&-E_1^{old}-y_2K_{11}(\alpha_2^{new}-\alpha_2^{old})-y_2K_{21}(\alpha_2^{new}-\alpha_2^{old})+b^{old}\\
+=&-E_2^{old}+y_2(K_{11}+K_{22}-2K_{12})(\alpha_2^{unclipped}-\alpha_2^{old})\\
+&\quad-y_2K_{11}(\alpha_2^{new}-\alpha_2^{old})-y_2K_{21}(\alpha_2^{new}-\alpha_2^{old})+b^{old}\\
+=&b_2^{new}+y_1K_{12}(\alpha_1^{new}-\alpha_1^{old})+y_2K_{22}(\alpha_2^{new}-\alpha_2^{old})-b^{old}\\
+&\quad+y_2(K_{11}+K_{22}-2K_{12})(\alpha_2^{unclipped}-\alpha_2^{old})\\
+&\quad-y_2K_{11}(\alpha_2^{new}-\alpha_2^{old})-y_2K_{21}(\alpha_2^{new}-\alpha_2^{old})+b^{old}\\
+=&b_2^{new}+y_2(K_{11}+K_{22}-2K_{12})(\alpha_2^{unclipped}-\alpha_2^{new})
+\end{aligned}
+\tag{51}</script></blockquote>
+<p>由于此时 $\alpha_1,\alpha_2$ 均不在边界上，所以 $\alpha_2^{unclipped}=\alpha_2^{new}$，因此证毕 $b_1^{new}=b_2^{new }$。</p>
+</li>
+</ol>
+<h3 id="alpha-1-new-和-alpha-2-new-均在边界取值-0-C"><a href="#alpha-1-new-和-alpha-2-new-均在边界取值-0-C" class="headerlink" title="$\alpha_1^{new}$ 和 $\alpha_2^{new}$ 均在边界取值 ($\{0,C\}$)"></a>$\alpha_1^{new}$ 和 $\alpha_2^{new}$ 均在边界取值 ($\{0,C\}$)</h3><p>在这种情况下，我们继续分以下四种情况讨论：</p>
+<ol>
+<li><p>当 $\alpha_1^{new}=\alpha_2^{new}=0$ 时：</p>
+<p>a. 若 $y_1y_2=1$ ，由 $y_{1} \alpha_{1}^{n e w}+y_{2} \alpha_{2}^{n e w}=y_{1} \alpha_{1}^{o l d}+y_{2} \alpha_{2}^{o l d} $ 等式两边同时乘以 $y_1$ 容易推出</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\alpha_{1}^{n e w}+ \alpha_{2}^{n e w}=\alpha_{1}^{o l d}+\alpha_{2}^{o l d}=0</script></blockquote>
+<p>因此 $\alpha_1^{old}=\alpha_1^{new}=\alpha_2^{old}=\alpha_2^{new}=0$，且此时有 $L=H=0$.</p>
+<p>这种情况下无需进行二次优化问题的计算，直接返回，进行下一轮的变量选择。</p>
+<p>b. 若 $y_1y_2\neq 1$，则 $y_1$ 和 $y_2$ 异号，且 $L\neq H$，因此由KKT条件 (33.1) 可得：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+y_{1} g(x_{1})=y_{1}\left(\sum_{i=1}^{n} y_{i} k_{i 1} \alpha_{i}+b\right) \geq 1 \\
+y_{2} g(x_{2})=y_{2}\left(\sum_{i=1}^{n} y_{i} k_{i 2} \alpha_{i}+b\right) \geq 1</script></blockquote>
+<p>因此在上述不等式之间会形成一个在 $b_1^{new}$ 和 $b_2^{new}$ 之间的闭区间。这个区间内的所有取值都将满足KKT条件。在实际操作中，我们通常取 $b^{new}=\frac{b_1^{new}+b_2^{new}}{2}$。</p>
+</li>
+<li><p>当 $\alpha_1^{new}=\alpha_2^{new}=C$ 时：</p>
+<p>a.  若 $y_1y_2=1$ ，则类似于情况1，可以推出</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\alpha_{1}^{n e w}+ \alpha_{2}^{n e w}=\alpha_{1}^{o l d}+\alpha_{2}^{o l d}=2C</script></blockquote>
+<p>因此 $\alpha_1^{old}=\alpha_1^{new}=\alpha_2^{old}=\alpha_2^{new}=C$，且此时有 $L=H=C$.</p>
+<p>这种情况下无需进行二次优化问题的计算，直接返回，进行下一轮的变量选择。</p>
+<p>b. 若 $y_1y_2\neq 1$，同样可以推出，在KKT条件 (33.3) 下会存在一个 $b_1^{new}$ 和 $b_2^{new}$ 之间的闭区间，取 $b^{new}=\frac{b_1^{new}+b_2^{new}}{2}$。</p>
+</li>
+<li><p>当 $\alpha_1^{new}=0,\alpha_2^{new}=C$ 时：</p>
+<p>a. 若 $y_1y_2=1$ , 则 $y_1$ 和 $y_2$ 同号，因此由KKT条件 (33.1)(33.3) 可得：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+y_{1} g(x_{1})=y_{1}\left(\sum_{i=1}^{n} y_{i} k_{i 1} \alpha_{i}+b\right) \geq 1 \\
+y_{2} g(x_{2})=y_{2}\left(\sum_{i=1}^{n} y_{i} k_{i 2} \alpha_{i}+b\right) \leq 1</script></blockquote>
+<p>则存在一个在 $b_1^{new}$ 和 $b_2^{new}$ 之间的闭区间，取 $b^{new}=\frac{b_1^{new}+b_2^{new}}{2}$。</p>
+<p>b. 若 $y_1y_2\neq 1$，可以推出 $\alpha_{1}^{n e w}- \alpha_{2}^{n e w}=\alpha_{1}^{o l d}-\alpha_{2}^{o l d}=-C$, 此时有 $ L=H=C$。此时无需进行二次优化问题的计算。</p>
+</li>
+<li><p>当 $\alpha_1^{new}=C,\alpha_2^{new}=0$ 时：</p>
+<p>类似于情况3的分析，当 $y_1y_2=1$ 时，取 $b^{new}=\frac{b_1^{new}+b_2^{new}}{2}$，当 $y_1y_2\neq1$ 时，$L=H=0$，且此时 $\alpha_1,\alpha_2$ 都无需进行二次优化。</p>
+</li>
+</ol>
+<p>结合上述分析，在实际操作中，我们可以按照 $L$ 是否等于 $H$，将情况统一分成两类。</p>
+<blockquote>
+<ol>
+<li>当 $L=H$ 时，不进行二次规划问题的计算，进行下一轮的变量选择。</li>
+<li>当 $L\neq H$ 时，进行二次规划问题的计算，依据 $\alpha_1^{new},\alpha_2^{new}$ 的取值来决定 $b^{new}$ 的取值。</li>
+</ol>
+</blockquote>
+<h2 id="差值-E-i-的更新"><a href="#差值-E-i-的更新" class="headerlink" title="差值 $E_i$ 的更新"></a>差值 $E_i$ 的更新</h2><p>由 $E_i$ 的定义，可以得到</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+E_i^{new}&=\sum_{j=1}^ny_j\alpha_j^{new}K_{ji}+b^{new}-y_i\\
+&=\sum_{S}y_i\alpha_i^{new}K_{ij}+b^{new}-y_i
+\end{aligned}\tag{52}</script></blockquote>
+<p>其中 $S$ 表示当前的所有支持向量。</p>
+<p>更进一步，我们可以推出</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+E_i^{new}&=\sum_{i=3}^ny_i\alpha_i^{new}K_{ij}+y_1\alpha_1^{new}K_{1i}+y_2\alpha_2^{new}K_{2i}+b^{new}-y_i\\
+&=E_{i}^{old}++y_1(\alpha_1^{new}-\alpha_1^{old})K_{1i}+y_2(\alpha_2^{new}-\alpha_2^{old})K_{2i}+b^{new}-y_i
+\end{aligned}\tag{53}</script></blockquote>
+<p>若我们在计算过程中将 $E_i$ 保存在一个列表中，则我们可以用 (53) 进行计算。</p>
+<p>但若将所有样本的 $E_i$ 均保存，则所需要的内存空间将会特别巨大，因此在 [4] [5] 中是仅保存 $0&lt;\alpha_i&lt;C$ 的样本的 $E_i$ 值。</p>
+<p>这是因为在一次交替遍历中，$0&lt;\alpha_i&lt;C$ 的样本点将进行多次迭代计算，使其最终收敛。而边界上的样本点只进行一次迭代计算。且在一般情况下，绝大多数点都是边界点，因此只保存 $0&lt;\alpha_i&lt;C$ 的样本的 $E_i$ 值，不仅可以节省内存使用量，又可以简便运算。对于为保存的 $E_i$ 值，则使用公式 (52) 进行计算。[4] [5] [8]</p>
+<hr>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p>[1] 李航. 统计学习方法. 清华大学出版社，2019</p>
+<p>[2] 周志华. 机器学习. 清华大学出版社，2016.1</p>
+<p>[3] 邓乃杨，田英杰. 数据挖掘中的新方法——支持向量机. 北京：科学出版社，2004</p>
+<p>[4] John C. Platt. Sequential minimal optimization: A fast algorithm for training support vector machines. Technical Report MSR-TR-98-14, Microsoft Research, 1998.</p>
+<p>[5] John C. Platt. Fast training of support vector machines using sequential minimal optimization. In Advances in Kernel Methods - Support Vector Learning. B. Scholkopf, C. J. C. Burges, and A. J. Smola, Eds. MIT Press, Cambridge, MA, 1999: 185-208.</p>
+<p>[6] Osuna, E., Freund, R., Girosi, F., An improved training algorithm for support vector machines. Proc. IEEE NNSP ’97, 1997.</p>
+<p>[7] <a href="https://zhuanlan.zhihu.com/p/64580199" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/64580199</a></p>
+<p>[8] <a href="https://zhuanlan.zhihu.com/p/62367247" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/62367247</a></p>
+
+        </div>
+        
+            <div style="text-align:center;color: rgb(125,125,125);font-size:14px;">
+               -------------本文结束 感谢您的阅读-------------
+            </div>
+        
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>文章作者:</span>
+                        <span>会飞的猪</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>文章链接:</span>
+                        <span><a href="http://shellyandliu.github.io/2020/06/25/%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA/">http://shellyandliu.github.io/2020/06/25/%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>版权声明:</span>
+                        <span>本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC-BY-NC-4.0</a> ， 转载请注明来自 会飞的猪！</span>
+                    </p>
+                
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>标签:</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E5%88%86%E7%B1%BB/"> <i class="iconfont icon-tags"></i> 分类</a>
+                    
+                        <a href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/"> <i class="iconfont icon-tags"></i> 线性模型</a>
+                    
+                        <a href="/tags/%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA/"> <i class="iconfont icon-tags"></i> 支持向量机</a>
+                    
+                        <a href="/tags/SMO%E7%AE%97%E6%B3%95/"> <i class="iconfont icon-tags"></i> SMO算法</a>
+                    
+                        <a href="/tags/%E6%A0%B8%E5%87%BD%E6%95%B0/"> <i class="iconfont icon-tags"></i> 核函数</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">返回</a>
+                <span> /  </span>
+                <a href="/">首页</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2020/05/22/Lagrange%E5%AF%B9%E5%81%B6/">Lagrange对偶原理</a>
+            
+        </section>
+        <div class="post-content">
+            <section style="font-size: 20px;font-weight: 700;margin-bottom: 10px;margin-top: 20px;">
+                <i class="iconfont icon-comments"></i>
+                <span>
+                    评论
+                </span>
+            </section>
+        </div>
+        
+            <section id="comments" class="comments">
+              <style>
+                .comments{margin:0px;padding:10px;background:#fff}
+                @media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#fff}}
+              </style>
+              <div class="valine_comment"></div>
+<!--����js����</body>֮ǰ���뼴��-->
+<!--Leancloud ������:-->
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<!--Valine �ĺ��Ĵ����-->
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+      el: '.valine_comment',
+      app_id: 'bCvyxhtL2V59mmqAp81lAGob-gzGzoHsz#Leancloud应用的appId',
+      app_key: 'J4zVKQfUjhToGJwBfLcoOHOv',
+      placeholder: '欢迎大家评论交流~',
+      notify: 'true',
+      verify: 'true',
+    });
+</script>
+            </section>
+        
+        
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 会飞的猪 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

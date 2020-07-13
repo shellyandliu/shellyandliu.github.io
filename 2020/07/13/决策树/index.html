@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="会飞的猪">
+
+
+
+
+
+<link rel="stylesheet" href="/fonts/iconfont_new/iconfont.css">
+
+
+<title>决策树 | 会飞的猪</title>
+
+
+
+    <link rel="icon" href="/image/longmao.jpg">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+            <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+        
+    
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">会飞的猪</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">文章</a>
+                
+                    <a class="menu-item" href="/categories">分类</a>
+                
+                    <a class="menu-item" href="/tags">标签</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">会飞的猪</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">文章</a>
+                
+                    <a class="menu-item" href="/categories">分类</a>
+                
+                    <a class="menu-item" href="/tags">标签</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">展开目录</a>
+        <a onclick="go_top()">回到顶部</a>
+        <a onclick="go_bottom()">到达底部</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">决策树</h1>
+            
+                <div class="post-meta">
+                    
+                        作者: <a itemprop="author" rel="author" href="/">会飞的猪</a>
+                    
+
+                    
+                        <span class="post-time">
+                        时间: <a href="#">七月 13, 2020&nbsp;&nbsp;16:01:49</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    类别:
+                            
+                                <a href="/categories/%E5%88%86%E7%B1%BB/">-分类</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                            <span class="post-meta-item-icon">
+                              <i class="fa fa-keyboard-o"></i>
+                              <span class="post-meta-item-text">  字数统计: </span>
+                              <span class="post-count"><a href="#">3.4k字</a></span>
+                            </span>
+                        </span>
+                        <span class="post-time">
+                            <span class="post-meta-item-icon">
+                            <i class="fa fa-hourglass-half"></i>
+                            <span class="post-meta-item-text">  阅读时长: </span>
+                            <span class="post-count"><a href="#">13分</a></span>
+                            </span>
+                        </span>
+                    
+
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="决策树"><a href="#决策树" class="headerlink" title="决策树"></a>决策树</h1><p>决策树可用于分类问题和回归问题，是一种基本的方法，它具有可读性强，分类速度快等优点。决策树学习通常包括3个步骤：特征选择，决策树的生成和决策树的修剪。常用的决策树模型有<strong>ID3算法、C4.5算法和CART算法</strong>。</p>
+<h2 id="ID3算法"><a href="#ID3算法" class="headerlink" title="ID3算法"></a>ID3算法</h2><h3 id="特征选择"><a href="#特征选择" class="headerlink" title="特征选择"></a>特征选择</h3><p>设 $X$ 是一个取有限个值得离散随机变量，其概率分布为 $P(X=x_i)=p_i,i=1,2,\cdots,n$.</p>
+<blockquote>
+<p>定义1：随机变量 $X$ 得信息熵：</p>
+<script type="math/tex; mode=display">
+H(X)=-\sum_{i=1}^np_i\log p_i\tag{1}</script></blockquote>
+<p>显然由定义可知，信息熵只依赖于 $X$ 的分布，与 $X$ 的取值无关，并且信息熵越大，随机变量的不确定性也越大。</p>
+<blockquote>
+<p>定义2：随机变量 $X$ 在给定条件下随机变量 $Y$ 的条件熵 $H(Y|X)$ 表示为：</p>
+<script type="math/tex; mode=display">
+H(Y|X)=\sum_{i=1}^np_iH(Y|X=x_i)\tag{2}</script><p>这里 $p_i=P(X=x_i),i=1,2,\cdots,n$</p>
+</blockquote>
+<p>当熵和条件熵中的概率由数据估计得到时，所对应的熵和条件熵分别称为经验熵和经验条件熵。因此可以给出信息增益的定义</p>
+<blockquote>
+<p>定义3：特征 $A$ 对训练数据集 $D$ 的信息增益 $g(D,A)$，定义为集合 $D$的经验熵 $H(D)$ 与在给定特征 $A$ 的条件下的经验条件熵 $H(D|A)$ 之差，即</p>
+<script type="math/tex; mode=display">
+g(D,A)=H(D)-H(D|A)\tag{3}</script></blockquote>
+<p>信息增益的意义在于：由于经验熵 $H(D)$ 表示对数据 $D$ 进行分类的不确定性，$H(D|A)$ 表示在特征 $A$ 给定的条件下，对数据集 $D$ 进行分类的不确定性.因此二者之间的差值就可以理解为特征 $A$ 使得数据集 $D$ 的分类的不确定性减少的程度。</p>
+<p>若我们设有 $K$ 个类 $C_k,k=1,2,\cdots,K$ 。$|C_k|$ 表示属于 $C_k$ 的样本数，设特征 $A$ 有 $n$ 个不同的取值 $\{a_1,a_2,\cdots,a_n\}$ ，根据特征 $A$ 的取值将 $D$ 划分为 $n$ 个子集 $D_1,D_2,\cdots,D_n$，记 $|D_i|$ 为 $D_i$ 的样本数。则由定义1、2可以得到</p>
+<blockquote>
+<script type="math/tex; mode=display">
+H(D)=-\sum_{k=1}^K\frac{|C_k|}{|D|}\log_2\frac{|C_k|}{|D|}</script><script type="math/tex; mode=display">
+H(D|A)=\sum_{i=1}^n\frac{|D_i|}{|D|}H(D_i)=-\sum_{i=1}^n\frac{|D_i|}{|D|}\sum_{k=1}^K\frac{|D_{ik}|}{|D_i|}\log\frac{|D_{ik}|}{|D_i|}</script></blockquote>
+<p>ID3算法正是利用信息增益 $g(D,A)$ 进行特征选择的。</p>
+<h3 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h3><p>因此ID3生成算法为：</p>
+<blockquote>
+<ol>
+<li>初始化特征集和数据集。</li>
+<li>计算数据集合的信息熵和所有特征的条件熵，选择信息增益 $g(D,A)$ 最大的特征作为当前的决策节点。</li>
+<li>根据该特征不同的取值划分为不同分支的数据集。</li>
+<li>更新数据集和特征集合。</li>
+<li>重复上述步骤，直到子节点仅包含单一特征取值。</li>
+</ol>
+</blockquote>
+<h2 id="C4-5算法"><a href="#C4-5算法" class="headerlink" title="C4.5算法"></a>C4.5算法</h2><h3 id="特征选择-1"><a href="#特征选择-1" class="headerlink" title="特征选择"></a>特征选择</h3><p>由于ID3算法使用信息增益作为特征的选择方式，这会存在一个问题，即这将偏向与选择取值较多的特征。另外在ID3算法中，还不能处理连续的数据和缺失的数据，这些问题在C4.5算法中得到了解决。</p>
+<p>首先在 C4.5算法中，将采用信息增益比来进行特征选择，下面给出信息增益比的定义。</p>
+<blockquote>
+<p>定义4：特征 $A$ 对训练数据集 $D$ 的信息增益比 $g_R(D,A)$定义为其信息增益 $g(D,A)$ 与训练数据集 $D$ 关于特征 $A$ 的值的熵 $H_A(D)$ 之比，即</p>
+<script type="math/tex; mode=display">
+g_R(D,A)=\frac{g(D,A)}{H_A(D)}\tag{4}</script><p>其中， $H_A(D)=-\sum_{i=1}^n\frac{|D_i|}{|D|}\log\frac{|D_i|}{|D|}$，$n$ 是特征 $A$ 取值的个数。</p>
+</blockquote>
+<p>注：C4.5并不是直接用信息增益比最大的特征进行划分，而是选择信息增益高于平均值的特征中信息增益比最高的特征。</p>
+<h3 id="连续值和缺失值的处理"><a href="#连续值和缺失值的处理" class="headerlink" title="连续值和缺失值的处理"></a>连续值和缺失值的处理</h3><p>对于特征是连续数据的问题，在C4.5中是使用二分法进行处理的。即若对于特征 $A$ 在数据集 $D$ 上出现了 $n$ 个取值，则将这些取值从小到大的排列，记录相邻两个点的平局值作为划分的边界，则两个相邻边界之间的值就作为一个属性进行划分。</p>
+<p>而对于缺失值的情况有两个问题需要解决：</p>
+<ol>
+<li>如何在特征缺失的情况下进行特征选择？</li>
+<li>选择好特征后该如何将该样本进行划分？</li>
+</ol>
+<p>对于问题1：记 $\tilde{D}$ 表示在特征 $A$ 上没有缺失值的样本子集，$\tilde{C}_k,k=1,2,\cdots,K$ 表示特征 $A$ 上没有缺失值且属于第  $k$ 类的样本子集，同样的记 $\tilde{D}_i,i=1,2,\cdots,n$ 表示特征 $A$ 所具有的 $n$ 个取值的样子子集。假设为每个样本引入一个权重 $w_x$</p>
+<p>引入一下符号：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}\rho& =\frac{\sum_{x\in \tilde D}w_x}{\sum_{x\in D}w_x},\\
+\tilde p_k&=\frac{\sum_{x\in \tilde C_k}w_x}{\sum_{x\in \tilde D}w_x},\quad k=1,2,\cdots,K\\
+\tilde r_i &= \frac{\sum_{x\in \tilde D_i}w_x}{\sum_{x\in \tilde D}w_x},\quad i=1,2,\cdots,n
+\end{aligned}</script></blockquote>
+<p>显然 $\rho$ 表示无缺失值的样本所占的比例，$\tilde p_k$ 表示无缺失值样本中第 $k$ 类样本所占的比例， $\tilde r_i$ 表示无缺失值样本中在特征 $A$ 上取值为 $A_i$ 的样本所占的比例。</p>
+<p>因此可以将信息增益定义为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+g(D,A)=\rho \times g(\tilde D,A)=\rho \times (H(\tilde D)-\sum_{i=1}^n\tilde r_iH(\tilde D|A))\tag{5}</script></blockquote>
+<p>对于问题2：若样本 $x$ 在特征 $A$ 上的取值已知，则将 $x$ 划入与其取值对应的子结点上，样本权重保持不变 $w_x$，若未知，则将 $x$ 划入所有子节点，但样本权重那个将乘上对应子节点的比例，即样本权重变为 $\tilde r_i\cdot w_x$。</p>
+<h3 id="剪枝方法"><a href="#剪枝方法" class="headerlink" title="剪枝方法"></a>剪枝方法</h3><p>决策树生成算法会不断的生成子节点，直到样本不能划分下去，这样生成得到的决策树对训练数据将会十分准确，但是对测试数据的表现就不一定这么好。即过拟合现象。因此制定一定的原则，抑制决策树无限制的划分下去有十分重要的意义。我们将这些方法称之为决策树的剪枝处理。</p>
+<p>一般有两种常用的减枝方法，即预剪枝和后剪枝。</p>
+<p>预剪枝： 预剪枝是在生成决策树的过程中，对每个节点进行评估，若该节点的生成不能提高泛化能力，则停止划分。预剪枝不仅可以降低过拟合的风险而且还可以减少训练时间，但另一方面它是基于“贪心”策略，会带来欠拟合风险。</p>
+<p>后减枝：后剪枝则是先从训练集生成一颗完整的决策树，然后自底向上地对非叶结点进行评估，若将该节点对应的子树替换为叶结点提高泛化能力，则将该子树替换为叶结点。后剪枝决策树的欠拟合风险很小，泛化性能往往优于预剪枝决策树。但同时其训练时间会大的多。其中 C4.5算法正是采用了后剪枝的方法。</p>
+<h2 id="CART算法"><a href="#CART算法" class="headerlink" title="CART算法"></a>CART算法</h2><p>CART算法既可以用于分类问题也可以用于回归问题，下面先介绍其应用于分类问题。</p>
+<p>CART算法生成的是二叉树，其中内部结点的特征取值为“是”或“否”，左分支是取值为“是”的分支，右分支是取值为“否”的分支。CART算法仍主要有以下两个部分组成：</p>
+<ol>
+<li>决策树的生成：分裂过程是一个二叉递归划分过程，且没有停止准则，将会不断划分下去。</li>
+<li>决策树的减枝：从最大树开始，每次选择训练数据熵对整体性能贡献最小的那个分裂节点作为下一个剪枝对象，直到只剩下根节点。CART 会产生一系列嵌套的剪枝树，需要从中选出一颗最优的决策树。</li>
+</ol>
+<h3 id="特征选择-2"><a href="#特征选择-2" class="headerlink" title="特征选择"></a>特征选择</h3><p>由于熵模型需要大量进行对数运算。因此在CART模型中，对其进行了简化。下面给出基尼指数的定义。</p>
+<blockquote>
+<p>定义5：在分类问题中，假设有 $K$ 个类，样本点属于第 $k$ 类的概率为 $p_k$，则概率分布的基尼指数定义为 </p>
+<script type="math/tex; mode=display">
+\operatorname {Gini}(p)=\sum_{k=1}^Kp_k(1-p_k)=1-\sum_{k=1}^Kp_k^2\tag{6}</script><p>对于给定的样本集合 $D$，其基尼指数为：</p>
+<script type="math/tex; mode=display">
+\operatorname{Gini}(D)=1-\sum_{k=1}^K\left(\frac{|C_k|}{|D|}\right)^2\tag{7}</script></blockquote>
+<p>从定义可以看出，<strong>基尼指数实际上就是信息熵的一阶泰勒展开。</strong></p>
+<p>由于CART模型是二叉树模型，因此在每一步生成树的过程中，样本将会按照特征 $A$ 被划分成两个集合 $D_1$ 和 $D_2$ 。即在特征 $A$ 下，集合 $D$ 的基尼指数定义为</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\operatorname{Gini}(D,A)=\frac{|D_1|}{|D|}\operatorname{Gini}(D_1)+\frac{|D_2|}{|D|}\operatorname{Gini}(D_2)\tag{8}</script></blockquote>
+<p>基尼指数反映了从数据集中随机抽取两个样本，其类别标记不一致的概率。因此基尼指数越小，则数据集纯度越高。在CART模型中，每次将挑选基尼指数最小的特征进行分割。</p>
+<h3 id="CART剪枝"><a href="#CART剪枝" class="headerlink" title="CART剪枝"></a>CART剪枝</h3><p>CART算法采用的是基于代价复杂度的方式进行后剪枝。该方法会产生一系列的树，每个树都是由之前的树的某个或某些子树替换成叶节点得到的。然后使用一种成本复杂度的度量方式来判断哪棵子树应该被一个预测类别的叶节点来代替。具体的，考虑下面损失函数：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+C_\alpha(T)=C(T)+\alpha|T|\tag{9}</script></blockquote>
+<p>其中 $T$ 为任意子树，$C(T)$ 为预测误差，$|T|$ 为子树的叶节点个数，$\alpha\ge0$ 为参数。</p>
+<p>显然对于每个 $\alpha$ ，都可以找到使得 $C_\alpha(T)$ 最小的最优子树 $T(\alpha)$，设 $T_0$ 为未剪枝的最大子树，则当 $\alpha$ 很小的时候，显然 $T_0$ 为最有字数，而当 $\alpha$ 很大时，只有根结点的子树是最优子树。因此，有下面结论：</p>
+<blockquote>
+<p>定理：当 $\alpha$ 从小到大增大， $0=\alpha_0&lt;\alpha_1&lt;\cdots&lt;\alpha_n&lt;+\infty$，产生一系列区间 $[\alpha_i,\alpha_{i+1}),i=0,1,\cdots,n$ ，在每个取值区间得到的最优子树分别为 $T_0,T_1,\cdots,T_n$，其中 $T_{i+1}$ 是由前一个子树 $T_i$ 减取一个内部节点生成的。</p>
+</blockquote>
+<p>对于 $T_0$ 的任意内部结点 $t$，以 $t$ 为单结点树的损失函数是</p>
+<blockquote>
+<script type="math/tex; mode=display">
+C_\alpha(t)=C(t)+\alpha\tag{10}</script></blockquote>
+<p>以 $t$ 为根结点的子树 $T_t$ 的损失函数为：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+C_\alpha(T_t)=C(T_t)+\alpha|T_t|\tag{11}</script></blockquote>
+<p>当 $\alpha$ 增大到一个值时，会存在 $C_\alpha(t)=C_\alpha(T_t)$</p>
+<p>令 $g(t)=\frac{C(t)-C_\alpha(T_t)}{|T_t-1|}$，对所有的内部结点 $t$ 计算 $g(t)$，将得到 $\alpha_0,\alpha_1,\cdots,\alpha_n$。可使用交叉验证得到最优的 $\alpha$。</p>
+<h3 id="类别不平衡"><a href="#类别不平衡" class="headerlink" title="类别不平衡"></a>类别不平衡</h3><p>CART算法还可以自动处理类别不平衡的情况。在 CART 分类中，总是要计算每个节点关于根节点的类别频率的比值，这就相当于对数据自动重加权，对类别进行均衡。例如，对于二分类的问题，结点被分类为类别1当且仅当 $\frac{N_1(node)}{N_1(root)}&gt;\frac{N_0(node)}{N_0(root)}$ 。</p>
+<h3 id="CART回归树"><a href="#CART回归树" class="headerlink" title="CART回归树"></a>CART回归树</h3><p>CART还可以用作回归树的建立，对于分类问题，我们是考虑将特征空间划分为 $M$ 个单元，在每个单元中设定类别，即完成了分类模型的构建，而对于回归问题，类似的，我们可以在每个单元中设定一个固定的输出值 $c_m$，来完成回归的任务。</p>
+<p>因此回归树的模型可以表示为</p>
+<blockquote>
+<script type="math/tex; mode=display">
+f(x)=\sum_{m=1}^Mc_mI(x\in R_m)\tag{12}</script></blockquote>
+<p>其中 $R_m$ 表示第 $m$ 个划分单元。</p>
+<p>当特征空间的划分确定时，可以用平方误差 $\sum_{x_i\in R_m}(y_i-f(x_i))^2$ 来表示回归树对训练数据的预测误差，由于在 $R_m$ 上 $f(x_i)$ 取值为常数，因此容易得到 $c_m$ 的最优值为 $R_m$ 上所有输入实例 $x_i$ 对应的输出 $y_i$ 的均值，即 $\hat{c}_m=\operatorname{ave}(y_i|x_i\in R_m)$。</p>
+<p>而对于特征空间的划分方式可以采用启发式的方法，定义</p>
+<blockquote>
+<script type="math/tex; mode=display">
+R_1(j,s)=\{x|x^{(j)}\le s\}\qquad R_2(j,s)=\{x|x^{(j)}>s\}\tag{13}</script></blockquote>
+<p>其中 $x^{(j)}$ 为第 $j$ 个变量，被称为切分变量， $s$ 被称为切分点。因此最优的切分变量和最优切分点可以通过求解下列式子得到</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\min_{j,s}\left[\min_{c_1}\sum_{x_i\in R_1(j,s)}(y_i-c_1)^2+\min_{c_2}\sum_{x_i\in R_2(j,s)}(y_i-c_2)\right]\tag{14}</script></blockquote>
+<p>事实上，其中 $\hat{c}_1=\operatorname{ave}(y_i|x_i\in R_1(j,s)) ,\hat{c}_2=\operatorname{ave}(y_i|x_i\in R_2(j,s)) $</p>
+<p>上述回归树也称为最小二乘回归树。</p>
+<hr>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p>[1] 李航. 统计学习方法. 清华大学出版社，2019</p>
+<p>[2] 周志华. 机器学习. 清华大学出版社，2016.1</p>
+<p>[3] <a href="https://zhuanlan.zhihu.com/p/85731206" target="_blank" rel="noopener">【机器学习】决策树（上）——ID3、C4.5、CART（非常详细）</a></p>
+
+        </div>
+        
+            <div style="text-align:center;color: rgb(125,125,125);font-size:14px;">
+               -------------本文结束 感谢您的阅读-------------
+            </div>
+        
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>文章作者:</span>
+                        <span>会飞的猪</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>文章链接:</span>
+                        <span><a href="http://shellyandliu.github.io/2020/07/13/%E5%86%B3%E7%AD%96%E6%A0%91/">http://shellyandliu.github.io/2020/07/13/%E5%86%B3%E7%AD%96%E6%A0%91/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>版权声明:</span>
+                        <span>本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC-BY-NC-4.0</a> ， 转载请注明来自 会飞的猪！</span>
+                    </p>
+                
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>标签:</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E5%88%86%E7%B1%BB/"> <i class="iconfont icon-tags"></i> 分类</a>
+                    
+                        <a href="/tags/%E5%9B%9E%E5%BD%92/"> <i class="iconfont icon-tags"></i> 回归</a>
+                    
+                        <a href="/tags/%E5%86%B3%E7%AD%96%E6%A0%91/"> <i class="iconfont icon-tags"></i> 决策树</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">返回</a>
+                <span> /  </span>
+                <a href="/">首页</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2020/06/25/%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA/">支持向量机</a>
+            
+        </section>
+        <div class="post-content">
+            <section style="font-size: 20px;font-weight: 700;margin-bottom: 10px;margin-top: 20px;">
+                <i class="iconfont icon-comments"></i>
+                <span>
+                    评论
+                </span>
+            </section>
+        </div>
+        
+            <section id="comments" class="comments">
+              <style>
+                .comments{margin:0px;padding:10px;background:#fff}
+                @media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#fff}}
+              </style>
+              <div class="valine_comment"></div>
+<!--����js����</body>֮ǰ���뼴��-->
+<!--Leancloud ������:-->
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<!--Valine �ĺ��Ĵ����-->
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+      el: '.valine_comment',
+      app_id: 'bCvyxhtL2V59mmqAp81lAGob-gzGzoHsz#Leancloud应用的appId',
+      app_key: 'J4zVKQfUjhToGJwBfLcoOHOv',
+      placeholder: '欢迎大家评论交流~',
+      notify: 'true',
+      verify: 'true',
+    });
+</script>
+            </section>
+        
+        
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 会飞的猪 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

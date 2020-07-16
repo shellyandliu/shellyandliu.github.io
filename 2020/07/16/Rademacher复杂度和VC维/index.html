@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="会飞的猪">
+
+
+
+
+
+<link rel="stylesheet" href="/fonts/iconfont_new/iconfont.css">
+
+
+<title>Rademacher复杂度和VC维 | 会飞的猪</title>
+
+
+
+    <link rel="icon" href="/image/longmao.jpg">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+            <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+        
+    
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">会飞的猪</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">文章</a>
+                
+                    <a class="menu-item" href="/categories">分类</a>
+                
+                    <a class="menu-item" href="/tags">标签</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">会飞的猪</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">文章</a>
+                
+                    <a class="menu-item" href="/categories">分类</a>
+                
+                    <a class="menu-item" href="/tags">标签</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">展开目录</a>
+        <a onclick="go_top()">回到顶部</a>
+        <a onclick="go_bottom()">到达底部</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Rademacher复杂度和VC维</h1>
+            
+                <div class="post-meta">
+                    
+                        作者: <a itemprop="author" rel="author" href="/">会飞的猪</a>
+                    
+
+                    
+                        <span class="post-time">
+                        时间: <a href="#">七月 16, 2020&nbsp;&nbsp;21:29:30</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    类别:
+                            
+                                <a href="/categories/%E8%AE%A1%E7%AE%97%E5%AD%A6%E4%B9%A0%E7%90%86%E8%AE%BA/">-计算学习理论</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                            <span class="post-meta-item-icon">
+                              <i class="fa fa-keyboard-o"></i>
+                              <span class="post-meta-item-text">  字数统计: </span>
+                              <span class="post-count"><a href="#">4.1k字</a></span>
+                            </span>
+                        </span>
+                        <span class="post-time">
+                            <span class="post-meta-item-icon">
+                            <i class="fa fa-hourglass-half"></i>
+                            <span class="post-meta-item-text">  阅读时长: </span>
+                            <span class="post-count"><a href="#">20分</a></span>
+                            </span>
+                        </span>
+                    
+
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>在上一篇文章中所给出的PAC可学习定理都是有假设空间有限这个限定条件，这是很具有局限性的。若我们将假设空间放大为无限的，利用上一节的分析方式，则最终得到的上界将含有无穷大的项 $\log|\mathcal H|$。这是没有意义的。于是需要用别的方式来衡量无限的假设集。下面我们将介绍几种衡量假设空间复杂度的方法。分别是<strong>Rademacher复杂度，增长函数和VC维。</strong></p>
+<h1 id="Rademacher复杂度"><a href="#Rademacher复杂度" class="headerlink" title="Rademacher复杂度"></a>Rademacher复杂度</h1><p>仍先考虑二分类的问题，即输出空间为 $\{+1,-1\}$。给定数据集 $D=\{(x_1,y_1),(x_2,y_2),\cdots,(x_m,y_m)\}$，假设 $h$ 的经验误差为</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}\hat R(h)=&\frac1m\sum_{i=1}^mI(h(x_i)\neq y_i)\\=&\frac1m\sum_{i=1}^m\frac{1-y_ih(x_i)}{2}\\
+=&\frac12-\frac1{2m}\sum_{i=1}^my_ih(x_i)
+\end{aligned}\tag{1}</script></blockquote>
+<p>若 $h$ 相对于样本 $D$ 是一致的。则 $\frac1m\sum_{i=1}^my_ih(x_i)$ 取最大值 $1$，因此 $\arg\min_{h\in\mathcal H}\hat R(h)=\arg\max_{h\in\mathcal H}\frac1m\sum_{i=1}^my_ih(x_i)$。但是在现实中的样本标记很有能会受到噪声的影响，即某些样本的 $y_i$ 已经不是真实的标记，这时选择假设空间 $\mathcal H$ 在训练集上表现最好的假设还不如选择 $\mathcal H$ 中事先考虑随机噪声影响的假设。因此引入Rademacher随机变量 $\sigma_i$ ，它以 $1/2$ 的概率取值 $-1$ ，以 $1/2$ 的概率取值 $+1$。</p>
+<p>用 $\sigma _i$ 替换 $y_i$ 并关于 $h$ 得到取上确界，再对 $\sigma$ 求期望可以得到：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+E_{\sigma}(\sup_{h\in\mathcal H}\frac1m \sum_{i=1}^m\sigma_ih(x_i))\tag{2}</script></blockquote>
+<p>显然式子 (2) 的取值范围为 $[0,1]$，当 $|\mathcal H|=1$ 时，显然式子 (2) 为 $0$，当 $|\mathcal H|=2^m$ 时，且 $\mathcal H$ 能打散 $D$ 时。则对于任意的 $\sigma$ ，总可以找到一个 $h$，使得 $h(x_i)=\sigma_i,i=1,2\cdots,m$。这时式子 (2) 的值为 $1$。对于越复杂的假设空间 $\mathcal H$ ，式子 (2) 的值越大，因此可以利用式子 (2) 来作为假设空间复杂度的度量。</p>
+<p>更一般的，我们考虑实值函数空间 $\mathcal F:\mathcal Z\to\mathbb R$ . 令 $Z=\{z_1,z_2,\cdots,z_m\}$，其中 $z_i\in\mathcal Z$。</p>
+<blockquote>
+<p>定义1：函数空间 $\mathcal F$ 关于 $Z$ 的经验 Rademacher 复杂度为</p>
+<script type="math/tex; mode=display">
+\hat R_Z(\mathcal F)=E_\sigma(\sup_{f\in\mathcal F}\frac1m\sum_{i=1}^m\sigma_if(z_i))\tag{3}</script><p>定义2：函数空间 $\mathcal F$ 关于 $\mathcal Z$ 上分布 $\mathcal D$ 的Rademacher复杂度为</p>
+<script type="math/tex; mode=display">
+R_m(\mathcal F)=E_{Z\sim \mathcal D}(\hat R_Z(\mathcal F))\tag{4}</script></blockquote>
+<p>利用Rademacher复杂度可以来刻画函数空间的泛化误差上界。</p>
+<blockquote>
+<p>定理1：对实值函数空间 $\mathcal F:\mathcal Z\to[0,1]$，设 $Z=\{z_1,z_2,\cdots,z_m\},z_i\in\mathcal Z$ 是从 $\mathcal Z$ 中按照分布 $\mathcal D$ 采样得到的样本集 ，$0&lt;\delta&lt;1$， 则对于任意 $f\in\mathcal F$，以至少 $1-\delta$ 的概率有 </p>
+<script type="math/tex; mode=display">
+\begin{align}
+&E(f(z))\le\frac1m\sum_{i=1}^mf(z_i)+2R_m(\mathcal F)+\sqrt{\frac{\log(1/\delta)}{2m}},\tag{5.1}\\
+&E(f(z))\le \frac1m\sum_{i=1}^mf(z_i)+2\hat R_Z(\mathcal F)+3\sqrt{\frac{\log(2/\delta)}{2m}},\tag{5.2}
+\end{align}</script></blockquote>
+<p>要证明定理1，需要用到McDiarmid不等式：</p>
+<blockquote>
+<p>引理1：<strong>McDiarmid不等式</strong>：若 $x_1,x_2,\cdots,x_m$ 是 $m$ 个独立的随机变量，若存在 $c_1,c_2,\cdots,c_m&gt;0$，使得函数 $f$ 满足</p>
+<script type="math/tex; mode=display">
+\sup_{x_1,\cdots,x_m,x_i'}|f(x_1,\cdots,x_m)-f(x_1,\cdots,x_{i-1},x_i',x_{i+1},\cdots,x_m)|\le c_i,\tag{6}</script><p>则对任意 $\epsilon&gt;0$，有</p>
+<script type="math/tex; mode=display">
+\begin{align}
+&P(f(x_1,\cdots,x_m)-E(f(x_1,\cdots,x_m))\ge \epsilon)\le \exp(\frac{-2\epsilon^2}{\sum_{i=1}^mc_i^2})\tag{7.1}\\
+&P(f(x_1,\cdots,x_m)-E(f(x_1,\cdots,x_m))\le- \epsilon)\le \exp(\frac{-2\epsilon^2}{\sum_{i=1}^mc_i^2})\tag{7.2}
+\end{align}</script></blockquote>
+<p>现在证明定理1.</p>
+<p>证明：</p>
+<p>用 $\hat E_Z(f)$ 表示函数 $f$ 再任意样本 $Z$ 下的经验平均：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\hat E_Z(f)=\frac1m\sum_{i=1}^mf(z_i)\tag{8}</script></blockquote>
+<p>定义函数 $\Phi$ 为</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\Phi (Z)=\sup_{f\in\mathcal F }(E(f)-\hat E_Z(f))\tag{9}</script></blockquote>
+<p>令 $Z,Z’$ 为两个大小为 $m$ 的样本集，且只有一个点不同，不妨就设为 $z_m$，则</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}\Phi(Z')-\Phi(Z)=&\sup_{f\in\mathcal F}(E(f)-\hat{E}_{Z'}(f))-\sup_{f\in\mathcal F}(E(f)-\hat{E}_{Z}(f))\\
+\le&\sup_{f\in\mathcal F}(E(f)-\hat{E}_{Z'}(f)-E(f)+\hat{E}_Z(f))\\
+=&\sup_{f\in\mathcal F}\frac{f(z_m)-f(z_m')}{m}\\
+\le&\frac1m
+\end{aligned}\tag{10}</script></blockquote>
+<p>同理可得</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\Phi(Z)-\Phi(Z')\le\frac1m\tag{11}</script></blockquote>
+<p>应用McDiarmid不等式有</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\operatorname{P}[\Phi(Z)-E[\Phi(Z)] \geq \epsilon] \leq \exp \left(\frac{-2 \epsilon^{2}}{1 / m}\right)\tag{12}</script></blockquote>
+<p>令 $\delta=\exp(-2m\epsilon^2)$，则 $\epsilon=\sqrt{\frac{\log\frac1\delta}{2m}}$。因此下列不等式以 $1-\delta$ 概率成立：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\Phi(Z)\le E(\Phi(S))+\sqrt{\frac{\log\frac1\delta}{2m}}\tag{13}</script></blockquote>
+<p>因此</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}E_Z(\Phi(Z))=&E_Z(\sup_{f\in\mathcal F}(E(f)-\hat E_Z(f)))\\
+=&E_Z(\sup_{f\in\mathcal F}E_{Z'}(\hat E_{Z'}(f)-\hat{E}_Z(f)))\quad(E(f)=E_{Z'}(\hat E_{Z'}(f)))\\
+\le&E_{Z,Z'}(\sup_{f\in\mathcal F}\hat{E}_{Z'}(f)-\hat{E}_{Z'}(f))\quad (\sup 函数为凸函数，利用Jesen不等式)\\
+=&E_{Z,Z'}(\sup_{f\in\mathcal F}\frac1m\sum_{i=1}^mf(z_i')-f(z_i))\\
+=&E_{\sigma,Z,Z'}(\sup_{f\in\mathcal F}\frac1m\sum_{i=1}^m\sigma_i(f(z_i')-f(z_i)))\\
+\le &E_{\sigma,Z'}(\sup_{f\in\mathcal F}\frac1m\sum_{i=1}^m\sigma_if(z_i'))+E_{\sigma,Z}(\sup_{f\in\mathcal F}\frac1m\sum_{i=1}^m-\sigma_if(z_i))\\
+=&2E_{\sigma,Z}(\sup\frac1m\sum_{i=1}^m\sigma_if(z_i))\\
+=&2R_m(\mathcal F)
+\end{aligned}\tag{14}</script></blockquote>
+<p>因此由 (9)(13)(14)</p>
+<blockquote>
+<script type="math/tex; mode=display">
+E(f)-\hat{E}_Z(f)\le \Phi(Z)\le E_Z(\Phi(Z))+\sqrt{\frac{\log\frac1\delta}{2m}}\le 2R_m(\mathcal F)+\sqrt{\frac{\log\frac1\delta}{2m}}\tag{15}</script></blockquote>
+<p>因此第一个不等式证毕。</p>
+<p>由经验Rademacher复杂度的定义可知，若只改变一个样本点，则 $\hat R_Z(\mathcal F)$ 将至多改变 $\frac 1m$ ，又因为 $E(\hat R_Z(\mathcal F))=R_m(\mathcal F)$，因此将 $\hat{R}(\mathcal F)$ 视为McDiarmid不等式中的 $f(Z)$，应用McDiarmid不等式中的第二个。</p>
+<blockquote>
+<script type="math/tex; mode=display">
+P(\hat R_Z(\mathcal F)-R_m(\mathcal F)\le -\epsilon)\le \exp(-2\epsilon^2m)\tag{16}</script></blockquote>
+<p>令 $\frac\delta2=\exp(-2\epsilon^2m)$，则 $\epsilon=\sqrt{\frac{\log\frac2\delta}{2m}}$，因此至少 $\frac\delta2$ 的概率成立 $R_m(\mathcal F)\le \hat{R}_Z(\mathcal F)+\sqrt{\frac{\log(\frac2\delta)}{2m}}\tag{17}$</p>
+<p>综上，至少以 $\delta $ 的概率成立 (5.2) 式。</p>
+<p>上述定理针对的函数空间 $\mathcal F$ 是区间 $[0,1]$ 的实值函数，因此适用于回归问题，对于二分类问题，有下列定理</p>
+<blockquote>
+<p>定理2：对假设空间 $\mathcal H:\mathcal X\to\{-1,+1\}$，设 $D=\{x_1,x_2,\cdots,x_m\},x_i\in\mathcal X$ 是从 $\mathcal X$ 中按照分布 $\mathcal D$ 采样得到的样本集 ，$0&lt;\delta&lt;1$， 则对于任意 $h\in\mathcal H$，以至少 $1-\delta$ 的概率有 </p>
+<script type="math/tex; mode=display">
+\begin{align}
+&R(h)\le\hat R(h)+R_m(\mathcal H)+\sqrt{\frac{\log(1/\delta)}{2m}},\tag{18.1}\\
+&R(h)\le \hat R(h)+\hat R_D(\mathcal H)+3\sqrt{\frac{\log(2/\delta)}{2m}},\tag{18.2}
+\end{align}</script></blockquote>
+<p>证明：</p>
+<p>令 $\mathcal Z=\mathcal X\times\{-1,+1\}$，则 $\mathcal H$ 中的假设 $h$ 可以变形为 </p>
+<blockquote>
+<script type="math/tex; mode=display">
+f_h(z)\triangleq f_h(x,y)\triangleq I(h(x)\neq y)\tag{19}</script></blockquote>
+<p>于是就可以将值域为 $\{-1,+1\}$ 的假设空间 $\mathcal H$ 转化为值域为 $[0,1]$ 的函数空间 $\mathcal F_{\mathcal H}=\{f_h:h\in\mathcal H\}$。因此我们仅需证明 $R_m(\mathcal F_{\mathcal H})=\frac12R_m(\mathcal H)$ 和 $ \hat R_D(\mathcal F_{\mathcal H})=\frac12 \hat R_{D}(\mathcal H)$ 即可。</p>
+<p>下证明之：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\hat R_D(\mathcal F_{\mathcal H})=&E_\sigma \left(\sup_{f_h\in\mathcal F_\mathcal H}\frac1m\sum_{i=1}^m\sigma_if_h(x_i,y_i)\right)\\
+=&E_{\sigma}\left(\sup_{h\in\mathcal H}\frac1m \sum_{i=1}^m\sigma_iI(h(x_i)\neq y_i)\right)\\
+=&E_\sigma \left(\sup_{h\in\mathcal H} \frac 1m \sum_{i=1}^m\sigma_i\frac{1-y_ih(x_i)}{2}\right)\\
+=&\frac12E_\sigma\left(\frac1m\sum_{i=1}^m\sigma_i+\sup_{h\in\mathcal H}\frac 1m \sum_{i=1}^m(-y_i\sigma_ih(x_i)\right)\\
+=&\frac1 2 E_\sigma \left(\sup_{h\in\mathcal H}\frac 1m \sum_{i=1}^m(\sigma_ih(x_i))\right)\\
+=&\frac12 \hat{R}_D(\mathcal H)
+\end{aligned}\tag{20}</script></blockquote>
+<p>证毕。</p>
+<h1 id="增长函数"><a href="#增长函数" class="headerlink" title="增长函数"></a>增长函数</h1><p>定义对分集合：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\Pi_{\mathcal H}(D)=\{(h(x_1),h(x_2),\cdots,h(x_m)):h\in\mathcal H\}\tag{21}</script></blockquote>
+<p>显然 $|\Pi_{\mathcal H}(D)|\le 2^m$。</p>
+<p>下面给出增长函数的定义：</p>
+<blockquote>
+<p>定义3：<strong>增长函数</strong>：假设空间 $\mathcal H$ 的增长函数 $\Pi_\mathcal H:N\to N$ 定义为：</p>
+<script type="math/tex; mode=display">
+\forall m\in N,\Pi_H(m)=\max_{D\in\mathcal X^m}|\Pi_{\mathcal H}(D)|</script></blockquote>
+<p>注：不同于Rademacher复杂度，增长函数不依赖于样本的分布。</p>
+<p>下面给出增长函数和Rademacher复杂度的关系。首先给出 Massart 定理。</p>
+<blockquote>
+<p>定理3： (Massart定理) : 令 $A\in\mathbb R^m$ 为一个有限的集合，记 $r=\max_{X\in A}|X|_2 $，那么以下不等式成立：</p>
+<script type="math/tex; mode=display">
+E_\sigma \left(\frac1m\sup_{x\in A}\sum_{i=1}^m\sigma_ix_i\right)\le \frac{r\sqrt{2\log|A|}}{m}\tag{22}</script></blockquote>
+<p>这里的 $\sigma _i$ 围为取值为 $\{+1,-1\}$ 的独立均匀随机变量，$x_1,\cdots,x_m$ 为向量 $x$ 的各个成分。</p>
+<p>为证明这个定理，需要用到 Hoeffding 引理。</p>
+<blockquote>
+<p>引理2：(Hoeffding 引理)：令 $a\le X\le b$ 为期望 $E(X)=0$ 的随机变量。那么，对于所有 $t&gt;0$，以下不等式成立</p>
+<script type="math/tex; mode=display">
+E[\exp (t X)] \leq \exp \left(\frac{t^{2}(b-a)^{2}}{8}\right)</script></blockquote>
+<p>下面给出这个定理的证明：</p>
+<p>对任意 $t&gt;0$，使用Jensen不等式可以得到</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\left.\exp \left(t \underset{\sigma}E{\left[\sup _{x \in A}\right.} \sum_{i=1}^{m} \sigma_{i} x_{i}\right]\right) & \leq \underset{\sigma}{E}\left[\exp \left(t \sup _{x \in A} \sum_{i=1}^{m} \sigma_{i} x_{i}\right)\right] \\
+&=\underset{\sigma}{E}\left[\sup _{x \in A} \exp \left(\sum_{i=1}^{m} t \sigma_{i} x_{i}\right)\right] \\
+& \leq \sum_{x \in A} E\left[\exp \left(\sum_{i=1}^{m} t \sigma_{i} x_{i}\right)\right]
+\end{aligned}\tag{23}</script></blockquote>
+<p>由 $\sigma_i$ 的独立性和 Hoeffding 引理可得</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\left.\exp \left(t \underset{\sigma}E{\left[\sup _{x \in A}\right.} \sum_{i=1}^{m} \sigma_{i} x_{i}\right]\right) & \leq \sum_{x \in A} \prod_{i=1}^{m} \underset{\sigma_{i}}E{\left[\exp \left(t \sigma_{i} x_{i}\right)\right]} \\
+& \leq \sum_{x \in A} \prod_{i=1}^{m} \exp \left[\frac{t^{2}\left(2 x_{i}\right)^{2}}{8}\right] \\
+&=\sum_{x \in A} \exp \left[\frac{t^{2}}{2} \sum_{i=1}^{m} x_{i}^{2}\right] \\
+& \leq \sum_{x \in A} \exp \left[\frac{t^{2} r^{2}}{2}\right]\\
+&=|A| e^{\frac{t^{2} r^{2}}{2}}
+\end{aligned}\tag{24}</script></blockquote>
+<p>再在两边取 $\log$ 并除以 $t$ 可得</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\underset{\sigma}E{\left[\sup _{x \in A}\sum_{i=1}^{m} \sigma_{i} x_{i}\right]}\le  \frac{\log|A|}{t}+\frac{tr^2}{2}\tag{25}</script></blockquote>
+<p>对所有 $t&gt;0$ 均成立，因此令 $t=\frac{\sqrt{2\log|A|}}{r}$ 可以使右边的式子最小，即</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\underset{\sigma}E{\left[\sup _{x \in A}\sum_{i=1}^{m} \sigma_{i} x_{i}\right]}\le r\sqrt{2\log|A|}\tag{26}</script></blockquote>
+<p>两边同时除以 $m$ 即证毕。</p>
+<blockquote>
+<p>推论2：令 $\mathcal H$ 为取值为 $\{+1,-1\}$ 的函数族，那么以下不等式成立</p>
+<script type="math/tex; mode=display">
+R_m(\mathcal H)\le \sqrt{\frac{2\log\Pi_\mathcal H(m)}{m}}</script></blockquote>
+<p>证明：</p>
+<p>对于固定的样本 $D=(x_1,\cdots,x_m)$，定义 $\mathcal H_D$ 为</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\left.\mathcal H_{D}=\left\{\left(h\left(x_{1}\right), \ldots, h\left(x_{m}\right)\right)\right)^{T}: h \in \mathcal H\right\}</script></blockquote>
+<p>由于 $h(x)$ 取值为 $\{+1,-1\}$，所有对 $\forall u\in\mathcal H_D$，有 $|u|_2\le \sqrt m$，并且由于 $\mathcal H_D=\Pi_\mathcal H(D)$，所以 $|\mathcal H_D|\le \Pi_{\mathcal H}(m)$</p>
+<p>由 Massart 定理有</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+R_{m}(\mathcal H) &=\underset{D}{E}\left[\underset{\sigma}{E}\left[\sup _{u \in \mathcal H_D} \frac{1}{m} \sum_{i=1} \sigma_{i} u_{i}\right]\right] \\
+& \leq \underset{D}{E}\left[\frac{\sqrt{m} \sqrt{2 \log \left|\mathcal H_D\right|}}{m}\right] \\
+&\leq \underset{D}{E}\left[\frac{\sqrt{m} \sqrt{2 \log \Pi_{\mathcal H}(m)}}{m}\right] \\&\leq \sqrt{\frac{2 \log \Pi_{\mathcal H}(m)}{m}}
+\end{aligned}\tag{27}</script></blockquote>
+<p>证毕。</p>
+<p>因此结合定理2和推论2有</p>
+<blockquote>
+<script type="math/tex; mode=display">
+R(h)\le\hat R(h)+\sqrt{\frac{2 \log \Pi_{\mathcal H}(m)}{m}}+\sqrt{\frac{\log(1/\delta)}{2m}}\tag{28}</script></blockquote>
+<h1 id="VC维"><a href="#VC维" class="headerlink" title="VC维"></a>VC维</h1><p>先给出两个基本概念</p>
+<blockquote>
+<ol>
+<li>对于二分类问题，$\mathcal H$ 中的假设对 $D$ 中示例进行赋值得到的结果称为对 $D$ 的一种对分。</li>
+<li>若假设空间 $\mathcal H$ 能实现示例集 $D$ 上的所有对分，即 $\Pi_\mathcal H(m)=2^m$，则称示例集 $D$ 能被假设空间 $\mathcal H$ 打散。</li>
+</ol>
+</blockquote>
+<p>下面给出VC维的定义</p>
+<blockquote>
+<p>定义4：假设空间 $\mathcal H$ 的<strong>VC维</strong>是能被 $\mathcal H$ 打散的最大示例集的大小，即</p>
+<script type="math/tex; mode=display">
+VC(\mathcal H)=\max\{m:\Pi_{\mathcal H}(m)=2^m\}\tag{29}</script></blockquote>
+<p>显然VC维的定义与数据分布 $\mathcal D$ 无关</p>
+<p>下面给两个例子：</p>
+<ol>
+<li>令 $\mathcal H$ 表示 $n$ 维实平面上所有线性划分构成的集合，$\mathcal X=\mathbb R^n$，则假设空间 $\mathcal H$ 的VC维为 $n+1$。</li>
+<li>函数类 $sin\alpha x$ 的VC维是无穷。</li>
+</ol>
+<p>下面简单证明例子1.</p>
+<p>由于 $\mathcal H$ 为所有线性化分构成的集合，即对任意 $h\in\mathcal H$，存在 $w,b$ 满足 $y=wx+b$，使得 $\operatorname{sign}(y)=h(x)$。为方便起见，令 $x’=(x,1)^T$ , $w’=(w,b)$，则 $h(x)=w’x’$，假设样本数量为 $n+1$，由于矩阵 $X=(x_1’,x_2’,\cdots,x_m’)$ 为 $(n+1)\times(n+1)$ 矩阵，则对于任意的 $y=(y_1,y_2,\cdots,y_m)$，只要矩阵 $X$ 可逆，就一定存在 $w’$ 满足 $w’X=y$。即对于这 $n+1$ 个点的 $2^{n+1}$ 种分类，总能被打散，因此 $VC(\mathcal H)\ge n+1$。</p>
+<p>当取 $n+2$ 个点时，矩阵 $X$ 为 $(n+1)\times(n+2)$ 维，因此 $x_i’,i=1,2,\cdots,n+1$ 为线性相关的，即存在不全为 $0$ 的 $\alpha_i,i=1,2,\cdots,n+1$，使得 $\sum_{i=1}^{n+1}\alpha_ix_i’=0$，不妨设 $\alpha_{n+1}\neq 0$ ， 则 $x_{n+1}’=-\frac 1{\alpha_{n+1}}\sum_{i=1}^n\alpha_ix_i’$，令 $h(x_i)=\operatorname{sign}(-\frac{\alpha_i}{\alpha_{n+1}})$，$h(x_{n+1})=-1$，由于 $h(x_i)=\operatorname{sign}(w’x_i’)=\operatorname {sign}(-\frac{\alpha_i}{\alpha_{n+1}})$，即 $w’x’_i$ 与 $-\frac{\alpha_i}{\alpha_{n+1}}$ 同号，所以 $h(x_{n+1})=\operatorname {sign}(w’x_{n+1}’)=\operatorname {sign}(-\frac {w’}{\alpha_{n+1}}\sum_{i=1}^n\alpha_ix_i’)=1$ ,矛盾。所以 $VC(\mathcal H)&lt;n+2$。</p>
+<p>下面的引理将VC维和增长函数联系起来</p>
+<blockquote>
+<p>定理4：(Sauer引理) 若假设空间 $\mathcal H$ 的VC维为 $d$ ，则对任意 $m\in N$ 有</p>
+<script type="math/tex; mode=display">
+\Pi_{\mathcal H}(m)\le \sum_{i=0}^d\left(\begin{array}{c}
+m \\
+i
+\end{array}\right)\tag{30}</script></blockquote>
+<p>证明：</p>
+<p>利用数学归纳法来证明。</p>
+<p>首先，当 $m=1,d=1$ 或 $m=1,d=0$ 时，不等式显然成立。</p>
+<p>假设定理对 $(m-1,d-1)$ 和 $(m-1,d)$ 成立。令 $D=\{x_1,x_2,\cdots,x_m\}$， $D’=\{x_1,x_2,\cdots,x_{m-1}\}$，且令 $\mathcal H_D=\{(h(x_1),\cdots,h(x_m)):h\in\mathcal H\}$，$\mathcal H_{D’}=\{(h(x_1),\cdots,h(x_{m-1})):h\in\mathcal H\}$。</p>
+<p>由于假设 $h$ 的取值为 $\{+1,-1\}$，因此任何在 $\mathcal H_{D’}$ 中出现的元素都将在 $\mathcal H_D$ 中出现一到两次。令 $\mathcal H_{D|D’}$ 为 $\mathcal H_D$ 中出现两次的 $\mathcal H_{D’}$ 中元素组成的集合，即</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}\mathcal H_{D|D'}=&\{(y_1,\cdots,y_{m-1})\in\mathcal H_{D'}|\exists h,h'\in\mathcal H,\\
+&\qquad(h(x_i)=h'(x_i)=y_i)\cap(h(x_m)\neq h'(x_m)),i=1,\cdots,m-1\}\end{aligned}\tag{31}</script></blockquote>
+<p>因此</p>
+<blockquote>
+<script type="math/tex; mode=display">
+|\mathcal H_D|=|\mathcal H_{D'}|+|\mathcal H_{D|D'}|\tag{32}</script></blockquote>
+<p>由假设可知</p>
+<blockquote>
+<script type="math/tex; mode=display">
+|\mathcal H_{D'}|\le \Pi_{\mathcal H}(m-1)\le \sum_{i=0}^d\left(\begin{array}{c}
+m-1 \\
+i
+\end{array}\right)\tag{33}</script></blockquote>
+<p>由于 $\mathcal H$ 的VC维为 $d$，因此 $\mathcal H_{D|D’}$ 的VC维最大为 $d-1$ ，于是</p>
+<blockquote>
+<script type="math/tex; mode=display">
+|\mathcal H_{D|D'}|\le \Pi_{\mathcal H}(m-1)\le \sum_{i=0}^{d-1}\left(\begin{array}{c}
+m-1 \\
+i
+\end{array}\right)\tag{34}</script></blockquote>
+<p>由 (32)(33)(34) 可得</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\left|\mathcal{H}_{D}\right| & \leqslant \sum_{i=0}^{d}\left(\begin{array}{c}
+m-1 \\
+i
+\end{array}\right)+\sum_{i=0}^{d-1}\left(\begin{array}{c}
+m-1 \\
+i
+\end{array}\right) \\
+&=\sum_{i=0}^{d}\left(\left(\begin{array}{c}
+m-1 \\
+i
+\end{array}\right)+\left(\begin{array}{c}
+m-1 \\
+i-1
+\end{array}\right)\right) \\
+&=\sum_{i=0}^{d}\left(\begin{array}{c}
+m \\
+i
+\end{array}\right)
+\end{aligned}\tag{35}</script></blockquote>
+<p>由上述定理可以得到增长函数的上界。</p>
+<blockquote>
+<p>推论3：若假设空间 $\mathcal H$ 的VC维为 $d$ ，则对任意整数 $m\ge d$ 有</p>
+<script type="math/tex; mode=display">
+\Pi_{\mathcal H}(m)\le \left(\frac{e\cdot m}{d}\right)^d\tag{36}</script></blockquote>
+<p>证明：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\Pi_{\mathcal{H}}(m) & \leqslant \sum_{i=0}^{d}\left(\begin{array}{c}
+m \\
+i
+\end{array}\right) \\
+& \leqslant \sum_{i=0}^{d}\left(\begin{array}{c}
+m \\
+i
+\end{array}\right)\left(\frac{m}{d}\right)^{d-i} \\
+&=\left(\frac{m}{d}\right)^{d} \sum_{i=0}^{d}\left(\begin{array}{c}
+m \\
+i
+\end{array}\right)\left(\frac{d}{m}\right)^{i} \\
+& \leqslant\left(\frac{m}{d}\right)^{d} \sum_{i=0}^{m}\left(\begin{array}{c}
+m \\
+i
+\end{array}\right)\left(\frac{d}{m}\right)^{i} \\
+&=\left(\frac{m}{d}\right)^{d}\left(1+\frac{d}{m}\right)^{m} \\
+& \leqslant\left(\frac{e \cdot m}{d}\right)^{d}
+\end{aligned}\tag{37}</script></blockquote>
+<p>由式 (28) 和推论3可以得到</p>
+<blockquote>
+<p>定理5：若假设空间 $\mathcal H$ 的VC维为 $d$，则对任意 $m&gt;d,0&lt;\delta&lt;1$，至少以概率 $1-\delta$，以下不等式对所有 $h\in\mathcal H$ 都成立：</p>
+<script type="math/tex; mode=display">
+\mathcal{R}(h) \leq \widehat{\mathcal{R}}(h)+\sqrt{\frac{2 d \log \frac{e m}{d}}{m}}+\sqrt{\frac{\log \frac{1}{\delta}}{2 m}}</script><p>我们可以将上式简写成</p>
+<script type="math/tex; mode=display">
+R(h) \leq \widehat{R}(h)+O(\sqrt{\left.\frac{\log (m / d)}{m / d}\right)}</script></blockquote>
+<p>即上界由 $m/d$ 决定，$m$ 越大上界越小， $d$ 越大 $\mathcal H$ 越复杂。</p>
+<hr>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p>[1] 李航. 统计学习方法. 清华大学出版社，2019</p>
+<p>[2] 周志华. 机器学习. 清华大学出版社，2016.1</p>
+<p>[3] Chen L P . Mehryar Mohri, Afshin Rostamizadeh, and Ameet Talwalkar: Foundations of machine learning, second edition[J]. Statal Papers, 2019, 60.</p>
+
+        </div>
+        
+            <div style="text-align:center;color: rgb(125,125,125);font-size:14px;">
+               -------------本文结束 感谢您的阅读-------------
+            </div>
+        
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>文章作者:</span>
+                        <span>会飞的猪</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>文章链接:</span>
+                        <span><a href="http://shellyandliu.github.io/2020/07/16/Rademacher%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%92%8CVC%E7%BB%B4/">http://shellyandliu.github.io/2020/07/16/Rademacher%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%92%8CVC%E7%BB%B4/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>版权声明:</span>
+                        <span>本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC-BY-NC-4.0</a> ， 转载请注明来自 会飞的猪！</span>
+                    </p>
+                
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>标签:</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E8%AE%A1%E7%AE%97%E5%AD%A6%E4%B9%A0%E7%90%86%E8%AE%BA/"> <i class="iconfont icon-tags"></i> 计算学习理论</a>
+                    
+                        <a href="/tags/Rademacher%E5%A4%8D%E6%9D%82%E5%BA%A6/"> <i class="iconfont icon-tags"></i> Rademacher复杂度</a>
+                    
+                        <a href="/tags/VC%E7%BB%B4/"> <i class="iconfont icon-tags"></i> VC维</a>
+                    
+                        <a href="/tags/%E5%A2%9E%E9%95%BF%E5%87%BD%E6%95%B0/"> <i class="iconfont icon-tags"></i> 增长函数</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">返回</a>
+                <span> /  </span>
+                <a href="/">首页</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2020/07/15/PAC%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6/">PAC学习框架</a>
+            
+        </section>
+        <div class="post-content">
+            <section style="font-size: 20px;font-weight: 700;margin-bottom: 10px;margin-top: 20px;">
+                <i class="iconfont icon-comments"></i>
+                <span>
+                    评论
+                </span>
+            </section>
+        </div>
+        
+            <section id="comments" class="comments">
+              <style>
+                .comments{margin:0px;padding:10px;background:#fff}
+                @media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#fff}}
+              </style>
+              <div class="valine_comment"></div>
+<!--����js����</body>֮ǰ���뼴��-->
+<!--Leancloud ������:-->
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<!--Valine �ĺ��Ĵ����-->
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+      el: '.valine_comment',
+      app_id: 'bCvyxhtL2V59mmqAp81lAGob-gzGzoHsz#Leancloud应用的appId',
+      app_key: 'J4zVKQfUjhToGJwBfLcoOHOv',
+      placeholder: '欢迎大家评论交流~',
+      notify: 'true',
+      verify: 'true',
+    });
+</script>
+            </section>
+        
+        
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 会飞的猪 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="会飞的猪">
+
+
+
+
+
+<link rel="stylesheet" href="/fonts/iconfont_new/iconfont.css">
+
+
+<title>PAC学习框架 | 会飞的猪</title>
+
+
+
+    <link rel="icon" href="/image/longmao.jpg">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+            <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+        
+    
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">会飞的猪</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">文章</a>
+                
+                    <a class="menu-item" href="/categories">分类</a>
+                
+                    <a class="menu-item" href="/tags">标签</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">会飞的猪</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">文章</a>
+                
+                    <a class="menu-item" href="/categories">分类</a>
+                
+                    <a class="menu-item" href="/tags">标签</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">展开目录</a>
+        <a onclick="go_top()">回到顶部</a>
+        <a onclick="go_bottom()">到达底部</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">PAC学习框架</h1>
+            
+                <div class="post-meta">
+                    
+                        作者: <a itemprop="author" rel="author" href="/">会飞的猪</a>
+                    
+
+                    
+                        <span class="post-time">
+                        时间: <a href="#">七月 15, 2020&nbsp;&nbsp;13:32:11</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    类别:
+                            
+                                <a href="/categories/%E8%AE%A1%E7%AE%97%E5%AD%A6%E4%B9%A0%E7%90%86%E8%AE%BA/">-计算学习理论</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                            <span class="post-meta-item-icon">
+                              <i class="fa fa-keyboard-o"></i>
+                              <span class="post-meta-item-text">  字数统计: </span>
+                              <span class="post-count"><a href="#">2.1k字</a></span>
+                            </span>
+                        </span>
+                        <span class="post-time">
+                            <span class="post-meta-item-icon">
+                            <i class="fa fa-hourglass-half"></i>
+                            <span class="post-meta-item-text">  阅读时长: </span>
+                            <span class="post-count"><a href="#">9分</a></span>
+                            </span>
+                        </span>
+                    
+
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="基本定义"><a href="#基本定义" class="headerlink" title="基本定义"></a>基本定义</h1><p>给出以下定义：</p>
+<blockquote>
+<ol>
+<li>定义 $\mathcal X$ 表示<strong>输入空间</strong>，其中 $\mathcal X$ 中的所有样本都服从一个隐含未知的分布 $\mathcal D$。定义 $\mathcal Y$ 表示<strong>输出空间</strong>。在下列讨论中，我们始终假设问题为二分类问题，即 $\mathcal Y$ 为 $\{+1,-1\}$。</li>
+<li>称从 $\mathcal X$ 到 $\mathcal Y$ 的映射 $c:\mathcal X\to\mathcal Y$ 为<strong>概念（concept）</strong>。</li>
+<li>令 $\mathcal C$ 表示从 $\mathcal X$ 到 $\mathcal Y$ 所有概念的集合，称为<strong>概念类</strong>。</li>
+<li>给定学习算法 $\mathcal L$ ，它所考虑的所有可能概念的集合称为<strong>假设空间</strong>，用符号 $\mathcal H$ 表示。</li>
+<li>设给定的样例集为 $D=\{(x_1,y_1),(x_2,y_2),\cdots,(x_m,y_m)\}$，其中所有样本都是独立的从分布 $\mathcal D$ 上采样得到。</li>
+</ol>
+</blockquote>
+<p>理想情况下，我们希望找到一个学习算法 $\mathcal L$，他能学习到一个概念 $c$，使得对任意 $x\in\mathcal X$，$c(x)$ 决定了 $x$ 的真实标记，但这是几乎不可能的，一是在实际中，我们仅能获取一个有限数量的样本。我们很难根据有限的样本，推算出真实复杂的映射关系。二是受限于假设空间的大小，即使是有限的样本，在假设空间中也可能并不存在映射 $h(x_i)=y_i,i=1,2,\cdots,m。$三是从分布 $\mathcal D$ 采样具有一定的偶然性，即便同样大小的不同训练集，学得的结果也可能不同。因此不要求精确的学习到目标概念，而是在假设空间 $H$ 中选择一个最好的 $h$ ，使得它能最接近目标概念 $c$ 。</p>
+<p>下面给出两个衡量 $h$ 与目标概念 $c$ 接近程度的定义：</p>
+<blockquote>
+<p>定义1：给定假设 $h\in\mathcal H$ 和目标概念 $c\in C$，在给定样例集 $D$ 的情况下，定义泛化误差为：</p>
+<script type="math/tex; mode=display">
+R(h)=\operatorname{P}_{x\sim\mathcal D}(h(x)\neq c(x))=E_{x\sim \mathcal D}[I(h(x)\neq c(x))]\tag{1}</script><p>定义2：给定假设 $h\in\mathcal H$ 和目标概念 $c\in C$，在给定样例集 $D$ 的情况下，定义经验误差为：</p>
+<script type="math/tex; mode=display">
+\hat R(h)=\frac 1m \sum_{i=1}^m I(h(x)\neq c(x))\tag{2}</script></blockquote>
+<p>显然，泛化误差是经验误差在分布 $\mathcal D$ 下的期望值。</p>
+<p>下面定义PAC学习：</p>
+<blockquote>
+<p>定义3：<strong>PAC辨识</strong>：对任意 $0&lt;\epsilon,\delta&lt;1$，和所有 $c\in \mathcal C$ 和分布 $\mathcal D$ ，若存在学习算法 $\mathcal  L$ , 存在假设 $h\in\mathcal H$ 满足 </p>
+<script type="math/tex; mode=display">
+P(R(h)\le \epsilon)\ge 1-\delta,</script><p>则称学习算法 $\mathcal L$ 能从假设空间 $\mathcal H$ 中PAC辨识概念类 $\mathcal C$。</p>
+<p>定义4：<strong>PAC可学习</strong>：令 $m$ 表示从分布 $\mathcal D$ 中独立同分布采样得到的样本数，对任意 $0&lt;\epsilon,\delta&lt;1$，对所有分布 $\mathcal D$ ，若存在学习算法 $\mathcal L$ 和多项式函数 $\operatorname {poly}(\cdot,\cdot,\cdot,\cdot)$，使得对于任意 $m\ge \operatorname{poly(1/\epsilon,1/\delta,size(x),size(c))}$，$\mathcal L$ 能从假设空间 $\mathcal H$ 中PAC辨识概念类 $\mathcal C$，则称概念类 $\mathcal C$ 对假设空间 $\mathcal H$ 是PAC可学习的。</p>
+</blockquote>
+<p>注：PAC可学习的定义上，并没有对分布做任何限制，PAC可学习是定义在概念类 $\mathcal C$ 上的，而不是具体的某个概念 $c$。</p>
+<p>PAC学习中，一个很重要的地方是假设空间 $\mathcal H$ 的复杂度。若在PAC学习中假设空间和概念类完全相同，即 $\mathcal H=\mathcal C$ 则称为恰PAC学习，但这种要求并不实际，因为现实中对概念类 $\mathcal C$ 一无所知。因此主要研究 $\mathcal H\neq \mathcal C$ 的情况。下面讨论假设空间有限的情况。</p>
+<h1 id="有限假设空间下的泛化误差上界"><a href="#有限假设空间下的泛化误差上界" class="headerlink" title="有限假设空间下的泛化误差上界"></a>有限假设空间下的泛化误差上界</h1><p>下面给出一致性的定义：</p>
+<blockquote>
+<p>定义5：如果一个算法产生的假设 $h$ 不会在训练样本 $D$ 上产生错误，则称 $h$ 相对于样本 $D$ 是一致的。</p>
+</blockquote>
+<h2 id="一致性条件下的泛化误差上界"><a href="#一致性条件下的泛化误差上界" class="headerlink" title="一致性条件下的泛化误差上界"></a>一致性条件下的泛化误差上界</h2><p>在一致性的条件，我们有下列的泛化误差上界的定理。</p>
+<blockquote>
+<p>定理1：设假设空间为有限个函数的集合。假设对任意的目标概念 $c\in\mathcal H$ 以及任意一个独立同分布的样本 $D$ ，算法 $\mathcal L$ 总是返回一致性的假设 $h:\hat R(h)=0$。那么对于任意的 $\epsilon,\delta&gt;0$，如果 $m\ge \frac 1\epsilon(\log|\mathcal H|+\log\frac1\delta)$ 成立，那么下列不等式成立：</p>
+<script type="math/tex; mode=display">
+\operatorname{P}(R(h)\le\epsilon)\ge 1-\delta</script><p>同样的，可以得到泛化误差上界，即对任意的 $\epsilon,\delta&gt;0$， $R(h)\le\frac 1m(\log|\mathcal H|+\log \frac1\delta)$ 以概念 $1-\delta$ 的情况发生。</p>
+</blockquote>
+<p>证明：</p>
+<p>对任意的 $h\in\mathcal H$ ，若 $h$ 的泛化误差大于 $\epsilon$，则在分布 $\mathcal D$ 上堆积采样得到的样本 $(x,y)$ 有：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+P(h(x)=y)=1-P(h(x)\neq y)=1-R(h)\le 1-\epsilon\tag{3}</script></blockquote>
+<p>由于样本集 $D$ 包含 $m$ 个从 $\mathcal D$ 中随机采样的样本。因此 $h$ 与样本集 $D$ 一致的概率为</p>
+<blockquote>
+<script type="math/tex; mode=display">
+P(\bigcap_{i=1}^m(h(x_i)=y_i))=(1-P(h(x)\neq y))^m<(1-\epsilon)^m\tag{4}</script></blockquote>
+<p> 由假设总是存在满足一致性条件的 $h$ ，则</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}&P(\exists h\in\mathcal H:\hat{R}(h)=0\cup R(h)>\epsilon)\\
+=&P(\bigcup_{h\in\mathcal H}(\hat{R}(h)=0\cup R(h)>\epsilon))\\
+\le&\sum_{h\in\mathcal H}P(\hat{R}(h)=0\cup R(h)>\epsilon)\\
+\le &|\mathcal H|(1-\epsilon)^m\\
+\le &|\mathcal H|\exp(-m\epsilon)
+
+\end{aligned}\tag{5}</script></blockquote>
+<p>令 (5) 式不大于 $\delta$ ，即 $|\mathcal H|\exp(-m\epsilon)\le \delta$，可得</p>
+<blockquote>
+<script type="math/tex; mode=display">
+m\ge\frac1\epsilon(\log|\mathcal H|+\log\frac 1\delta)\tag{6}</script></blockquote>
+<p>得证。</p>
+<h2 id="非一致性条件下的泛化误差上界"><a href="#非一致性条件下的泛化误差上界" class="headerlink" title="非一致性条件下的泛化误差上界"></a>非一致性条件下的泛化误差上界</h2><p>非一致性条件下的泛化误差上界需要用到 Hoeffding 不等式：</p>
+<blockquote>
+<p><strong>Hoeffding 不等式</strong>：若 $X_1,\cdots,X_m$ 为取值为 $[a_i,b_i]$ 的独立随机变量。$\bar{X}$ 为 $X_1,\cdots,X_m$ 的经验均值 ，即 $\bar{X}=\frac1m\sum_{i=1}^mX_i$,则对于任意的 $\varepsilon$，下列不等式成立：</p>
+<script type="math/tex; mode=display">
+P(\bar{X}-E(\bar{X})\ge \varepsilon)\le \exp\left(-\frac{2m^2\varepsilon^2}{\sum_{i=1}^m(b_i-a_i)^2}\right)\\
+P(\bar{X}-E(\bar{X})\le- \varepsilon)\le \exp\left(-\frac{2m^2\varepsilon^2}{\sum_{i=1}^m(b_i-a_i)^2}\right)</script></blockquote>
+<p>由 Hoeffding 不等式可以得到以下推论</p>
+<blockquote>
+<p>推论1：固定 $\epsilon&gt;0$，对于任意的假设 $h\in\mathcal H:\mathcal X\to\{0,1\}$，以下不等式成立</p>
+<script type="math/tex; mode=display">
+P(\hat{R}(h)-R(h)\ge\epsilon)\le \exp(-2m\epsilon^2),\\
+P(\hat{R}(h)-R(h)\le-\epsilon)\le \exp(-2m\epsilon^2),\\</script></blockquote>
+<p>事实上，令 $X_i=I(h(x_i)\neq c(x_i))$，则 </p>
+<script type="math/tex; mode=display">
+\hat R(h)=\frac1m\sum_{i=1}^mI(h(x_i)\neq c(x_i))=\frac 1m\sum_{i=1}^mX_i\tag{7}</script><p>而 $E(\hat R(h))=R(h)$，运用Hoeffding不等式即可。</p>
+<blockquote>
+<p>定理2：若 $\mathcal H$ 为有限假设集合，那么对于任意的 $\delta&gt;0$，以下不等式至少以概率 $1-\delta$ 成立</p>
+<script type="math/tex; mode=display">
+\forall h\in\mathcal H,R(h)\le \hat{R}(h)+\sqrt{\frac{\log|\mathcal H|+\log\frac 2\delta}{2m}}</script></blockquote>
+<p>证明：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+P(\exists h\in\mathcal H:\hat R(h)-R(h)>\epsilon)=&P\left(\bigcup_{h\in\mathcal H}\{\hat R(h)-R(h)>\epsilon\}\right)\\
+\le&\sum_{h\in\mathcal H}P(\hat R(h)-R(h)>\epsilon)\\
+\le&|\mathcal H|\exp(-2m\epsilon^2)
+\end{aligned}\tag{8}</script></blockquote>
+<p>令 $\delta=|\mathcal H|\exp(-2m\epsilon^2)$，则证毕。</p>
+<p>注：从上述结果可以看出，当 $|\mathcal H|$ 越大，经验误差的上界越小，但是 $\sqrt{\frac{\log|\mathcal H|+\log\frac 2\delta}{2m}}$ 越大。当样本数 $m$ 越大时，$\sqrt{\frac{\log|\mathcal H|+\log\frac 2\delta}{2m}}$ 越小，但经验误差越大。这是符合我们的直观的。</p>
+<p>显然，当 $c\notin \mathcal H$ 时，学习算法 $\mathcal L$ 无法学习目标概念 $c$ 的 $\epsilon $ 近似。但是其中必存在一个泛化误差最小的假设，因此找出此假设的 $\epsilon$ 近似也是一个较好的选择。因此给出下列定义：</p>
+<blockquote>
+<p>定义6：<strong>不可知PAC可学习</strong>：令 $m$ 表示从分布 $\mathcal D$ 中独立同分布采样得到的样本数，对任意 $0&lt;\epsilon,\delta&lt;1$，对所有分布 $\mathcal D$ ，若存在学习算法 $\mathcal L$ 和多项式函数 $\operatorname{poly}(\cdot,\cdot,\cdot,\cdot)$，使得对于任意 $m\ge \operatorname{poly(1/\epsilon,1/\delta,size(x),size(c))}$，$\mathcal L$ 能从假设空间 $\mathcal H$ 中输出满足式 (9) 的假设 $h$：</p>
+<script type="math/tex; mode=display">
+P(R(h)-\min_{h'\in\mathcal H}R(h')\le\epsilon)\ge1-\delta\tag{9}</script><p>则称假设空间 $\mathcal H$ 是不可知PAC可学习的。</p>
+</blockquote>
+<hr>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p>[1] 李航. 统计学习方法. 清华大学出版社，2019</p>
+<p>[2] 周志华. 机器学习. 清华大学出版社，2016.1</p>
+<p>[3] Chen L P . Mehryar Mohri, Afshin Rostamizadeh, and Ameet Talwalkar: Foundations of machine learning, second edition[J]. Statal Papers, 2019, 60.</p>
+
+        </div>
+        
+            <div style="text-align:center;color: rgb(125,125,125);font-size:14px;">
+               -------------本文结束 感谢您的阅读-------------
+            </div>
+        
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>文章作者:</span>
+                        <span>会飞的猪</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>文章链接:</span>
+                        <span><a href="http://shellyandliu.github.io/2020/07/15/PAC%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6/">http://shellyandliu.github.io/2020/07/15/PAC%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>版权声明:</span>
+                        <span>本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC-BY-NC-4.0</a> ， 转载请注明来自 会飞的猪！</span>
+                    </p>
+                
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>标签:</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E8%AE%A1%E7%AE%97%E5%AD%A6%E4%B9%A0%E7%90%86%E8%AE%BA/"> <i class="iconfont icon-tags"></i> 计算学习理论</a>
+                    
+                        <a href="/tags/PAC%E5%AD%A6%E4%B9%A0/"> <i class="iconfont icon-tags"></i> PAC学习</a>
+                    
+                        <a href="/tags/%E6%B3%9B%E5%8C%96%E8%AF%AF%E5%B7%AE%E4%B8%8A%E7%95%8C/"> <i class="iconfont icon-tags"></i> 泛化误差上界</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">返回</a>
+                <span> /  </span>
+                <a href="/">首页</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2020/07/16/Rademacher%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%92%8CVC%E7%BB%B4/">Rademacher复杂度和VC维</a>
+            
+            
+            <a class="next" rel="next" href="/2020/07/13/%E5%86%B3%E7%AD%96%E6%A0%91/">决策树</a>
+            
+        </section>
+        <div class="post-content">
+            <section style="font-size: 20px;font-weight: 700;margin-bottom: 10px;margin-top: 20px;">
+                <i class="iconfont icon-comments"></i>
+                <span>
+                    评论
+                </span>
+            </section>
+        </div>
+        
+            <section id="comments" class="comments">
+              <style>
+                .comments{margin:0px;padding:10px;background:#fff}
+                @media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#fff}}
+              </style>
+              <div class="valine_comment"></div>
+<!--����js����</body>֮ǰ���뼴��-->
+<!--Leancloud ������:-->
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<!--Valine �ĺ��Ĵ����-->
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+      el: '.valine_comment',
+      app_id: 'bCvyxhtL2V59mmqAp81lAGob-gzGzoHsz#Leancloud应用的appId',
+      app_key: 'J4zVKQfUjhToGJwBfLcoOHOv',
+      placeholder: '欢迎大家评论交流~',
+      notify: 'true',
+      verify: 'true',
+    });
+</script>
+            </section>
+        
+        
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 会飞的猪 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="会飞的猪">
+
+
+
+
+
+<link rel="stylesheet" href="/fonts/iconfont_new/iconfont.css">
+
+
+<title>AdaBoost算法的理论分析 | 会飞的猪</title>
+
+
+
+    <link rel="icon" href="/image/longmao.jpg">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+            <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+        
+    
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">会飞的猪</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">文章</a>
+                
+                    <a class="menu-item" href="/categories">分类</a>
+                
+                    <a class="menu-item" href="/tags">标签</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">会飞的猪</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">文章</a>
+                
+                    <a class="menu-item" href="/categories">分类</a>
+                
+                    <a class="menu-item" href="/tags">标签</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">展开目录</a>
+        <a onclick="go_top()">回到顶部</a>
+        <a onclick="go_bottom()">到达底部</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">AdaBoost算法的理论分析</h1>
+            
+                <div class="post-meta">
+                    
+                        作者: <a itemprop="author" rel="author" href="/">会飞的猪</a>
+                    
+
+                    
+                        <span class="post-time">
+                        时间: <a href="#">七月 23, 2020&nbsp;&nbsp;11:07:31</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    类别:
+                            
+                                <a href="/categories/%E9%9B%86%E6%88%90%E5%AD%A6%E4%B9%A0/">-集成学习</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                            <span class="post-meta-item-icon">
+                              <i class="fa fa-keyboard-o"></i>
+                              <span class="post-meta-item-text">  字数统计: </span>
+                              <span class="post-count"><a href="#">5.7k字</a></span>
+                            </span>
+                        </span>
+                        <span class="post-time">
+                            <span class="post-meta-item-icon">
+                            <i class="fa fa-hourglass-half"></i>
+                            <span class="post-meta-item-text">  阅读时长: </span>
+                            <span class="post-count"><a href="#">28分</a></span>
+                            </span>
+                        </span>
+                    
+
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="AdaBoost-算法经验误差"><a href="#AdaBoost-算法经验误差" class="headerlink" title="AdaBoost 算法经验误差"></a>AdaBoost 算法经验误差</h1><p>沿用<a href="https://shellyandliu.github.io/2020/07/22/Boosting与Adaboost/">Boosting与AdaBoost</a>文章中的记号，给出以下定理。</p>
+<blockquote>
+<p>定理1：AdaBoost算法的经验误差满足</p>
+<script type="math/tex; mode=display">
+\hat{R}(h) \leq \exp \left[-2 \sum_{t=1}^{T}\left(\frac{1}{2}-\epsilon_{t}\right)^{2}\right]\tag{1}</script><p>更进一步，若存在 $\gamma\le\frac12-\epsilon_t$，对任意的 $t=1,2,\cdots,T$ 成立，则</p>
+<script type="math/tex; mode=display">
+\widehat{R}(h) \leq \exp \left[-2 \gamma^2T\right]\tag{2}</script></blockquote>
+<p>证明：</p>
+<p>首先由经验误差的定义</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\hat{R}(h) =\frac1m\sum_{i=1}^mI(G(x_i)\neq y_i)\le\frac1m\sum_{i=1}^m\exp(-y_iH(x_i))\tag{3}</script></blockquote>
+<p>由于 $Z_t=\frac{\mathbb{E}_{ {x} \sim \mathcal{D}}\left[e^{-y H_{t-1}( {x})}\right]}{\mathbb{E}_{ {x} \sim \mathcal{D}}\left[e^{-y H_{t}( {x})}\right]}$ ，所以对于 $\frac1m\sum_{i=1}^m\exp(-y_iH(x_i))$ 我们有</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\frac1m\sum_{i=1}^m\exp(-y_iH(x_i))=&E_{x\sim\mathcal D}\left(\exp(yH(x))\right)\\
+=&\prod_{t=1}^TZ_t
+\end{aligned}\tag{4}</script></blockquote>
+<p>又由 (2) 式可得</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\prod_{t=1}^{T} Z_{t}=\prod_{t=1}^{T} 2 \sqrt{\epsilon_{t}\left(1-\epsilon_{t}\right)}=\prod_{t=1}^{T} \sqrt{1-4\left(\frac{1}{2}-\epsilon_{t}\right)^{2}} & \leq \prod_{t=1}^{T} \exp \left[-2\left(\frac{1}{2}-\epsilon_{t}\right)^{2}\right] \\
+&=\exp \left[-2 \sum_{t=1}^{T}\left(\frac{1}{2}-\epsilon_{t}\right)^{2}\right]
+\end{aligned}\tag{5}</script></blockquote>
+<p>其中不等式可以由 $1-x\le e^{-x}$ 得到。</p>
+<p>证毕</p>
+<h1 id="AdaBoost-算法泛化误差"><a href="#AdaBoost-算法泛化误差" class="headerlink" title="AdaBoost 算法泛化误差"></a>AdaBoost 算法泛化误差</h1><h2 id="利用VC理论分析泛化误差上界"><a href="#利用VC理论分析泛化误差上界" class="headerlink" title="利用VC理论分析泛化误差上界"></a>利用VC理论分析泛化误差上界</h2><p>设 $\mathcal H$ 为基学习器的假设空间，$\mathcal C_T$ 是 $T$ 个基学习器的线性组合生成的空间，若我们定义函数 $\sigma:R^T\to\{-1,+1\}$ 为 $\sigma(x)\operatorname{sign}(w\cdot x)$，令 $\Sigma_T$ 表示所有这样的 $\sigma$ 函数组成的集合，$\Sigma_T=\{\sigma(x)=\operatorname{sign}(w\cdot x);w\in\mathbb R^T\}$ ，所以 $H(x)=\operatorname{sign}(\sum_{t=1}^T\alpha_th_t(x))$ 就可以表示成 $H(x)=\sigma(h_1(x),h_2(x),\cdots,h_T(x))$，而 $\mathcal C_T$ 可以表示为 $C_{T}=\left\{x \rightarrow \sigma\left(h_{1}(x), h_{2}(x), \cdots ,h_{T}(x)\right): \sigma \in \Sigma_{T} ; h_{1}, \ldots, h_{T} \in H\right\}$</p>
+<p>首先给出下列引理。</p>
+<blockquote>
+<p>引理1：$R^n$ 中的线性阈值函数空间 $\sum_{n}$ 的VC维为 $n$。</p>
+</blockquote>
+<p>该引理的证明见<a href="https://shellyandliu.github.io/2020/07/16/Rademacher复杂度和VC维/">Rademacher复杂度和VC维</a>中的例子。</p>
+<h3 id="有限维假设空间"><a href="#有限维假设空间" class="headerlink" title="有限维假设空间"></a>有限维假设空间</h3><p>我们首先考虑有限维的假设空间，在此假设下，我们有以下引理</p>
+<blockquote>
+<p>引理2：假设 $\mathcal H$ 是有限的，令 $m\ge T\ge 1$，则对任意有 $m$ 个训练集的集合 $D$ ，在空间 $\mathcal C_T$ 下所实现的对分数量的界为</p>
+<script type="math/tex; mode=display">
+\left|\Pi_{\mathcal C_{T}}(S)\right| \leq \Pi_{\mathcal C_{T}}(m) \leq\left(\frac{e m}{T}\right)^{T}|\mathcal H|^{T}\tag{6}</script></blockquote>
+<p>证明：</p>
+<p>令 $D=(x_1,x_2,\cdots,x_m)$，考虑假设 $h_1,h_2,\cdots,h_T\in\mathcal H$ ，对于这些假设我们令 $x’_i=(h_1(x_1),\cdots,h_T(x_i))$，则可以得到一个新的样本集 $D’=(x’_1,x’_2,\cdots,x_m’)$，由于 $\Sigma_T$ 的VC维是 $T$，因此由<a href="https://shellyandliu.github.io/2020/07/16/Rademacher复杂度和VC维/">Rademacher复杂度和VC维</a>的推论3有</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\left|\Pi_{\Sigma_{T}}\left(D^{\prime}\right)\right| \leq\left(\frac{e m}{T}\right)^{T}\tag{7}</script></blockquote>
+<p>又因为 $h_1,h_2,\cdots,h_T$ 的选择方式有 $|\mathcal H|^T$ 种。</p>
+<p>因此引理证毕。</p>
+<p>注：实际上对于Boosting算法，我们相当于进行了两步，一是基函数的选择，总共有 $|\mathcal H|^T$ 种可能性，第二步是线性函数的选择，其中有效的类型有 $|\Pi_{\Sigma_T}(D’)|$ 种。</p>
+<p>我们将引理2和<a href="https://shellyandliu.github.io/2020/07/16/Rademacher复杂度和VC维/">Rademacher复杂度和VC维</a>中的定理4结合可得</p>
+<blockquote>
+<p>定理2：假设AdaBoost有 $T$ 个基学习器 ，且 $m\ge T$ ，若基分类器的假设空间 $\mathcal H$ 为有限空间。 则对于任意的组合分类器 $H$，以至少 $1-\delta$ 的概率有 </p>
+<script type="math/tex; mode=display">
+R(h)\le\hat R(h)+\sqrt{\frac{2T \log\left(\frac{e m}{T}|\mathcal H|\right)}{m}}+\sqrt{\frac{\log(1/\delta)}{2m}}\tag{8}</script></blockquote>
+<p>由于我们在前面已经证明了经验误差 $\hat{R}(h)\le \exp \left[-2 \gamma^2T\right]$，其中  $\gamma\le\frac12-\epsilon_t,t=1,2,\cdots,T$，结合 (28) 有</p>
+<blockquote>
+<script type="math/tex; mode=display">
+R(h)\le e^{\left(-2 \gamma^2T\right)}+O\left(\sqrt{\frac{T \log\left(\frac{ m|\mathcal H|}{T}\right)}{m}}\right)+\sqrt{\frac{\log\left(\frac1\delta\right)}{m}}\tag{9}</script></blockquote>
+<h3 id="无限维假设空间"><a href="#无限维假设空间" class="headerlink" title="无限维假设空间"></a>无限维假设空间</h3><p>同样的，当 $\mathcal H$ 为无限空间的时候，我们有以下引理</p>
+<blockquote>
+<p>引理3：假设 $\mathcal H$ 的VC维为 $d$，令 $m\ge\max\{d,T\}\ge 1$，则对任意有 $m$ 个训练集的集合 $D$ ，在空间 $\mathcal C_T$ 下所实现的对分数量的界为</p>
+<script type="math/tex; mode=display">
+\left|\Pi_{\mathcal C_{T}}(S)\right| \leq \Pi_{\mathcal C_{T}}(m) \leq\left(\frac{e m}{T}\right)^{T}\left(\frac{em}{d}\right)^{dT}\tag{10}</script></blockquote>
+<p>证明：</p>
+<p>对于假设集 $\mathcal H$ 中的每一个元素用来预测数据集 $D$ 最多可实现的对分结果数为 $|\Pi_\mathcal H(S)|$，因此我们对每一种对分结果只取一个假设 $h’$ 构成一个新的假设集 $\mathcal H’$，则 $|\mathcal H’|=|\Pi_\mathcal H(D)|$，且由<a href="https://shellyandliu.github.io/2020/07/16/Rademacher复杂度和VC维/">Rademacher复杂度和VC维</a>的推论3有</p>
+<blockquote>
+<script type="math/tex; mode=display">
+|\mathcal H'|=|\Pi_\mathcal H(D)|\le \left(\frac{em}{d}\right)^d\tag{11}</script></blockquote>
+<p>由于对于每一个 $h\in\mathcal H$ 在样本 $D$ 上产生的对分结果在 $\mathcal H’$ 中存在唯一的 $h’\in\mathcal H’$ 与之对应。因此根据引理2有</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\left|\Pi_{C_{T}}(S)\right| & \leq\left(\frac{e m}{T}\right)^{T}\left|\mathcal H^{\prime}\right|^{T} \\
+& \leq\left(\frac{e m}{T}\right)^{T}\left(\frac{e m}{d}\right)^{dT} 
+\end{aligned}\tag{12}</script></blockquote>
+<p>证毕。</p>
+<p>同样的将引理3和<a href="https://shellyandliu.github.io/2020/07/16/Rademacher复杂度和VC维/">Rademacher复杂度和VC维</a>中的定理4结合可得:</p>
+<blockquote>
+<p>定理3：假设AdaBoost有 $T$ 个基学习器 ，且 $m\ge\max\{d,T\}\ge 1$，若基分类器的假设空间 $\mathcal H$ 的VC维为 $d$。 则对于任意的组合分类器 $H$，以至少 $1-\delta$ 的概率有 </p>
+<script type="math/tex; mode=display">
+\begin{aligned}R(h)\le&\hat R(h)+\sqrt{\frac{2T \log\left(\frac{e m}{T}\right)}{m}}+\sqrt{\frac{2dT \log\left(\frac{e m}{d}\right)}{m}}+\sqrt{\frac{\log(1/\delta)}{2m}}
+\end{aligned}\tag{13}</script></blockquote>
+<p>当 $T$ 较小时，由第一项起主导作用，因此随着 $T$ 的增大，泛化误差上界减小。当 $T$ 较大时，第二，三项起主导作用，因此随着 $T$ 的增大，泛化误差上界增大。因此从上述分析看来似乎我们应该选择 $T$ 使得当经验误差足够小的时候就停止迭代，继续迭代似乎会导致过拟合。但是实验证明，随着 $T$ 的不断增大，泛化误差并不会不断增大。这可以用边界理论来解释。</p>
+<p>若省略 $\log$ 项，并结合定理2和定理3，我们有</p>
+<blockquote>
+<script type="math/tex; mode=display">
+R(h)\le \hat R(h)+\tilde O\left(\frac{T\cdot C_\mathcal H}{m}\right)\tag{14}</script></blockquote>
+<p>其中 $C_\mathcal H$ 表示假设空间 $\mathcal H$ 的复杂度的一种度量方式。</p>
+<h2 id="利用边界理论分析泛化误差上界"><a href="#利用边界理论分析泛化误差上界" class="headerlink" title="利用边界理论分析泛化误差上界"></a>利用边界理论分析泛化误差上界</h2><p>仍考虑二分类问题，假设 $h(x)$ 为分类器，则显然若 $|h(x_i)|&gt;0$ 很小时，尽管样本点 $x_i$ 能够被分类，但是置性度可能较小，即很容易分类错误。显然，$|h(x_i)|$ 越大，分类正确的可能性越大。因此我们引入Margin来衡量这种置性度，为简单起见，定义为 $yh(x)$，其中 $y\in\{+1,-1\}$ 表示样本点 $x$ 的标签。同样的，对于集成函数 $H(x)=\sum_{t=1}^T\alpha_th_t(x)$，同样定义它的Margin为 $f(x)H(x)=\sum_{t=1}^T\alpha_tyh_t(x)$，将其 $L_1$ 范数规范化，得到的结果 $\frac{\sum_{t=1}^T\alpha_tyh_t(x)}{\sum_{t=1}^T\alpha_t}$ 称之为 $L_1$ Margin。</p>
+<p>注：这里之所以采用 $L_1$ 范数规范化，是因为可以将 Margin 写成 $yh_t(x),t=1,\cdots,T$ 的凸组合形式。</p>
+<p>现在我们定义集合 $conv(\mathcal H)$ 表示假设空间 $\mathcal H$ 的所有凸组合形式，即</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\operatorname{conv}(\mathcal H)=\left\{\sum_{t=1}^{T} \mu_{t} h_{t}: T \geq 1, \forall t \in[1, T], \mu_{t} \geq 0, h_{t} \in H, \sum_{t=1}^{T}\mu_t=1\right\}\tag{15}</script></blockquote>
+<p>我们将要证明，AdaBoost算法的泛化误差上界（其实是所有投票类算法的泛化误差上界）将与样本的Margin相关，而与基学习器的个数 $T$ 无关。</p>
+<h3 id="有限维假设空间-1"><a href="#有限维假设空间-1" class="headerlink" title="有限维假设空间"></a>有限维假设空间</h3><blockquote>
+<p>定理4：令 $\mathcal D$ 是 $\mathcal X\times\{-1,+1\}$ 上的分布， $D$ 是根据分布 $\mathcal D$ 独立随机的选取的样本集，共有 $m$ 个样本，若 $\mathcal H$ 为有限维假设空间，则对于任意 $\delta$ ，任意的函数 $f\in conv(\mathcal H)$，，对任意的 $\theta&gt;\sqrt{\log|\mathcal H|/(4m)}$ ，以 $1-\delta$ 的概率满足下列不等式</p>
+<script type="math/tex; mode=display">
+\operatorname{P}_{\mathcal{D}}[y f(x) \leq 0] \leq \operatorname{P}_{D}[y f(x) \leq \theta]+O\left(\sqrt{\frac{\log |\mathcal{H}|}{m \theta^{2}} \cdot \log \left(\frac{m \theta^{2}}{\log |\mathcal{H}|}\right)+\frac{\log (1 / \delta)}{m}}\right)\tag{16}</script></blockquote>
+<p>上述定理的详细证明较为复杂，下面仅介绍其基本思路。</p>
+<p>step1：定义集合 $\mathcal A_n$ 为</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\mathcal{A}_{n} \doteq\left\{f: x \mapsto \frac{1}{n} \sum_{j=1}^{n} h_{j}(x) \mid h_{1}, \ldots, h_{n} \in \mathcal{H}\right\}\tag{17}</script></blockquote>
+<p>其中 $h_j$ 可以在 $\mathcal H$ 中重复选取。</p>
+<p>由于对于任意 $f=\sum_{t=1}^T\alpha_th_t(x)$ ，我们都可以将 $f$ 的权重系数 $\alpha_t$ 视为一个概率分布，并依据其概率分布在 $\mathcal H$ 中独立的选择 $n$ 个函数记为 $\tilde  h_i,i=1,2,\cdots,n$，可以令 $\tilde f=\frac1n\sum_{i=1}^n\tilde h_i(x)\in\mathcal A_n$。可以用 $\tilde f$ 去逼近 $f$ 。令 $P_{\tilde f}$ 和 $E_{\tilde f}$ 表示在 $\tilde f$ 随机性下的概率分布和期望。</p>
+<p>step2：给出在概率分布 $P_{\tilde f}$ 下，$\tilde f$ 与 $f$ 的逼近关系。</p>
+<p>即对于固定的 $x,\theta&gt;0$，且 $n\ge1$，有</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\operatorname{P}_{\tilde{f}}\left[|\tilde{f}(x)-f(x)| \geq \frac{\theta}{2}\right] \leq 2 e^{-n \theta^{2} / 8} \doteq \beta_{n, \theta}\tag{18}</script></blockquote>
+<p>上述结果可以利用关系 $E_\tilde f\left[\tilde h_j(x)\right]=f(x)$ 和Hoeffding不等式直接得到。</p>
+<p>step3：同时考虑在数据分布 $\mathcal D$ 和函数 $\tilde f$ 下的概率分布下$y\tilde f$ 与 $yf$ 的逼近关系，即</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\operatorname{P}_{\mathcal D,\tilde{f}}\left[|y\tilde{f}(x)-yf(x)| \geq \frac{\theta}{2}\right] \leq\beta_{n, \theta}\tag{19}</script></blockquote>
+<p>step4：利用概率关系 $P[A]=P[B \cap A]+P[\bar{B} \cap A] \leq P[B]+P[\bar{B} \cap A]$，可以得到</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\operatorname{P}_{\mathcal{D}}[y f(x) \leq 0] &=\operatorname{P}_{\mathcal{D}, \tilde{f}}[y f(x) \leq 0] \\
+& \leq \operatorname{P}_{\mathcal{D}, \tilde{f}}\left[y \tilde{f}(x) \leq \frac{\theta}{2}\right]+\operatorname{P}_{\mathcal{D}, \tilde{f}}\left[y f(x) \leq 0, y \tilde{f}(x)>\frac{\theta}{2}\right] \\
+& \leq \operatorname{P}_{\mathcal{D}, \tilde{f}}\left[y \tilde{f}(x) \leq \frac{\theta}{2}\right]+\operatorname{P}_{\mathcal{D}, \tilde{f}}\left[|y f(x)-y \tilde{f}(x)|>\frac{\theta}{2}\right] \\
+& \leq \operatorname{P}_{\mathcal{D}, \tilde{f}}\left[y \tilde{f}(x) \leq \frac{\theta}{2}\right]+\beta_{n, \theta}
+\end{aligned}\tag{20}</script></blockquote>
+<p>同理运用于 $P_{D,\tilde f}\left[y\tilde f(x)\le \frac\theta 2\right]$，可以得到</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\operatorname{P}_{D,\tilde f}[y \tilde f(x) \leq \frac\theta2] \le \operatorname{P}_{D, \tilde{f}}\left[y f(x) \leq \theta\right]+\beta_{n, \theta}\tag{21}</script></blockquote>
+<p>step5：建立 $y\tilde f(x)\le \frac\theta2 $ 关于样本集 $D$ 的概率分布和关于分布 $\mathcal D$ 的逼近关系。即对于任意 $n\ge1$ 和 $\tilde f\in\mathcal A_n$，对于所有的 $\theta\ge0$，至少以概率 $1-\delta$ 成立下列不等式</p>
+<blockquote>
+<script type="math/tex; mode=display">
+P_{\mathcal D}\left[y\tilde f(x)\le\frac\theta2\right]\le P_{D}\left[y\tilde f(x)\le \frac\theta2\right]+\varepsilon_n\tag{22}</script></blockquote>
+<p>其中 $\varepsilon_{n} \doteq \sqrt{\frac{\ln \left[n(n+1)^{2}|\mathcal{H}|^{n} / \delta\right]}{2 m}}$.</p>
+<p>step6：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+P_{\mathcal D,\tilde f}\left[y\tilde f(x)\le\frac\theta2\right]\le P_{D,\tilde f}\left[y\tilde f(x)\le \frac\theta2\right]+\varepsilon_n\tag{23}</script></blockquote>
+<p>step7：结合 (21)(22)(23) 得</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\operatorname{P}_{\mathcal{D}}[y f(x) \leq 0] \leq \operatorname{P}_{D}[y f(x) \leq \theta]+4 e^{-n \theta^{2} / 8}+\sqrt{\frac{\ln \left[n(n+1)^{2}|\mathcal{H}|^{n} / \delta\right]}{2 m}}\tag{24}</script></blockquote>
+<p>取 $n=\left\lceil\frac{4}{\theta^{2}} \ln \left(\frac{4 m \theta^{2}}{\ln |\mathcal{H}|}\right)\right\rceil$ 即可得到最终结果。</p>
+<h3 id="无限维假设空间-1"><a href="#无限维假设空间-1" class="headerlink" title="无限维假设空间"></a>无限维假设空间</h3><blockquote>
+<p>定理5：令 $\mathcal D$ 是 $\mathcal X\times\{-1,+1\}$ 上的分布， $D$ 是根据分布 $\mathcal D$ 独立随机的选取的样本集，共有 $m$ 个样本，若 $\mathcal H$ 的VC维为 $d$，且 $m\ge d\ge1$则对于任意 $\delta&gt;0$ ，任意的函数 $f\in conv(\mathcal H)$，，对任意的 $\theta&gt;\sqrt{8 d \ln (e m / d) / m}$ ，以 $1-\delta$ 的概率满足下列不等式</p>
+<script type="math/tex; mode=display">
+\operatorname{P}_{\mathcal{D}}[y f(x) \leq 0] \leq \operatorname{P}_{D}[y f(x) \leq \theta]+O\left(\sqrt{\frac{d \log (m / d) \log \left(m \theta^{2} / d\right)}{m \theta^{2}}+\frac{\log (1 / \delta)}{m}}\right)\tag{25}</script></blockquote>
+<p>证明过程与定理4类似。只是其中的step5中的 $\varepsilon $ 将变为 $\varepsilon_{n} \doteq \sqrt{\frac{32\left[\ln \left(n(n+1)^{2}\right)+d n \ln (e m / d)+\ln (8 / \delta)\right]}{m}}$。</p>
+<h3 id="基于Rademacher复杂度的分析"><a href="#基于Rademacher复杂度的分析" class="headerlink" title="基于Rademacher复杂度的分析"></a>基于Rademacher复杂度的分析</h3><p>首先我们分析假设集 $\mathcal H$ 的凸组合的Rademacher复杂度。</p>
+<blockquote>
+<p>引理4：设 $\mathcal H$ 是 $\mathcal X$ 到 $\mathbb R$ 的函数的集合，那么对于任意样本 $D$，有 </p>
+<script type="math/tex; mode=display">
+\hat R_D(\mathcal H)=\hat R_{D}(conv(\mathcal H))\tag{26}</script></blockquote>
+<p>证明：</p>
+<p>由Rademacher经验复杂度的定义可知</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\hat{R}_{D}(conv(\mathcal H)) =&\frac{1}{m} E_\sigma \left[\sup _{h_1, \ldots, h_{T} \in \mathcal H, \mu \geq 0,\|\mu\|_{1}=1} \sum_{i=1}^{m} \sigma_{i} \sum_{t=1}^{T} \mu_{t} h_{t}\left(x_{i}\right)\right]\\
+=&\frac{1}{m}  E_\sigma \left[\sup _{h_{1}, \ldots, h_{T} \in \mathcal H, \mu \geq 0} \sup _{\|\mu\|_{1}=1} \sum_{t=1}^{T} \mu_{t} \sum_{i=1}^{m} \sigma_{i} h_{t}\left(x_{i}\right)\right]\\
+=&\frac{1}{m} E_\sigma\left[\sup _{h_{1}, \ldots, h_{T} \in \mathcal H} \max _{t \in[1, T]}\left(\sum_{i=1}^{m} \sigma_{i} h_{t}\left(x_{i}\right)\right)\right]\\
+=&\frac{1}{m} E_\sigma\left[\sup _{h \in\mathcal  H} \sum_{i=1}^{m} \sigma_{i} h\left(x_{i}\right)\right]\\
+=&\hat{R}_{D}(\mathcal H)
+\end{aligned}\tag{27}</script></blockquote>
+<p>同样的，由Radenacher复杂度的定义</p>
+<blockquote>
+<script type="math/tex; mode=display">
+R_{m}(conv(\mathcal H))=E_D\left[\hat{R}_{D}(conv(\mathcal H))\right]=E_D\left[\hat{R}_{D}(\mathcal H)\right]=R_{m}(\mathcal H)\tag{28}</script></blockquote>
+<p>对于任意函数集 $\mathcal F$，定义 $\phi \circ \mathcal{F} \doteq\{z \mapsto \phi(f(z)) \mid f \in \mathcal{F}\}$，则对于Lipschitz函数可以得到下面结果</p>
+<blockquote>
+<p>引理5：设函数 $\phi$ 为 $l-Lipschitz$ 连续的，则对于任何实值函数的假设集 $\mathcal H$ ，有</p>
+<script type="math/tex; mode=display">
+\hat R_D(\phi\circ\mathcal H)\le l\hat R_D(\mathcal H)\tag{29}</script></blockquote>
+<p>证明：</p>
+<p>由定义</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\hat{R}_{D}(\phi \circ \mathcal H) &=\frac{1}{m}E_\sigma\left[\sup _{h \in\mathcal  H} \sum_{i=1}^{m} \sigma_{i}(\phi \circ h)\left(x_{i}\right)\right] \\
+&=\frac{1}{m} \underset{\sigma_{1}, \ldots, \sigma_{m-1}}{E}\left[\underset{\sigma_{m}}{E}\left[\sup _{h \in \mathcal H} u_{m-1}(h)+\sigma_{m}(\Phi \circ h)\left(x_{m}\right)\right]\right]
+\end{aligned}\tag{30}</script></blockquote>
+<p>其中 $u_{m-1}(h)=\sum_{i=1}^{m-1}\sigma_i(\phi\circ h)(x_i)$。根据上确界的定义，可以得到对任意的 $\epsilon&gt;0$，存在 $h_1,h_2\in\mathcal H$ 满足</p>
+<blockquote>
+<script type="math/tex; mode=display">
+u_{m-1}\left(h_{1}\right)+\left(\phi \circ h_{1}\right)\left(x_{m}\right) \geq(1-\epsilon)\left[\sup _{h \in \mathcal H} u_{m-1}(h)+(\phi \circ h)\left(x_{m}\right)\right] \\
+u_{m-1}\left(h_{2}\right)-\left(\phi \circ h_{2}\right)\left(x_{m}\right) \geq(1-\epsilon)\left[\sup _{h \in \mathcal H} u_{m-1}(h)-(\phi \circ h)\left(x_{m}\right)\right]</script></blockquote>
+<p>因此由 $E_{\sigma_m} $ 的定义有</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+(1-\epsilon) & \mathrm{E}\left[\sup _{\sigma_{m}}\left[\sup _{h \in\mathcal  H} u_{m-1}(h)+\sigma_{m}(\phi \circ h)\left(x_{m}\right)\right]\right.\\
+&=(1-\epsilon)\left[\frac{1}{2} \sup _{h \in\mathcal  H} u_{m-1}(h)+(\phi \circ h)\left(x_{m}\right)+\frac{1}{2} \sup _{h \in \mathcal H} u_{m-1}(h)-(\phi \circ h)\left(x_{m}\right)\right] \\
+& \leq \frac{1}{2}\left[u_{m-1}\left(h_{1}\right)+\left(\phi \circ h_{1}\right)\left(x_{m}\right)\right]+\frac{1}{2}\left[u_{m-1}\left(h_{2}\right)-\left(\phi \circ h_{2}\right)\left(x_{m}\right)\right]
+\end{aligned}\tag{31}</script></blockquote>
+<p>令 $s=\operatorname {sign}(h_1(x_m)-h_2(x_m))$，结合 (31) 式</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+(1-\epsilon) &E_{\sigma_{m}}\left[\sup _{h\in\mathcal H}
+u_{m-1}(h)+\sigma_{m}(\phi \circ h)\left(x_{m}\right)\right] \\
+&\le \frac12 \left[u_{m-1(h_1)}+u_{m-1}(h_2)+sl(h_1(x_m)-h_2(m))\right]\\
+&= \frac{1}{2}\left[u_{m-1(h_1)}+slh_1(x_m)\right]+\frac12\left[u_{m-1}(h_2)-slh_2(x_m)\right]\\
+&\le \frac{1}{2}\sup_{h\in\mathcal H}\left[u_{m-1(h)}+slh(x_m)\right]+\frac12\sup_{h\in\mathcal H}\left[u_{m-1}(h)-slh(x_m)\right]\\
+&=E_{\sigma_m}\left[\sup_{h\in\mathcal H}u_{m-1}(h)+\sigma_mlh(x_m)\right]
+\end{aligned}\tag{32}</script></blockquote>
+<p>由于上式对所有 $\epsilon&gt;0$ 均成立，因此我们有</p>
+<blockquote>
+<script type="math/tex; mode=display">
+E_{\sigma_{m}}\left[\sup _{h\in\mathcal H}
+u_{m-1}(h)+\sigma_{m}(\phi \circ h)\left(x_{m}\right)\right]\le E_{\sigma_m}\left[\sup_{h\in\mathcal H}u_{m-1}(h)+\sigma_mlh(x_m)\right]\tag{33}</script></blockquote>
+<p>对所有 $i=1,2,\cdots,m$ 使用上述不等式有</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+& \frac{1}{m} \underset{\sigma_{1}, \ldots, \sigma_{m}}{E}\left[\sup _{h \in\mathcal  H} \sum_{i=1}^{m} \sigma_{i}(\phi \circ h)\left(x_{i}\right)\right] \\
+\leq & \frac{1}{m} \underset{\sigma_{1}, \ldots, \sigma_{m-1}}{E}\left[\underset{\sigma_{m}}{E}\left[\sup _{h\in\mathcal H} u_{m-1}(h)+\sigma_{m} l h\left(x_{m}\right)\right]\right] \\
+\leq & \frac{1}{m}\underset{ \sigma_{1, \ldots, \sigma_{m-2}}}{E}\left[\underset{\sigma_{m-1}\sigma_{m}}{E}\left[\sup _{h \in\mathcal  H} u_{m-2}(h)+\sigma_{m-1} l h\left(x_{m-1}\right)+\sigma_{m} l h\left(x_{m}\right)\right]\right] \\
+& \ldots \\
+\leq & \frac{1}{m} \underset{\sigma_{1}, \ldots, \sigma_{m}}{E}\left[\sup _{h \in\mathcal  H} \sigma_{1} l h\left(x_{1}\right)+\sigma_{2} l h\left(x_{2}\right)+\ldots+\sigma_{m} l h\left(x_{m}\right)\right] \\
+=&l\hat R_D(\mathcal H)
+\end{aligned}\tag{34}</script></blockquote>
+<p>证毕。</p>
+<p>下面定义边界损失函数和经验边界损失。</p>
+<blockquote>
+<p>定义2：对于任意的 $\theta&gt;0$，定义边界损失函数 $\phi_\theta(x)$ 为</p>
+<script type="math/tex; mode=display">
+\phi_{\theta}(x)=\left\{\begin{array}{ll}
+0 & \text { i f } \theta \leq x \\
+1-x / \theta & \text { if } 0 \leq x \leq \theta \\
+1 & \text { if } x \leq 0
+\end{array}\right.\tag{35}</script><p>定义3：若给定样本 $D=\{x_1,x_2,\cdots,x_m\}$ 和假设 $h\in\mathcal H$ ，则将经验边界损失定义为</p>
+<script type="math/tex; mode=display">
+\hat R_{\theta}(h)=\frac1m \sum_{i=1}^m\phi_\theta(y_ih(x_i))\tag{36}</script></blockquote>
+<p>则我们可以得到下面结果</p>
+<blockquote>
+<p>定理6：令 $\mathcal H$ 为实值函数构成的集合，固定 $\theta&gt;0$，那么，对于任意 $\delta&gt;0$，至少以概率 $1-\delta$，对所有 $h\in\mathcal H$ 成立</p>
+<script type="math/tex; mode=display">
+\begin{align}
+R(h)\le& P_D(yh(x)\le\theta)+\frac2\theta R_m(\mathcal H)+\sqrt{\frac{\log\frac1\delta}{2m}}\tag{37}\\
+R(h)\le& P_D(yh(x)\le\theta)+\frac2\theta R_D(\mathcal H)+3\sqrt{\frac{\log\frac1\delta}{2m}}\tag{38}
+\end{align}</script></blockquote>
+<p>证明：</p>
+<p>令 $\tilde{ \mathcal H}=\{z=(x,y)\mapsto yh(x):h\in\mathcal H\}$，考虑下列取值于 $[0,1]$ 的函数族：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\tilde H=\{\phi_\theta\circ f:f\in\tilde {\mathcal H}\}\tag{39}</script></blockquote>
+<p>由<a href="https://shellyandliu.github.io/2020/07/16/Rademacher复杂度和VC维/">Rademacher复杂度和VC维</a>中定理2可得，至少以概率 $1-\delta$ 成立，对于任意 $g\in\tilde H$ 可得</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\mathrm{E}[g(z)] \leq \frac{1}{m} \sum_{i=1}^{m} g\left(z_{i}\right)+2 R_{m}(\tilde{\mathcal{H}})+\sqrt{\frac{\log \frac{1}{\delta}}{2 m}}\tag{40}</script></blockquote>
+<p>即对于任意 $h\in\mathcal H$ 成立</p>
+<blockquote>
+<script type="math/tex; mode=display">
+E[\phi_\theta(yh(x))]\le \hat R_{\theta}(h)+2R_m(\phi_\theta\circ \tilde{ \mathcal H})+\sqrt{\frac{\log \frac{1}{\delta}}{2 m}}\tag{41}</script></blockquote>
+<p>又因为 $1_{u\le 0}\le \phi_\theta(u)\le 1_{u\le \theta}$，所以有</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{align}R(h)=E[1_{yh(x)\le 0}]\le E[\phi_\theta(yh(x))]\tag{42}\\
+\hat R_\theta(h)\le \frac1m\sum_{i=1}^m1_{yh(x)\le \theta}=P_D(yh(x)\le\theta)\tag{43}
+\end{align}</script></blockquote>
+<p>因此 </p>
+<blockquote>
+<script type="math/tex; mode=display">
+R(h)\le P_D(yh(x)\le\theta)+2R_m(\phi_\theta\circ\tilde{\mathcal H})+\sqrt{\frac{\log\frac1\delta}{2m}}\tag{44}</script></blockquote>
+<p>由于 $\phi_\theta$ 是 $\frac1\theta-Lipschitz$ 连续的，则由引理5可得 $\hat R_D(\phi\circ\tilde{\mathcal H})\le \frac1\theta\hat R_D(\tilde{\mathcal H})$，所以</p>
+<blockquote>
+<script type="math/tex; mode=display">
+R_{m}(\tilde{\mathcal H})=\frac{1}{m} \underset{D, \sigma}{E}\left[\sup _{h \in\mathcal H} \sum_{i=1}^{m} \sigma_{i} y_{i} h\left(x_{i}\right)\right]=\frac{1}{m} \underset{D, \sigma}{E}\left[\sup _{h \in \mathcal H} \sum_{i=1}^{m} \sigma_{i} h\left(x_{i}\right)\right]=R_{m}(\mathcal H)\tag{45}</script></blockquote>
+<p>由此第一个不等式证毕，同理可证第二个不等式。</p>
+<p>结合定理6和引理4可以得到下面推论</p>
+<blockquote>
+<p>推论1：令 $\mathcal H$ 为实值函数构成的集合，固定 $\theta&gt;0$，那么，对于任意 $\delta&gt;0$，至少以概率 $1-\delta$，对所有 $h\in conv(\mathcal H)$ 成立</p>
+<script type="math/tex; mode=display">
+\begin{align}
+R(h)\le& P_D(yh(x)\le\theta)+\frac2\theta R_m(\mathcal H)+\sqrt{\frac{\log\frac1\delta}{2m}}\tag{46}\\
+R(h)\le& P_D(yh(x)\le\theta)+\frac2\theta R_D(\mathcal H)+3\sqrt{\frac{\log\frac1\delta}{2m}}\tag{47}
+\end{align}</script></blockquote>
+<p>再结合<a href="https://shellyandliu.github.io/2020/07/16/Rademacher复杂度和VC维/">Rademacher复杂度和VC维</a>中定理3和推论3可以得到</p>
+<blockquote>
+<p>推论2：若 $\mathcal H$ 的VC维为 $d$，固定 $\theta&gt;0$，那么，对于任意 $\delta&gt;0$，至少以概率 $1-\delta$，对所有 $h\in conv(\mathcal H)$ 成立</p>
+<script type="math/tex; mode=display">
+R(h)\le P_D(yh(x)\le\theta)+\frac2\theta \sqrt{\frac{2d\log\frac{em}{d}}{m}}+\sqrt{\frac{\log\frac1\delta}{2m}}\tag{48}</script></blockquote>
+<p>注：上述推理中，并不仅针对AdaBoost算法使用，对于所有形式为 $H(x)=\sum_{t=1}^Ta_th_t(x)$ 的集成算法（包括Bagging）都使用，针对于AdaBoost算法，我们将给出下列的结果来说明，随着伦次 $T$ 的增大，即使训练误差减为 $0$，再增大 $T$ ，它的泛化误差也不会增大。</p>
+<p>由于AdaBoost算法产生的系数 $\alpha_t$ 并不能保证 $\sum_{t=1}^T\alpha_t=1$，因此我们要将其系数归一化，这也是考虑 $L_1$Margin的目的。由于 $\operatorname{sign}(g)=\operatorname{sign}(g/|\alpha|_1)$，因此 $R(g)=R(g/|\alpha|_1)$，而 $P_D(yh(x)/|\alpha|_1\le\theta)$ 将满足下面定理。</p>
+<blockquote>
+<p>定理7：设 $H(x)=\sum_{t=1}^T\alpha_th_t(x)$ 是AdaBoost算法经过 $T$ 步后返回的分类器函数，假设对于所有的 $t\in[1,T],\epsilon_t\le\frac12$，则对任意 $\theta&gt;0$，有以下不等式成立</p>
+<script type="math/tex; mode=display">
+P_D(yH(x)/\|\alpha\|_1\le\theta)\le 2^T\prod_{t=1}^T\sqrt{\epsilon^{1-\theta}_t(1-\epsilon_t)^{1+\theta}}\tag{49}</script></blockquote>
+<p>证明：</p>
+<p>结合 (4) 式可得</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+P_D(yH(x)/\|\alpha\|_1\le\theta)=&P_D(yH(x)-\theta\|\alpha\|_1\le0)\\
+=&\frac{1}{m}\sum_{i=1}^m1_{(y_iH(x_i)-\theta\|\alpha\|_1\le0)}\\
+\leq& \frac1m\sum_{i=1}^m\exp(-y_iH(x_i)+\theta\|\alpha\|_1)\\
+=&e^{\theta\|\alpha\|_1}\prod_{t=1}^TZ_t\\
+=&e^{\theta\sum_i\frac12\log\frac{1-\epsilon_t}{\epsilon_t}}\prod_{t=1}^T2\sqrt{\epsilon_t(1-\epsilon_t)}\\
+=&2^T\prod_{t=1}^T\left[\sqrt{\frac{1-\epsilon_t}{\epsilon_t}}\right]^\theta\sqrt{\epsilon_t(1-\epsilon_t)}\\
+=&2^T\prod_{t=1}^T\sqrt{\epsilon^{1-\theta}_t(1-\epsilon_t)^{1+\theta}}
+\end{aligned}\tag{50}</script></blockquote>
+<p>证毕。</p>
+<p>沿用之前的符号，若 $\gamma\le\frac12-\epsilon_t,t=1,2,\cdots,T$，则函数 $f(\epsilon_t)=4\epsilon_t^{1-\theta}(1-\epsilon_t)^{1+\theta}$ 在 $\epsilon_t=\frac12-\gamma$ 处取最大值，因此 (49) 式可以化为</p>
+<blockquote>
+<script type="math/tex; mode=display">
+P_D(yH(x)/\|\alpha\|_1\le\theta)\le 2^T\prod_{t=1}^T\sqrt{(1-2\gamma)^{1-\theta}(1+2\gamma)^{1+\theta}}\tag{51}</script></blockquote>
+<p>若 $(1-2\gamma)^{1-\theta}(1+2\gamma)^{1+\theta}&lt;1$，即 $\theta\le\Gamma(\gamma)\triangleq\frac{-\log(1-4\gamma^2)}{\log(\frac{1+2\gamma}{1-2\gamma})}$ 时，$P_D(yH(x)/|\alpha|_1\le\theta)$ 呈指数下降。即当 $T$ 足够大时，$P_D(yH(x)/|\alpha|_1\le\theta)$ 趋于 $0$</p>
+<p>又因为 $P_D(yH(x)/|\alpha|_1\le\theta) \leq \frac{1}{m} \sum_{i=1}^{m} \mathbb{I}\left(y_{i} g\left(x_{i}\right)-\theta|\alpha|_{1} \leq 0\right)$ ，则当 $T$ 趋于无穷时，所有样本的Margin都将大于 $\theta$，则Margin至少为 $\Gamma(\gamma)$。对于 $\Gamma(\gamma)$ 来说，当 $\gamma$ 越大时， $\Gamma(\gamma) $ 越大，即最小Margin越大。这也解释了AdaBoost不容易过拟合的原因：随着 $T$ 的增大，Margin也在增大。</p>
+<hr>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p>[1] 李航. 统计学习方法. 清华大学出版社，2019</p>
+<p>[2] 周志华. 机器学习. 清华大学出版社，2016.1</p>
+<p>[3] ZhiHua Zhou. Ensemble Methods: Foundations and Algorithms[M]. Taylor &amp; Francis, 2012.</p>
+<p>[4] Schapire R E, Freund Y. Boosting: Foundations and algorithms[J]. Kybernetes, 2013.</p>
+<p>[5] Chen L P . Mehryar Mohri, Afshin Rostamizadeh, and Ameet Talwalkar: Foundations of machine learning, second edition[J]. Statal Papers, 2019, 60.</p>
+<p>[6] Schapire R E. The strength of weak learnability[J]. Machine learning, 1990, 5(2): 197-227.</p>
+<p>[7] Schapire R E, Freund Y, Bartlett P, et al. Boosting the margin: A new explanation for the effectiveness of voting methods[J]. The annals of statistics, 1998, 26(5): 1651-1686.</p>
+
+        </div>
+        
+            <div style="text-align:center;color: rgb(125,125,125);font-size:14px;">
+               -------------本文结束 感谢您的阅读-------------
+            </div>
+        
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>文章作者:</span>
+                        <span>会飞的猪</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>文章链接:</span>
+                        <span><a href="http://shellyandliu.github.io/2020/07/23/AdaBoost%E7%AE%97%E6%B3%95%E7%9A%84%E7%90%86%E8%AE%BA%E5%88%86%E6%9E%90/">http://shellyandliu.github.io/2020/07/23/AdaBoost%E7%AE%97%E6%B3%95%E7%9A%84%E7%90%86%E8%AE%BA%E5%88%86%E6%9E%90/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>版权声明:</span>
+                        <span>本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC-BY-NC-4.0</a> ， 转载请注明来自 会飞的猪！</span>
+                    </p>
+                
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>标签:</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E8%AE%A1%E7%AE%97%E5%AD%A6%E4%B9%A0%E7%90%86%E8%AE%BA/"> <i class="iconfont icon-tags"></i> 计算学习理论</a>
+                    
+                        <a href="/tags/Boosting/"> <i class="iconfont icon-tags"></i> Boosting</a>
+                    
+                        <a href="/tags/AdaBoost/"> <i class="iconfont icon-tags"></i> AdaBoost</a>
+                    
+                        <a href="/tags/Margin%E7%90%86%E8%AE%BA/"> <i class="iconfont icon-tags"></i> Margin理论</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">返回</a>
+                <span> /  </span>
+                <a href="/">首页</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2020/07/22/Boosting%E4%B8%8EAdaboost/">Boosting与AdaBoost</a>
+            
+        </section>
+        <div class="post-content">
+            <section style="font-size: 20px;font-weight: 700;margin-bottom: 10px;margin-top: 20px;">
+                <i class="iconfont icon-comments"></i>
+                <span>
+                    评论
+                </span>
+            </section>
+        </div>
+        
+            <section id="comments" class="comments">
+              <style>
+                .comments{margin:0px;padding:10px;background:#fff}
+                @media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#fff}}
+              </style>
+              <div class="valine_comment"></div>
+<!--����js����</body>֮ǰ���뼴��-->
+<!--Leancloud ������:-->
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<!--Valine �ĺ��Ĵ����-->
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+      el: '.valine_comment',
+      app_id: 'bCvyxhtL2V59mmqAp81lAGob-gzGzoHsz#Leancloud应用的appId',
+      app_key: 'J4zVKQfUjhToGJwBfLcoOHOv',
+      placeholder: '欢迎大家评论交流~',
+      notify: 'true',
+      verify: 'true',
+    });
+</script>
+            </section>
+        
+        
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 会飞的猪 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

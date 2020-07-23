@@ -236,14 +236,14 @@
                             <span class="post-meta-item-icon">
                               <i class="fa fa-keyboard-o"></i>
                               <span class="post-meta-item-text">  字数统计: </span>
-                              <span class="post-count"><a href="#">3.7k字</a></span>
+                              <span class="post-count"><a href="#">4.2k字</a></span>
                             </span>
                         </span>
                         <span class="post-time">
                             <span class="post-meta-item-icon">
                             <i class="fa fa-hourglass-half"></i>
                             <span class="post-meta-item-text">  阅读时长: </span>
-                            <span class="post-count"><a href="#">18分</a></span>
+                            <span class="post-count"><a href="#">20分</a></span>
                             </span>
                         </span>
                     
@@ -433,6 +433,45 @@ h_{l}=\underset{h \in \mathcal H, \beta}{\arg \min } \sum_{i=1}^{m}\left[\left(-
 <p>d. 更新函数 $H_t(x)=H_{(t-1)}(x)+\eta\rho_th_t(x)$；</p>
 </li>
 <li><p>输出分类器 $G(x)=\operatorname{sign}\left(\sum_{t=0}^T\alpha_th_t(x)\right)$</p>
+</li>
+</ol>
+</blockquote>
+<h2 id="Newton-Boosting"><a href="#Newton-Boosting" class="headerlink" title="Newton Boosting"></a>Newton Boosting</h2><p>类似于Gradient Boosting算法，只是在这里考虑利用牛顿方向作为下降方向，考虑对 $E\left[L(Y,H_{(t-1)}(x)+h_t(x)|X=x\right]$ 在 $h_t(x)$ 处进行二阶泰勒展开得：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\mathrm{E}\left[L\left(Y, H_{(t-1)}(x)+h_{t}(x)\right) \mid X=x\right] \approx & \mathrm{E}\left[L\left(Y, H_{(t-1)}(x)\right) \mid X=x\right]+\\
+& g_{t}(x) h_{t}(x)+\frac{1}{2} f_{t}(x) h_{t}(x)^{2}
+\end{aligned}\tag{23}</script></blockquote>
+<p>其中 $f_t(x)$ 为</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+f_{t}(x) &=\left[\frac{\partial^2\hat R(H(x))}{\partial^2 H(x)}\right]_{H(x)=H_{(t-1)}(x)} \\
+&=\left[\frac{\partial ^2\mathrm{E}[L(Y, H(x)) \mid X=x]}{\partial^2 H(x)}\right]_{H(x)=H_{(t-1)}(x)} \\
+&=\mathrm{E}\left[\frac{\partial^2 L(Y, H(x))}{\partial^2 H(x)} \mid X=x\right]_{H(x)=H_{(t-1)}(x)}
+\end{aligned}\tag{24}</script></blockquote>
+<p>根据牛顿法，我们希望用 $f_t(x)^{-1}g_t(x)$ 来作为下降方向，因此我们考虑构造下面的代理损失函数</p>
+<blockquote>
+<script type="math/tex; mode=display">
+h_{t}=\underset{h \in \mathcal H}{\arg \min } \sum_{i=1}^{m}\left[{g}_{t}\left(x_{i}\right) h\left(x_{i}\right)+\frac{1}{2} f_{t}\left(x_{i}\right) h\left(x_{i}\right)^{2}\right]\tag{25}</script></blockquote>
+<p>上式可重写为</p>
+<blockquote>
+<script type="math/tex; mode=display">
+h_t=\underset{h\in\mathcal H}{\arg\min}\sum_{i=1}^m\frac12 f_t(x_i)\left[\left(-\frac{g_t(x_i)}{f_t(x_i)}\right)-h(x_i)\right]^2\tag{26}</script></blockquote>
+<p>同样的引入学习率参数，我们可以得到下面的 Newton Boosting算法。</p>
+<blockquote>
+<p><strong>Newton Boosting算法</strong>：</p>
+<ol>
+<li><p>初始化 $h_0(x)=\alpha_0=\underset{\alpha}{\arg\min}\sum_{i=1}^mL(y_i,\theta)$；</p>
+</li>
+<li><p>对 $t=1,2,\cdots,T$ 进行循环；</p>
+<p>a. 求损失函数在 $H_{t-1}(x)$ 处的一阶偏导和二阶偏导，即</p>
+<script type="math/tex; mode=display">
+g_{t}(x_i) =\left[\frac{\partial L(y_i, H(x_i))}{\partial H(x_i)} \right]_{H(x)=H_{(t-1)}(x)}，f_{t}(x_i) =\left[\frac{\partial^2 L(y_i, H(x_i))}{\partial^2 H(x_i)} \right]_{H(x)=H_{(t-1)}(x)}</script><p>b.求基函数 $h_t=\underset{h\in\mathcal H}{\arg\min}\sum_{i=1}^m\frac12 f_t(x_i)\left[\left(-\frac{g_t(x_i)}{f_t(x_i)}\right)-h(x_i)\right]^2$.</p>
+<p>c. 更新函数 $H_t(x)=H_{(t-1)}(x)+\eta h_t(x)$；</p>
+</li>
+<li><p>输出分类器 $G(x)=\operatorname{sign}\left(\sum_{t=0}^T\alpha_th_t(x)\right)$。</p>
 </li>
 </ol>
 </blockquote>

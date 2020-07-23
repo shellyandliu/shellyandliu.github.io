@@ -236,14 +236,14 @@
                             <span class="post-meta-item-icon">
                               <i class="fa fa-keyboard-o"></i>
                               <span class="post-meta-item-text">  字数统计: </span>
-                              <span class="post-count"><a href="#">4k字</a></span>
+                              <span class="post-count"><a href="#">3.7k字</a></span>
                             </span>
                         </span>
                         <span class="post-time">
                             <span class="post-meta-item-icon">
                             <i class="fa fa-hourglass-half"></i>
                             <span class="post-meta-item-text">  阅读时长: </span>
-                            <span class="post-count"><a href="#">19分</a></span>
+                            <span class="post-count"><a href="#">18分</a></span>
                             </span>
                         </span>
                     
@@ -436,25 +436,6 @@ h_{l}=\underset{h \in \mathcal H, \beta}{\arg \min } \sum_{i=1}^{m}\left[\left(-
 </li>
 </ol>
 </blockquote>
-<h2 id="Newton-Boosting"><a href="#Newton-Boosting" class="headerlink" title="Newton Boosting"></a>Newton Boosting</h2><p>类似于Gradient Boosting算法，只是在这里考虑利用牛顿方向作为下降方向，考虑对 $E\left[L(Y,H_{(t-1)}(x)+h_t(x)|X=x\right]$ 在 $h_t(x)$ 处进行二阶泰勒展开得：</p>
-<blockquote>
-<script type="math/tex; mode=display">
-\begin{aligned}
-\mathrm{E}\left[L\left(Y, H_{(t-1)}(x)+h_{t}(x)\right) \mid X=x\right] \approx & \mathrm{E}\left[L\left(Y, H_{(t-1)}(x)\right) \mid X=x\right]+\\
-& g_{t}(x) h_{t}(x)+\frac{1}{2} f_{t}(x) h_{t}(x)^{2}
-\end{aligned}\tag{23}</script></blockquote>
-<p>其中 $f_t(x)$ 为</p>
-<blockquote>
-<script type="math/tex; mode=display">
-\begin{aligned}
-f_{t}(x) &=\left[\frac{\partial^2\hat R(H(x))}{\partial^2 H(x)}\right]_{H(x)=H_{(t-1)}(x)} \\
-&=\left[\frac{\partial ^2\mathrm{E}[L(Y, H(x)) \mid X=x]}{\partial^2 H(x)}\right]_{H(x)=H_{(t-1)}(x)} \\
-&=\mathrm{E}\left[\frac{\partial^2 L(Y, H(x))}{\partial^2 H(x)} \mid X=x\right]_{H(x)=H_{(t-1)}(x)}
-\end{aligned}\tag{24}</script></blockquote>
-<p>根据牛顿法，我们希望用 $f_t(x)^{-1}g_t(x)$ 来作为下降方向，因此我们考虑构造下面的代理损失函数</p>
-<blockquote>
-<script type="math/tex; mode=display">
-h_{t}=\underset{h \in \mathcal H}{\arg \min } \sum_{i=1}^{m}\left[{g}_{t}\left(x_{i}\right) h\left(x_{i}\right)+\frac{1}{2} f_{t}\left(x_{i}\right) h\left(x_{i}\right)^{2}\right]\tag{25}</script></blockquote>
 <h3 id="LogitBoost算法"><a href="#LogitBoost算法" class="headerlink" title="LogitBoost算法"></a>LogitBoost算法</h3><p>LogitBoost 算法是在文章 [3] 中介绍的，它考虑的是Logistic损失函数的Newton Boosting算法。</p>
 <p>由于在这里我们的输出空间为 $\mathcal Y=\{-1,+1\}$，而Logistic回归中的输出空间为 $\{0,+1\}$，因此我们令 $y^*=\frac{f(x)+1}{2}$，设概率分布为 </p>
 <blockquote>

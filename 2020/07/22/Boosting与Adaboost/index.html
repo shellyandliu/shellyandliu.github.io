@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="会飞的猪">
+
+
+
+
+
+<link rel="stylesheet" href="/fonts/iconfont_new/iconfont.css">
+
+
+<title>Boosting与AdaBoost | 会飞的猪</title>
+
+
+
+    <link rel="icon" href="/image/longmao.jpg">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+            <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+        
+    
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">会飞的猪</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">文章</a>
+                
+                    <a class="menu-item" href="/categories">分类</a>
+                
+                    <a class="menu-item" href="/tags">标签</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">会飞的猪</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">文章</a>
+                
+                    <a class="menu-item" href="/categories">分类</a>
+                
+                    <a class="menu-item" href="/tags">标签</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">展开目录</a>
+        <a onclick="go_top()">回到顶部</a>
+        <a onclick="go_bottom()">到达底部</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Boosting与AdaBoost</h1>
+            
+                <div class="post-meta">
+                    
+                        作者: <a itemprop="author" rel="author" href="/">会飞的猪</a>
+                    
+
+                    
+                        <span class="post-time">
+                        时间: <a href="#">七月 22, 2020&nbsp;&nbsp;13:12:50</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    类别:
+                            
+                                <a href="/categories/%E9%9B%86%E6%88%90%E5%AD%A6%E4%B9%A0/">-集成学习</a>
+                            
+                        </span>
+                    
+                    
+                        <span class="post-time">
+                            <span class="post-meta-item-icon">
+                              <i class="fa fa-keyboard-o"></i>
+                              <span class="post-meta-item-text">  字数统计: </span>
+                              <span class="post-count"><a href="#">4k字</a></span>
+                            </span>
+                        </span>
+                        <span class="post-time">
+                            <span class="post-meta-item-icon">
+                            <i class="fa fa-hourglass-half"></i>
+                            <span class="post-meta-item-text">  阅读时长: </span>
+                            <span class="post-count"><a href="#">19分</a></span>
+                            </span>
+                        </span>
+                    
+
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="弱可学习"><a href="#弱可学习" class="headerlink" title="弱可学习"></a>弱可学习</h1><p>在实际中，直接学习到一个泛化误差小于 $\epsilon$ 的模型是十分困难的，但是如果我们降低要求，不需要学习到一个误差很小的模型，而只是比随机猜测稍加精确的模型是相对较为简单的，因此我们将之前定义的PAC可学习称为强  (PAC) 可学习的，类比于强可学习的定义，将比随机猜测稍加精确的模型定义弱 (PAC) 可学习。</p>
+<blockquote>
+<p>定义1：令 $m$ 表示从分布 $\mathcal D$ 中独立同分布采样得到的样本数，对任意 $0&lt;\epsilon,\delta<1$，存在 $\gamma>0$，对所有分布 $\mathcal D$ ，若存在学习算法 $\mathcal L$ 和多项式函数 $\operatorname {poly}(\cdot,\cdot,\cdot,\cdot)$，使得对于任意 $m\ge \operatorname{poly(1/\epsilon,1/\delta,size(x),size(c))}$，算法 $\mathcal L$ 能从假设空间 $\mathcal H$ 中学习到 $h_D$，使得</p>
+<script type="math/tex; mode=display">
+P\left(R(h_D)\le \frac12-\gamma\right )\ge 1-\delta\tag{1}</script><p>则将 $\mathcal L$ 称为弱可学习算法。</p>
+</blockquote>
+<p>关于强可学习和弱可学习的关系，Schapire [9] 在1990年利用构造的方法证明了它们是互相等价的。因此对于一个学习问题，我们只需要学习到弱可学习算法，再通过将其增强为强可学习算法达到我们最终的目的。其中我们把利用一族弱可学习算法提升为强可学习算法的过程称之为 <strong>Boosting</strong>。其中最具代表性的为 <strong>adaboost 算法</strong>。</p>
+<h1 id="AdaBoost-算法"><a href="#AdaBoost-算法" class="headerlink" title="AdaBoost 算法"></a>AdaBoost 算法</h1><p>考虑输出空间为 $\{+1,-1\}$ 的二分类问题，训练集为 $D=\{(x_1,y_1),(x_2,y_2),\cdots,(x_m,y_m)\}$，弱学习算法为 $\mathcal L$ ，学习的轮次为 $T$ 。则AdaBoost算法如下所示</p>
+<blockquote>
+<p><strong>AdaBoost算法</strong>：</p>
+<ol>
+<li><p>定义初始权重分布 $\mathcal D_1=(\frac 1m,\cdots,\frac1m ) $.</p>
+</li>
+<li><p>对 $t=1,2,\cdots,T$ 进行循环：</p>
+<p>a. 学习弱学习器 $h_t=\mathcal L(D,\mathcal D_t)$，</p>
+<p>b. 计算误差 $\epsilon_t=P_{x\sim\mathcal D_t}(h_t(x)\neq y_i)$，</p>
+<p>c. 若 $\epsilon_t&gt;0.5$ ，则跳出循环，否则计算 $h_t$ 的权重 $\alpha_t=\frac12\ln\left(\frac{1-\epsilon_t}{\epsilon_t}\right)$。</p>
+<p>d. 更新训练数据的权值分布 $\mathcal D_{t+1}(x)=\frac{\mathcal D_t(x)\exp(-\alpha_tyh_t(x))}{Z_t}$,其中 $Z_t$ 为规范化因子 $Z_t=2 \sqrt{\epsilon_{t}\left(1-\epsilon_{t}\right)}$。</p>
+</li>
+<li><p>得到最终分类器 $G(x)=\operatorname{sign}\left(\sum_{t=1}^T\alpha_th_t(x)\right)$</p>
+</li>
+</ol>
+</blockquote>
+<p>注：</p>
+<ol>
+<li><p>$\epsilon_t$ 为第 $t$ 个弱学习器的训练误差，$\alpha_t$ 为第 $t$ 个弱学习器的权重，显然当 $\epsilon_t\le \frac12$ 时， $\alpha_t\ge0$，并且 $\alpha_t$ 随着 $\epsilon_t$ 的减小而增大，这是符合实际的：误差越小的弱学习器，它的权重应该越大。</p>
+</li>
+<li><p>由权值分布的定义可知，当第 $t$ 个弱学习器对样本 $x_i$ 分类正确时，$\exp(-\alpha_ty_ih_t(x_i))&lt;1$，即该样本的权值将会缩小，而对于误分类的样本，样本权值将会增大。</p>
+</li>
+<li><p>$Z_t$ 为规范化因子，它的目的是使 $\mathcal D_{t+1}$ 称为一个分布。即有下列表达式</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+Z_{t} &=\sum_{i=1}^{m}\mathcal  D_{t}(i) e^{-\alpha_{t} y_i h_{t}\left(x_{i}\right)} \\
+&=\sum_{i: y_i h_{t}\left(x_{i}\right)=1}\mathcal D_{t}(i) e^{-\alpha_{t}}+\sum_{i: y_i h_{t}\left(x_{i}\right)=-1}\mathcal D_{t}(i) e^{\alpha_{t}} \\
+&=\left(1-\epsilon_{t}\right) e^{-\alpha_{t}}+\epsilon_{t} e^{\alpha_{t}} \\
+&=\left(1-\epsilon_{t}\right) \sqrt{\frac{\epsilon_{t}}{1-\epsilon_{t}}}+\epsilon_{t} \sqrt{\frac{1-\epsilon_{t}}{\epsilon_{t}}} \\
+&=2 \sqrt{\epsilon_{t}\left(1-\epsilon_{t}\right)}
+\end{aligned}\tag{2}</script></blockquote>
+</li>
+</ol>
+<h1 id="AdaBoost算法统计视角的解释"><a href="#AdaBoost算法统计视角的解释" class="headerlink" title="AdaBoost算法统计视角的解释"></a>AdaBoost算法统计视角的解释</h1><p>下面从加性模型来优化指数损失函数的角度来解释AdaBoost算法。</p>
+<p>考虑弱学习器的线性组合 </p>
+<blockquote>
+<script type="math/tex; mode=display">
+H(x)=\sum_{t=1}^T\alpha_th_t(x)\tag{3}</script></blockquote>
+<p>指数损失函数为</p>
+<blockquote>
+<script type="math/tex; mode=display">
+L(H|\mathcal D)=E_{x\sim \mathcal D}(e^{yH(x)})\tag{4}</script></blockquote>
+<p>其中加性模型的选择是为了计算的方便，下面指出指数损失函数的合理性。</p>
+<p>考虑将 $L(H|D)$ 关于 $H$ 求偏导并令其等于 $0$ 得</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\frac{\partial L(H|\mathcal D)}{\partial H(x)}=&-f(x)e^{-yH(x)}\\
+=&-e^{H(x)}P(y=1|x)+e^{H(x)}P(y=-1|x)\\
+=&0
+\end{aligned}\tag{5}</script></blockquote>
+<p>因此，我们有</p>
+<blockquote>
+<script type="math/tex; mode=display">
+H^*(x)=\arg\min_{H(x)}E_{x\sim \mathcal D}(e^{-yH(x)})=\frac12\ln\frac{P(y=1|x)}{P(y=-1|x)}\tag{6}</script></blockquote>
+<p>则</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\operatorname{sign}(H^*(x))=\operatorname{sign}\left(\frac12\ln\frac{P(y=1|x)}{P(y=-1|x)}\right)=\arg\max_{z\in\{-1,+1\}}P(y=z|x)</script></blockquote>
+<p>即 $\operatorname{sign}(H(x))$ 达到了贝叶斯最优误差，即指数损失函数最小时，分类错误率也是最小的。</p>
+<p>下面推导Adaboost算法。</p>
+<p>首先考虑权重参数 $\alpha_t$ 的选择，假设第 $t$ 步的弱学习器已经选择完成，且分布 $\mathcal D_t$ 已经由上一步计算得出。因此我们对 $\alpha_t$ 求偏导并令其为 $0$ 得</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\frac{\partial E_{x\sim \mathcal D_t}\left(e^{-y\alpha_th_t(x)}\right)}{\partial \alpha_t}=&e^{-\alpha_t}P_{x\sim \mathcal D_t}(y=h_t(x))+e^{\alpha_t}P_{x\sim \mathcal D_t}(y\neq h_t(x))\\
+=&e^{\alpha_t}(1-\epsilon _t)+e^{\alpha_t}\epsilon_t\\
+=&0
+\end{aligned}\tag{7}</script></blockquote>
+<p>因此 $\alpha_t=\frac12\ln\left(\frac{1-\epsilon_t}{\epsilon_t}\right)$，这正是AdaBoost算法得权重参数。</p>
+<p>另一方面，我们来分析弱学习器 $h_t(x)$ 的选择。由损失函数的定义</p>
+<blockquote>
+<script type="math/tex; mode=display">
+L( H_{t-1}(x)+h_t(x)|\mathcal D)=E_ {x\sim \mathcal D}\left(e^{-y(H_{t-1}(x)+h_t(x) )}\right)\tag{8}</script></blockquote>
+<p>由于 $y^2=h_t^2(x)=1$，则将 $e^{-yh_t(x)}$ 泰勒展开可以得到</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+L( H_{t-1}(x)+h_t(x)|\mathcal D)=&E_{x\sim\mathcal D}\left(e^{-yH_{t-1}(x)}\left(1-yh_t(x)+\frac{y^2\alpha_t^2h_t^2(x)}2-\cdots\right)\right)\\
+=&E_{x\sim\mathcal D}\left(e^{-yH_{t-1}(x)}\left(C_1+C_2yh_t(x)\right)\right)
+\end{aligned}\tag{9}</script></blockquote>
+<p>其中 $C_1,C_2$ 为常数，则</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}h_t^*(x)=&\arg\min_{h}L(H_{t-1}(x)+ h(x)|\mathcal D)\\
+=&\arg\min_{h}E_{x\sim \mathcal D}\left(e^{-yH_{t-1}(x)}\left(C_1+C_2yh_t(x)\right)\right)\\
+=&\arg\min_{h}E_{x\sim \mathcal D}\left(e^{-yH_{t-1}(x)}yh_t(x)\right)\\
+=&\arg\min_{h}E_{x\sim \mathcal D}\left(\frac{e^{-yH_{t-1}(x)}}{E_{x\sim \mathcal D}\left(e^{-yH_{t-1}(x)}\right)}yh_t(x)\right)
+\end{aligned}\tag{10}</script></blockquote>
+<p>最后一步是为了定义分布</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\mathcal D_t(x)=\frac{\mathcal D(x)e^{-yH_{t-1}(x)}}{E_{x\sim \mathcal D}\left(e^{-yH_{t-1}(x)}\right)}\tag{11}</script></blockquote>
+<p>因此由数学期望的定义可得</p>
+<blockquote>
+<script type="math/tex; mode=display">
+h_t^*(x)=\arg\max_{h}E_{x\sim \mathcal D_t}\left(yh_t(x)\right)\tag{12}</script></blockquote>
+<p>又因为 $f(x)h_t(x)=1-2I(f(x)\neq h_t(x))$，因此</p>
+<blockquote>
+<script type="math/tex; mode=display">
+h_t^*(x)=\arg\min_{h}E_{x\sim \mathcal D_t}I(y\neq h_t(x))     \tag{13}</script></blockquote>
+<p>可以得到 $\mathcal D_{t+1}$ 和 $\mathcal D_t$ 的关系</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\mathcal{D}_{t+1}( {x}) &=\frac{\mathcal{D}(x) e^{-y H_{t}( {x})}}{\mathbb{E}_{ {x} \sim \mathcal{D}}\left[e^{\left.-y H_{t}( {x})\right]}\right.} \\
+&=\frac{\mathcal{D}( {x}) e^{-y H_{t-1}( {x})} e^{-y \alpha_{t} h_{t}( {x})}}{\mathbb{E}_{ {x} \sim \mathcal{D}}\left[e^{-y H_{t}( {x})}\right]} \\
+&=\mathcal{D}_{t}( {x}) \cdot e^{-y \alpha_{t} h_{t}( {x})} \frac{\mathbb{E}_{ {x} \sim \mathcal{D}}\left[e^{-y H_{t-1}( {x})}\right]}{\mathbb{E}_{ {x} \sim \mathcal{D}}\left[e^{-y H_{t}( {x})}\right]}
+\end{aligned}\tag{14}</script></blockquote>
+<p>其中 </p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\frac{\mathbb{E}_{ {x} \sim \mathcal{D}}\left[e^{-y H_{t}( {x})}\right]}{\mathbb{E}_{ {x} \sim \mathcal{D}}\left[e^{-y H_{t-1}( {x})}\right]}=&\mathbb{E}_{ {x} \sim \mathcal{D}}\left[\frac{e^{-y H_{t-1}( {x})}e^{-y\alpha_th_t(x)}}{\mathbb{E}_{ {x} \sim \mathcal{D}}\left[e^{-y H_{t-1}( {x})}\right]}\right]\\
+=&\mathbb{E}_{ {x} \sim \mathcal{D}_t}\left[e^{-y\alpha_th_t(x)}\right]\\
+=&\sum_{i=1}^{m}\mathcal  D_{t}(i) e^{-\alpha_{t} y_i h_{t}\left(x_{i}\right)} \\
+=&2 \sqrt{\epsilon_{t}\left(1-\epsilon_{t}\right)}
+\end{aligned}\tag{15}</script></blockquote>
+<p>注：</p>
+<ol>
+<li>AdaBoost算法需要基学习器能对特定的数据分布进行学习，这可以通过”重赋权法“实现，即再训练过程中，根据数据分布为每个训练样本重新赋一个权重。对于无法接受带权重样本的基学习算法，则可以通过”重采样法“来处理。</li>
+<li>AdaBoost算法需要在每一次迭代中检查当前生成的基学习器是否比随机猜测好，一但条件不满足，则直接抛弃。若采用”重采样法“，则可以再抛弃不满足条件的基学习器后根据当前分布重新对训练样本进行采样，训练出新的学习器。</li>
+</ol>
+<h1 id="其他的Boosting算法"><a href="#其他的Boosting算法" class="headerlink" title="其他的Boosting算法"></a>其他的Boosting算法</h1><p>由前面分析，Adaboost算法实际上是加法模型对指数损失函数的前向分布算法。现在我们考虑更一般的损失函数 $L(y,H(x))$ ，其中 $H(x)$ 考虑为带偏差的加法模型</p>
+<blockquote>
+<script type="math/tex; mode=display">
+H(x)=\alpha_0+\sum_{t=1}^T\alpha_th_t(x\tag{16})</script></blockquote>
+<p>我们的目标是损失函数达到最小，即</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\min_{\alpha_t,h_t\in\mathcal H}\sum_{i=1}^mL(y_i,\sum_{t=1}^T\alpha_th_t(x_i))\tag{17}</script></blockquote>
+<p>这是一个复杂的问题，而前向分布算法考虑的是每次仅优化一个基函数和系数，即在第 $l$ 步时，极小化函数</p>
+<blockquote>
+<script type="math/tex; mode=display">
+(\alpha_l,h_l(x))=\arg\min_{\alpha,h(x)}\sum_{i=1}^mL(y_i,H_{l-1}(x_i)+\alpha h (x_i))\tag{18}</script></blockquote>
+<p>而对于问题 (18) 我们可以将 $h(x)$ 看作是在函数空间上的数值优化问题，由于可以得到其他不同的Boosting算法。</p>
+<p>若我们所考虑的假设空间里的函数，均有连续参数 $\theta$ 所决定，即对于任意的 $h\in\mathcal H$，可以表示为 $h(x;\theta)$，且函数 $\hat R(\theta)=E\left[L(Y,h(X;\theta))|X=x\right]$ 关于 $\theta$ 是二阶连续可微的，则我们可以利用传统的梯度下降法和牛顿法进行优化。若为更一般的情况，我们考虑在函数空间中优化问题 (18)</p>
+<h2 id="Gradient-Boosting"><a href="#Gradient-Boosting" class="headerlink" title="Gradient Boosting"></a>Gradient Boosting</h2><p>假设已经经过了 $l-1$ 次的迭代，则现在的损失函数为 </p>
+<blockquote>
+<script type="math/tex; mode=display">
+\hat R(H)=E\left[L(Y,H(X))|X=x\right]\tag{19}</script></blockquote>
+<p>我们对 (18) 关于函数 $H(x)$ 求偏导可得</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+g_{l}(x) &=\left[\frac{\partial\hat R(H(x))}{\partial H(x)}\right]_{H(x)=H_{(m-1)}(x)} \\
+&=\left[\frac{\partial \mathrm{E}[L(Y, H(x)) \mid X=x]}{\partial H(x)}\right]_{H(x)=H_{(l-1)}(x)} \\
+&=\mathrm{E}\left[\frac{\partial L(Y, H(x))}{\partial H(x)} \mid X=x\right]_{H(x)=H_{(l-1)}(x)}
+\end{aligned}\tag{20}</script></blockquote>
+<p>类似于梯度下降法，我们将 $-g_l(x)$ 作为函数 $H(x)$ 的下降方向，显然函数 $-g_{l}(x)$ 不一定属于假设空间 $\mathcal H$ ，可以考虑寻找在 $\mathcal H$ 中与 $-g_l(x)$ 函数最为接近的函数作为基函数，因此定义下面的代理损失函数</p>
+<blockquote>
+<script type="math/tex; mode=display">
+h_{l}=\underset{h \in \mathcal H, \beta}{\arg \min } \sum_{i=1}^{m}\left[\left(-g_{l}\left(x_{i}\right)\right)-\beta h\left(x_{i}\right)\right]^{2}\tag{21}</script></blockquote>
+<p>上述过程可以看作是梯度下降限制在空间 $\mathcal H$ 的情况，而每次下降的步长可以用线搜索得到</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\rho_{l}=\underset{\rho}{\arg \min } \sum_{i=1}^{m} L\left(y_{i}, H_{(m-1)}\left(x_{i}\right)+\rho h_{l}\left(x_{i}\right)\right)\tag{22}</script></blockquote>
+<p>在文章 [4] 中还考虑学习率参数 $\eta$ ，即每次更新的函数为 $\eta\rho_lh_l(x)$，我们令 $\alpha_l=\eta\rho_l$，则得到了权重参数的取法。而初始值 $\alpha_0=\underset{\alpha}{\arg\min}\sum_{i=1}^mL(y_i,\theta)$。</p>
+<p>下面给出Gradient Boosting算法的完整步骤</p>
+<blockquote>
+<p><strong>Gradient Boosting算法</strong>：</p>
+<ol>
+<li><p>初始化 $h_0(x)=\alpha_0=\underset{\alpha}{\arg\min}\sum_{i=1}^mL(y_i,\theta)$；</p>
+</li>
+<li><p>对 $t=1,2,\cdots,T$ 进行循环；</p>
+<p>a. 求损失函数在 $H_{t-1}(x)$ 处的梯度，即 $g_{t}(x_i) =\left[\frac{\partial L(y_i, H(x_i))}{\partial H(x_i)} \right]_{H(x)=H_{(t-1)}(x)}$。</p>
+<p>b. 求基函数 $h_t=\underset{h\in\mathcal H,\beta}{\arg\min}\sum_{i=1}^m\left[(-g_t(x_i))-\beta h(x_i)\right]^2$；</p>
+<p>c. 计算下降参数 $\rho_{t}=\underset{\rho}{\arg \min } \sum_{i=1}^{m} L\left(y_{i}, H_{(t-1)}\left(x_{i}\right)+\rho h_{t}\left(x_{i}\right)\right)$；</p>
+<p>d. 更新函数 $H_t(x)=H_{(t-1)}(x)+\eta\rho_th_t(x)$；</p>
+</li>
+<li><p>输出分类器 $G(x)=\operatorname{sign}\left(\sum_{t=0}^T\alpha_th_t(x)\right)$</p>
+</li>
+</ol>
+</blockquote>
+<h2 id="Newton-Boosting"><a href="#Newton-Boosting" class="headerlink" title="Newton Boosting"></a>Newton Boosting</h2><p>类似于Gradient Boosting算法，只是在这里考虑利用牛顿方向作为下降方向，考虑对 $E\left[L(Y,H_{(t-1)}(x)+h_t(x)|X=x\right]$ 在 $h_t(x)$ 处进行二阶泰勒展开得：</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\mathrm{E}\left[L\left(Y, H_{(t-1)}(x)+h_{t}(x)\right) \mid X=x\right] \approx & \mathrm{E}\left[L\left(Y, H_{(t-1)}(x)\right) \mid X=x\right]+\\
+& g_{t}(x) h_{t}(x)+\frac{1}{2} f_{t}(x) h_{t}(x)^{2}
+\end{aligned}\tag{23}</script></blockquote>
+<p>其中 $f_t(x)$ 为</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+f_{t}(x) &=\left[\frac{\partial^2\hat R(H(x))}{\partial^2 H(x)}\right]_{H(x)=H_{(t-1)}(x)} \\
+&=\left[\frac{\partial ^2\mathrm{E}[L(Y, H(x)) \mid X=x]}{\partial^2 H(x)}\right]_{H(x)=H_{(t-1)}(x)} \\
+&=\mathrm{E}\left[\frac{\partial^2 L(Y, H(x))}{\partial^2 H(x)} \mid X=x\right]_{H(x)=H_{(t-1)}(x)}
+\end{aligned}\tag{24}</script></blockquote>
+<p>根据牛顿法，我们希望用 $f_t(x)^{-1}g_t(x)$ 来作为下降方向，因此我们考虑构造下面的代理损失函数</p>
+<blockquote>
+<script type="math/tex; mode=display">
+h_{t}=\underset{h \in \mathcal H}{\arg \min } \sum_{i=1}^{m}\left[{g}_{t}\left(x_{i}\right) h\left(x_{i}\right)+\frac{1}{2} f_{t}\left(x_{i}\right) h\left(x_{i}\right)^{2}\right]\tag{25}</script></blockquote>
+<h3 id="LogitBoost算法"><a href="#LogitBoost算法" class="headerlink" title="LogitBoost算法"></a>LogitBoost算法</h3><p>LogitBoost 算法是在文章 [3] 中介绍的，它考虑的是Logistic损失函数的Newton Boosting算法。</p>
+<p>由于在这里我们的输出空间为 $\mathcal Y=\{-1,+1\}$，而Logistic回归中的输出空间为 $\{0,+1\}$，因此我们令 $y^*=\frac{f(x)+1}{2}$，设概率分布为 </p>
+<blockquote>
+<script type="math/tex; mode=display">
+p(f(x)=1|x)=\frac{e^{H(x)}}{e^{H(x)}+e^{-H(x)}}\tag{27}</script></blockquote>
+<p>则Logistic损失函数为</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}L(f(x)^*,p(x))=&f(x)^*\log(p(f(x)=1|x))+(1-f(x)^*)\log(1-p(f(x)=1|x))\\
+=&-\log(1+e^{-2f(x)H(x)})
+\end{aligned}\tag{28}</script></blockquote>
+<p>因此我们最终优化的损失函数为 $L(H|D)=E_{x\sim D}\left[-\log(1+e^{-2f(x)H(x)}\right]$。</p>
+<p>类似于AdaBoost算法的分析，对损失函数关于 $H$ 求偏导并令其等于 $0$ 可得</p>
+<blockquote>
+<script type="math/tex; mode=display">
+H^*(x)=\arg\min_{H(x)}E_{x\sim \mathcal D}(-\log(1+e^{-2f(x)H(x)})=\frac12\ln\frac{P(f(x)=1|x)}{P(f(x)=-1|x)}\tag{29}</script></blockquote>
+<p>与指数损失函数一致。</p>
+<p>下面用Newton Boosting的思想来分析</p>
+<p>由logistic回归的性质，我们容易得出</p>
+<blockquote>
+<script type="math/tex; mode=display">
+L(H|D)=E_{x\sim D}\left[2f(x)^*H(x)-\log\left[1+e^{2(H(x))}\right]\right]\tag{30}</script></blockquote>
+<p>将上式关于 $H$ 求一阶二阶偏导得</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}&\frac{\partial E_{x\sim D}L(H|D)}{\partial H(x)}=2E_{x\sim D}(f(x)^*-p(x))\\
+&\frac{\partial ^2E_{x\sim D}L(H|D)}{\partial H(x)^2}=-4E_{x\sim D}(p(x)(1-p(x)))
+\end{aligned}\tag{31}</script></blockquote>
+<p>所以根据牛顿法更新步骤为 </p>
+<blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}H(x)&=H(x)-{\left(\frac{\partial ^2E_{x\sim D}L(H|D)}{\partial H(x)^2}\right)}^{-1}\left(\frac{\partial E_{x\sim D}L(H|D)}{\partial H(x)}\right)\\
+&=H(x)+\frac12\frac{E_{x\sim D}\left[f(x)^*-p(x)\right]}{E_{X\sim D}\left[p(x)(1-p(x))\right]}\\
+&=H(x)+\frac12 E_{w}\left[\frac{f(x)^*-p(x)}{p(x)(1-p(x))}\right]
+\end{aligned}\tag{32}</script></blockquote>
+<p>其中 $w(x)=\frac{p(x)(1-p(x))}{E_{x\sim D}(p(x)(1-p(x)))}$，而在假设空间 $\mathcal H$ 中选择最优假设可以通过求解下列加权最小二乘问题得到</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\min _{h(x)} E_{w(x)}\left(H(x)+\frac{1}{2} \frac{f(x)^{*}-p(x)}{p(x)(1-p(x))}-(H(x)+h(x))\right)^{2}\tag{33}</script></blockquote>
+<p>综上，LogitBoost算法的完整过程为：</p>
+<blockquote>
+<p><strong>LogitBoost算法</strong>：</p>
+<ol>
+<li><p>初始化权重分布 $\mathcal D(i)=\frac1m,i=1,2,\cdots,m$，$H(x)=0$，概率分布 $p(x_i)=\frac12$。</p>
+</li>
+<li><p>对 $t=1,2,\cdots,T$ 进行循环：</p>
+<p>a. 计算概率分布为 $p_t(x)=\frac{1}{1+e^{-2H_{t-1}(x)}}$ 和权重系数 $w_i=p(x_i)(1-p(x_i))$。</p>
+<p>b. 计算权值分布为 $\mathcal D_t(i)=\frac{p(x)(1-p(x))}{E_{x\sim D}(p(x)(1-p(x)))}$。</p>
+<p>c. 在分布 $\mathcal D_t$ 下训练一个关于 $\frac{1}{2} \frac{f(x)^{*}-p(x)}{p(x)(1-p(x))}$ 的最小二乘分类器，即</p>
+<script type="math/tex; mode=display">
+\min _{h(x)} E_{\mathcal D_t}\left(\frac{1}{2} \frac{f(x)^{*}-p(x)}{p(x)(1-p(x))}-h(x)\right)^{2}</script></li>
+<li><p>输出分类器 $G(x)=\operatorname{sign}\left(\sum_{t=1}^Th_t(x)\right)$。</p>
+</li>
+</ol>
+</blockquote>
+<hr>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p>[1] 李航. 统计学习方法. 清华大学出版社，2019</p>
+<p>[2] 周志华. 机器学习. 清华大学出版社，2016.1</p>
+<p>[3] Friedman J, Hastie T, Tibshirani R. Additive logistic regression: a statistical view of boosting (with discussion and a rejoinder by the authors)[J]. The annals of statistics, 2000, 28(2): 337-407.</p>
+<p>[4] Friedman J H . Greedy Function Approximation: A Gradient Boosting Machine[J]. Annals of Statistics, 2001, 29(5):1189-1232.</p>
+<p>[5] ZhiHua Zhou. Ensemble Methods: Foundations and Algorithms[M]. Taylor &amp; Francis, 2012.</p>
+<p>[6] Nielsen D. Tree boosting with xgboost-why does xgboost win” every” machine learning competition?[D]. NTNU, 2016.</p>
+<p>[7] Schapire R E, Freund Y. Boosting: Foundations and algorithms[J]. Kybernetes, 2013.</p>
+<p>[8] Chen L P . Mehryar Mohri, Afshin Rostamizadeh, and Ameet Talwalkar: Foundations of machine learning, second edition[J]. Statal Papers, 2019, 60.</p>
+<p>[9] Schapire R E. The strength of weak learnability[J]. Machine learning, 1990, 5(2): 197-227.</p>
+
+        </div>
+        
+            <div style="text-align:center;color: rgb(125,125,125);font-size:14px;">
+               -------------本文结束 感谢您的阅读-------------
+            </div>
+        
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>文章作者:</span>
+                        <span>会飞的猪</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>文章链接:</span>
+                        <span><a href="http://shellyandliu.github.io/2020/07/22/Boosting%E4%B8%8EAdaboost/">http://shellyandliu.github.io/2020/07/22/Boosting%E4%B8%8EAdaboost/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>版权声明:</span>
+                        <span>本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC-BY-NC-4.0</a> ， 转载请注明来自 会飞的猪！</span>
+                    </p>
+                
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>标签:</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E9%9B%86%E6%88%90%E5%AD%A6%E4%B9%A0/"> <i class="iconfont icon-tags"></i> 集成学习</a>
+                    
+                        <a href="/tags/Boosting/"> <i class="iconfont icon-tags"></i> Boosting</a>
+                    
+                        <a href="/tags/AdaBoost/"> <i class="iconfont icon-tags"></i> AdaBoost</a>
+                    
+                        <a href="/tags/Gradient-Boosting/"> <i class="iconfont icon-tags"></i> Gradient Boosting</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">返回</a>
+                <span> /  </span>
+                <a href="/">首页</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2020/07/16/Rademacher%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%92%8CVC%E7%BB%B4/">Rademacher复杂度和VC维</a>
+            
+        </section>
+        <div class="post-content">
+            <section style="font-size: 20px;font-weight: 700;margin-bottom: 10px;margin-top: 20px;">
+                <i class="iconfont icon-comments"></i>
+                <span>
+                    评论
+                </span>
+            </section>
+        </div>
+        
+            <section id="comments" class="comments">
+              <style>
+                .comments{margin:0px;padding:10px;background:#fff}
+                @media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#fff}}
+              </style>
+              <div class="valine_comment"></div>
+<!--����js����</body>֮ǰ���뼴��-->
+<!--Leancloud ������:-->
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<!--Valine �ĺ��Ĵ����-->
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+      el: '.valine_comment',
+      app_id: 'bCvyxhtL2V59mmqAp81lAGob-gzGzoHsz#Leancloud应用的appId',
+      app_key: 'J4zVKQfUjhToGJwBfLcoOHOv',
+      placeholder: '欢迎大家评论交流~',
+      notify: 'true',
+      verify: 'true',
+    });
+</script>
+            </section>
+        
+        
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 会飞的猪 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

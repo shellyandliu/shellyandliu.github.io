@@ -236,14 +236,14 @@
                             <span class="post-meta-item-icon">
                               <i class="fa fa-keyboard-o"></i>
                               <span class="post-meta-item-text">  字数统计: </span>
-                              <span class="post-count"><a href="#">4.1k字</a></span>
+                              <span class="post-count"><a href="#">4.2k字</a></span>
                             </span>
                         </span>
                         <span class="post-time">
                             <span class="post-meta-item-icon">
                             <i class="fa fa-hourglass-half"></i>
                             <span class="post-meta-item-text">  阅读时长: </span>
-                            <span class="post-count"><a href="#">20分</a></span>
+                            <span class="post-count"><a href="#">21分</a></span>
                             </span>
                         </span>
                     
@@ -343,7 +343,10 @@ E(f)-\hat{E}_Z(f)\le \Phi(Z)\le E_Z(\Phi(Z))+\sqrt{\frac{\log\frac1\delta}{2m}}\
 <blockquote>
 <script type="math/tex; mode=display">
 P(\hat R_Z(\mathcal F)-R_m(\mathcal F)\le -\epsilon)\le \exp(-2\epsilon^2m)\tag{16}</script></blockquote>
-<p>令 $\frac\delta2=\exp(-2\epsilon^2m)$，则 $\epsilon=\sqrt{\frac{\log\frac2\delta}{2m}}$，因此至少 $\frac\delta2$ 的概率成立 $R_m(\mathcal F)\le \hat{R}_Z(\mathcal F)+\sqrt{\frac{\log(\frac2\delta)}{2m}}\tag{17}$</p>
+<p>令 $\frac\delta2=\exp(-2\epsilon^2m)$，则 $\epsilon=\sqrt{\frac{\log\frac2\delta}{2m}}$，因此至少 $\frac\delta2$ 的概率成立 </p>
+<blockquote>
+<script type="math/tex; mode=display">
+R_m(\mathcal F)\le \hat{R}_Z(\mathcal F)+\sqrt{\frac{\log(\frac2\delta)}{2m}}\tag{17}</script></blockquote>
 <p>综上，至少以 $\delta $ 的概率成立 (5.2) 式。</p>
 <p>上述定理针对的函数空间 $\mathcal F$ 是区间 $[0,1]$ 的实值函数，因此适用于回归问题，对于二分类问题，有下列定理</p>
 <blockquote>
@@ -440,8 +443,9 @@ R_{m}(\mathcal H) &=\underset{D}{E}\left[\underset{\sigma}{E}\left[\sup _{u \in 
 &\leq \underset{D}{E}\left[\frac{\sqrt{m} \sqrt{2 \log \Pi_{\mathcal H}(m)}}{m}\right] \\&\leq \sqrt{\frac{2 \log \Pi_{\mathcal H}(m)}{m}}
 \end{aligned}\tag{27}</script></blockquote>
 <p>证毕。</p>
-<p>因此结合定理2和推论2有</p>
+<p>因此结合定理2和推论2可以得到下面定理</p>
 <blockquote>
+<p>定理4：对假设空间 $\mathcal H:\mathcal X\to\{-1,+1\}$，设 $D=\{x_1,x_2,\cdots,x_m\},x_i\in\mathcal X$ 是从 $\mathcal X$ 中按照分布 $\mathcal D$ 采样得到的样本集 ，$0&lt;\delta&lt;1$， 则对于任意 $h\in\mathcal H$，以至少 $1-\delta$ 的概率有 </p>
 <script type="math/tex; mode=display">
 R(h)\le\hat R(h)+\sqrt{\frac{2 \log \Pi_{\mathcal H}(m)}{m}}+\sqrt{\frac{\log(1/\delta)}{2m}}\tag{28}</script></blockquote>
 <h1 id="VC维"><a href="#VC维" class="headerlink" title="VC维"></a>VC维</h1><p>先给出两个基本概念</p>
@@ -467,7 +471,7 @@ VC(\mathcal H)=\max\{m:\Pi_{\mathcal H}(m)=2^m\}\tag{29}</script></blockquote>
 <p>当取 $n+2$ 个点时，矩阵 $X$ 为 $(n+1)\times(n+2)$ 维，因此 $x_i’,i=1,2,\cdots,n+1$ 为线性相关的，即存在不全为 $0$ 的 $\alpha_i,i=1,2,\cdots,n+1$，使得 $\sum_{i=1}^{n+1}\alpha_ix_i’=0$，不妨设 $\alpha_{n+1}\neq 0$ ， 则 $x_{n+1}’=-\frac 1{\alpha_{n+1}}\sum_{i=1}^n\alpha_ix_i’$，令 $h(x_i)=\operatorname{sign}(-\frac{\alpha_i}{\alpha_{n+1}})$，$h(x_{n+1})=-1$，由于 $h(x_i)=\operatorname{sign}(w’x_i’)=\operatorname {sign}(-\frac{\alpha_i}{\alpha_{n+1}})$，即 $w’x’_i$ 与 $-\frac{\alpha_i}{\alpha_{n+1}}$ 同号，所以 $h(x_{n+1})=\operatorname {sign}(w’x_{n+1}’)=\operatorname {sign}(-\frac {w’}{\alpha_{n+1}}\sum_{i=1}^n\alpha_ix_i’)=1$ ,矛盾。所以 $VC(\mathcal H)&lt;n+2$。</p>
 <p>下面的引理将VC维和增长函数联系起来</p>
 <blockquote>
-<p>定理4：(Sauer引理) 若假设空间 $\mathcal H$ 的VC维为 $d$ ，则对任意 $m\in N$ 有</p>
+<p>定理5：(Sauer引理) 若假设空间 $\mathcal H$ 的VC维为 $d$ ，则对任意 $m\in N$ 有</p>
 <script type="math/tex; mode=display">
 \Pi_{\mathcal H}(m)\le \sum_{i=0}^d\left(\begin{array}{c}
 m \\
@@ -480,7 +484,7 @@ i
 <p>由于假设 $h$ 的取值为 $\{+1,-1\}$，因此任何在 $\mathcal H_{D’}$ 中出现的元素都将在 $\mathcal H_D$ 中出现一到两次。令 $\mathcal H_{D|D’}$ 为 $\mathcal H_D$ 中出现两次的 $\mathcal H_{D’}$ 中元素组成的集合，即</p>
 <blockquote>
 <script type="math/tex; mode=display">
-\begin{aligned}\mathcal H_{D|D'}=&\{(y_1,\cdots,y_{m-1})\in\mathcal H_{D'}|\exists h,h'\in\mathcal H,\\
+\begin{aligned}\mathcal H_{D|D'}=&\{(y_1,\cdots,y_{m-1})\in\mathcal H_{D'}|\exist h,h'\in\mathcal H,\\
 &\qquad(h(x_i)=h'(x_i)=y_i)\cap(h(x_m)\neq h'(x_m)),i=1,\cdots,m-1\}\end{aligned}\tag{31}</script></blockquote>
 <p>因此</p>
 <blockquote>
@@ -551,9 +555,9 @@ i
 &=\left(\frac{m}{d}\right)^{d}\left(1+\frac{d}{m}\right)^{m} \\
 & \leqslant\left(\frac{e \cdot m}{d}\right)^{d}
 \end{aligned}\tag{37}</script></blockquote>
-<p>由式 (28) 和推论3可以得到</p>
+<p>由定理3和推论3可以得到</p>
 <blockquote>
-<p>定理5：若假设空间 $\mathcal H$ 的VC维为 $d$，则对任意 $m&gt;d,0&lt;\delta&lt;1$，至少以概率 $1-\delta$，以下不等式对所有 $h\in\mathcal H$ 都成立：</p>
+<p>定理6：若假设空间 $\mathcal H$ 的VC维为 $d$，则对任意 $m&gt;d,0&lt;\delta&lt;1$，至少以概率 $1-\delta$，以下不等式对所有 $h\in\mathcal H$ 都成立：</p>
 <script type="math/tex; mode=display">
 \mathcal{R}(h) \leq \widehat{\mathcal{R}}(h)+\sqrt{\frac{2 d \log \frac{e m}{d}}{m}}+\sqrt{\frac{\log \frac{1}{\delta}}{2 m}}</script><p>我们可以将上式简写成</p>
 <script type="math/tex; mode=display">
@@ -616,6 +620,8 @@ R(h) \leq \widehat{R}(h)+O(\sqrt{\left.\frac{\log (m / d)}{m / d}\right)}</scrip
             </div>
         </section>
         <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2020/07/22/Boosting%E4%B8%8EAdaboost/">Boosting与AdaBoost</a>
             
             
             <a class="next" rel="next" href="/2020/07/15/PAC%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6/">PAC学习框架</a>

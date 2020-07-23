@@ -271,7 +271,7 @@
 <script type="math/tex; mode=display">
 R(h)=\operatorname{P}_{x\sim\mathcal D}(h(x)\neq c(x))=E_{x\sim \mathcal D}[I(h(x)\neq c(x))]\tag{1}</script><p>定义2：给定假设 $h\in\mathcal H$ 和目标概念 $c\in C$，在给定样例集 $D$ 的情况下，定义经验误差为：</p>
 <script type="math/tex; mode=display">
-\hat R(h)=\frac 1m \sum_{i=1}^m I(h(x)\neq c(x))\tag{2}</script></blockquote>
+\hat R(h)=\operatorname{P}_{x\sim D}(h(x)\neq c(x))=\frac 1m \sum_{i=1}^m I(h(x)\neq c(x))\tag{2}</script></blockquote>
 <p>显然，泛化误差是经验误差在分布 $\mathcal D$ 下的期望值。</p>
 <p>下面定义PAC学习：</p>
 <blockquote>

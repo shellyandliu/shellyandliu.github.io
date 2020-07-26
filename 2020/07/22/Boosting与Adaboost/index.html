@@ -236,14 +236,14 @@
                             <span class="post-meta-item-icon">
                               <i class="fa fa-keyboard-o"></i>
                               <span class="post-meta-item-text">  字数统计: </span>
-                              <span class="post-count"><a href="#">4.2k字</a></span>
+                              <span class="post-count"><a href="#">4.4k字</a></span>
                             </span>
                         </span>
                         <span class="post-time">
                             <span class="post-meta-item-icon">
                             <i class="fa fa-hourglass-half"></i>
                             <span class="post-meta-item-text">  阅读时长: </span>
-                            <span class="post-count"><a href="#">20分</a></span>
+                            <span class="post-count"><a href="#">21分</a></span>
                             </span>
                         </span>
                     
@@ -385,24 +385,28 @@ h_t^*(x)=\arg\min_{h}E_{x\sim \mathcal D_t}I(y\neq h_t(x))     \tag{13}</script>
 <li>AdaBoost算法需要基学习器能对特定的数据分布进行学习，这可以通过”重赋权法“实现，即再训练过程中，根据数据分布为每个训练样本重新赋一个权重。对于无法接受带权重样本的基学习算法，则可以通过”重采样法“来处理。</li>
 <li>AdaBoost算法需要在每一次迭代中检查当前生成的基学习器是否比随机猜测好，一但条件不满足，则直接抛弃。若采用”重采样法“，则可以再抛弃不满足条件的基学习器后根据当前分布重新对训练样本进行采样，训练出新的学习器。</li>
 </ol>
+<h1 id="AdaBoost算法的改进——多分类问题"><a href="#AdaBoost算法的改进——多分类问题" class="headerlink" title="AdaBoost算法的改进——多分类问题"></a>AdaBoost算法的改进——多分类问题</h1><p>最初的多分类算法是相对于Adaboost算法的简单的推广，称为AdaBoost.M1[10]。针对于Adaboost算法替换为多标签。但这要求每次基分类器对每个标签的误差小于 $\frac12$ ，在二分类的情形下很容易满足，因为比随机猜测强的基学习器都能满足条件，但是推广到有 $K$ 个标签的问题下时，每个标签随机猜测的错误率为 $(K-1)/K$，这将使得小于 $1/2$ 的要求很难满足。SAMME是对AdaBoost.M1算法的改进。即将Adaboost的算法的第2.c步变为</p>
+<blockquote>
+<script type="math/tex; mode=display">
+\alpha_t=\frac12 \log\left(\frac{1-\epsilon_t}{\epsilon_t}\right)+\log(|\mathcal Y|-1)\tag{16}</script></blockquote>
 <h1 id="其他的Boosting算法"><a href="#其他的Boosting算法" class="headerlink" title="其他的Boosting算法"></a>其他的Boosting算法</h1><p>由前面分析，Adaboost算法实际上是加法模型对指数损失函数的前向分布算法。现在我们考虑更一般的损失函数 $L(y,H(x))$ ，其中 $H(x)$ 考虑为带偏差的加法模型</p>
 <blockquote>
 <script type="math/tex; mode=display">
-H(x)=\alpha_0+\sum_{t=1}^T\alpha_th_t(x\tag{16})</script></blockquote>
+H(x)=\alpha_0+\sum_{t=1}^T\alpha_th_t(x)\tag{17}</script></blockquote>
 <p>我们的目标是损失函数达到最小，即</p>
 <blockquote>
 <script type="math/tex; mode=display">
-\min_{\alpha_t,h_t\in\mathcal H}\sum_{i=1}^mL(y_i,\sum_{t=1}^T\alpha_th_t(x_i))\tag{17}</script></blockquote>
+\min_{\alpha_t,h_t\in\mathcal H}\sum_{i=1}^mL(y_i,\sum_{t=1}^T\alpha_th_t(x_i))\tag{18}</script></blockquote>
 <p>这是一个复杂的问题，而前向分布算法考虑的是每次仅优化一个基函数和系数，即在第 $l$ 步时，极小化函数</p>
 <blockquote>
 <script type="math/tex; mode=display">
-(\alpha_l,h_l(x))=\arg\min_{\alpha,h(x)}\sum_{i=1}^mL(y_i,H_{l-1}(x_i)+\alpha h (x_i))\tag{18}</script></blockquote>
+(\alpha_l,h_l(x))=\arg\min_{\alpha,h(x)}\sum_{i=1}^mL(y_i,H_{l-1}(x_i)+\alpha h (x_i))\tag{19}</script></blockquote>
 <p>而对于问题 (18) 我们可以将 $h(x)$ 看作是在函数空间上的数值优化问题，由于可以得到其他不同的Boosting算法。</p>
 <p>若我们所考虑的假设空间里的函数，均有连续参数 $\theta$ 所决定，即对于任意的 $h\in\mathcal H$，可以表示为 $h(x;\theta)$，且函数 $\hat R(\theta)=E\left[L(Y,h(X;\theta))|X=x\right]$ 关于 $\theta$ 是二阶连续可微的，则我们可以利用传统的梯度下降法和牛顿法进行优化。若为更一般的情况，我们考虑在函数空间中优化问题 (18)</p>
 <h2 id="Gradient-Boosting"><a href="#Gradient-Boosting" class="headerlink" title="Gradient Boosting"></a>Gradient Boosting</h2><p>假设已经经过了 $l-1$ 次的迭代，则现在的损失函数为 </p>
 <blockquote>
 <script type="math/tex; mode=display">
-\hat R(H)=E\left[L(Y,H(X))|X=x\right]\tag{19}</script></blockquote>
+\hat R(H)=E\left[L(Y,H(X))|X=x\right]\tag{20}</script></blockquote>
 <p>我们对 (18) 关于函数 $H(x)$ 求偏导可得</p>
 <blockquote>
 <script type="math/tex; mode=display">
@@ -410,15 +414,15 @@ H(x)=\alpha_0+\sum_{t=1}^T\alpha_th_t(x\tag{16})</script></blockquote>
 g_{l}(x) &=\left[\frac{\partial\hat R(H(x))}{\partial H(x)}\right]_{H(x)=H_{(m-1)}(x)} \\
 &=\left[\frac{\partial \mathrm{E}[L(Y, H(x)) \mid X=x]}{\partial H(x)}\right]_{H(x)=H_{(l-1)}(x)} \\
 &=\mathrm{E}\left[\frac{\partial L(Y, H(x))}{\partial H(x)} \mid X=x\right]_{H(x)=H_{(l-1)}(x)}
-\end{aligned}\tag{20}</script></blockquote>
+\end{aligned}\tag{21}</script></blockquote>
 <p>类似于梯度下降法，我们将 $-g_l(x)$ 作为函数 $H(x)$ 的下降方向，显然函数 $-g_{l}(x)$ 不一定属于假设空间 $\mathcal H$ ，可以考虑寻找在 $\mathcal H$ 中与 $-g_l(x)$ 函数最为接近的函数作为基函数，因此定义下面的代理损失函数</p>
 <blockquote>
 <script type="math/tex; mode=display">
-h_{l}=\underset{h \in \mathcal H, \beta}{\arg \min } \sum_{i=1}^{m}\left[\left(-g_{l}\left(x_{i}\right)\right)-\beta h\left(x_{i}\right)\right]^{2}\tag{21}</script></blockquote>
+h_{l}=\underset{h \in \mathcal H, \beta}{\arg \min } \sum_{i=1}^{m}\left[\left(-g_{l}\left(x_{i}\right)\right)-\beta h\left(x_{i}\right)\right]^{2}\tag{22}</script></blockquote>
 <p>上述过程可以看作是梯度下降限制在空间 $\mathcal H$ 的情况，而每次下降的步长可以用线搜索得到</p>
 <blockquote>
 <script type="math/tex; mode=display">
-\rho_{l}=\underset{\rho}{\arg \min } \sum_{i=1}^{m} L\left(y_{i}, H_{(m-1)}\left(x_{i}\right)+\rho h_{l}\left(x_{i}\right)\right)\tag{22}</script></blockquote>
+\rho_{l}=\underset{\rho}{\arg \min } \sum_{i=1}^{m} L\left(y_{i}, H_{(m-1)}\left(x_{i}\right)+\rho h_{l}\left(x_{i}\right)\right)\tag{23}</script></blockquote>
 <p>在文章 [4] 中还考虑学习率参数 $\eta$ ，即每次更新的函数为 $\eta\rho_lh_l(x)$，我们令 $\alpha_l=\eta\rho_l$，则得到了权重参数的取法。而初始值 $\alpha_0=\underset{\alpha}{\arg\min}\sum_{i=1}^mL(y_i,\theta)$。</p>
 <p>下面给出Gradient Boosting算法的完整步骤</p>
 <blockquote>
@@ -442,7 +446,7 @@ h_{l}=\underset{h \in \mathcal H, \beta}{\arg \min } \sum_{i=1}^{m}\left[\left(-
 \begin{aligned}
 \mathrm{E}\left[L\left(Y, H_{(t-1)}(x)+h_{t}(x)\right) \mid X=x\right] \approx & \mathrm{E}\left[L\left(Y, H_{(t-1)}(x)\right) \mid X=x\right]+\\
 & g_{t}(x) h_{t}(x)+\frac{1}{2} f_{t}(x) h_{t}(x)^{2}
-\end{aligned}\tag{23}</script></blockquote>
+\end{aligned}\tag{24}</script></blockquote>
 <p>其中 $f_t(x)$ 为</p>
 <blockquote>
 <script type="math/tex; mode=display">
@@ -450,15 +454,15 @@ h_{l}=\underset{h \in \mathcal H, \beta}{\arg \min } \sum_{i=1}^{m}\left[\left(-
 f_{t}(x) &=\left[\frac{\partial^2\hat R(H(x))}{\partial^2 H(x)}\right]_{H(x)=H_{(t-1)}(x)} \\
 &=\left[\frac{\partial ^2\mathrm{E}[L(Y, H(x)) \mid X=x]}{\partial^2 H(x)}\right]_{H(x)=H_{(t-1)}(x)} \\
 &=\mathrm{E}\left[\frac{\partial^2 L(Y, H(x))}{\partial^2 H(x)} \mid X=x\right]_{H(x)=H_{(t-1)}(x)}
-\end{aligned}\tag{24}</script></blockquote>
+\end{aligned}\tag{25}</script></blockquote>
 <p>根据牛顿法，我们希望用 $f_t(x)^{-1}g_t(x)$ 来作为下降方向，因此我们考虑构造下面的代理损失函数</p>
 <blockquote>
 <script type="math/tex; mode=display">
-h_{t}=\underset{h \in \mathcal H}{\arg \min } \sum_{i=1}^{m}\left[{g}_{t}\left(x_{i}\right) h\left(x_{i}\right)+\frac{1}{2} f_{t}\left(x_{i}\right) h\left(x_{i}\right)^{2}\right]\tag{25}</script></blockquote>
+h_{t}=\underset{h \in \mathcal H}{\arg \min } \sum_{i=1}^{m}\left[{g}_{t}\left(x_{i}\right) h\left(x_{i}\right)+\frac{1}{2} f_{t}\left(x_{i}\right) h\left(x_{i}\right)^{2}\right]\tag{26}</script></blockquote>
 <p>上式可重写为</p>
 <blockquote>
 <script type="math/tex; mode=display">
-h_t=\underset{h\in\mathcal H}{\arg\min}\sum_{i=1}^m\frac12 f_t(x_i)\left[\left(-\frac{g_t(x_i)}{f_t(x_i)}\right)-h(x_i)\right]^2\tag{26}</script></blockquote>
+h_t=\underset{h\in\mathcal H}{\arg\min}\sum_{i=1}^m\frac12 f_t(x_i)\left[\left(-\frac{g_t(x_i)}{f_t(x_i)}\right)-h(x_i)\right]^2\tag{27}</script></blockquote>
 <p>同样的引入学习率参数，我们可以得到下面的 Newton Boosting算法。</p>
 <blockquote>
 <p><strong>Newton Boosting算法</strong>：</p>
@@ -479,41 +483,41 @@ g_{t}(x_i) =\left[\frac{\partial L(y_i, H(x_i))}{\partial H(x_i)} \right]_{H(x)=
 <p>由于在这里我们的输出空间为 $\mathcal Y=\{-1,+1\}$，而Logistic回归中的输出空间为 $\{0,+1\}$，因此我们令 $y^*=\frac{f(x)+1}{2}$，设概率分布为 </p>
 <blockquote>
 <script type="math/tex; mode=display">
-p(f(x)=1|x)=\frac{e^{H(x)}}{e^{H(x)}+e^{-H(x)}}\tag{27}</script></blockquote>
+p(f(x)=1|x)=\frac{e^{H(x)}}{e^{H(x)}+e^{-H(x)}}\tag{28}</script></blockquote>
 <p>则Logistic损失函数为</p>
 <blockquote>
 <script type="math/tex; mode=display">
 \begin{aligned}L(f(x)^*,p(x))=&f(x)^*\log(p(f(x)=1|x))+(1-f(x)^*)\log(1-p(f(x)=1|x))\\
 =&-\log(1+e^{-2f(x)H(x)})
-\end{aligned}\tag{28}</script></blockquote>
+\end{aligned}\tag{29}</script></blockquote>
 <p>因此我们最终优化的损失函数为 $L(H|D)=E_{x\sim D}\left[-\log(1+e^{-2f(x)H(x)}\right]$。</p>
 <p>类似于AdaBoost算法的分析，对损失函数关于 $H$ 求偏导并令其等于 $0$ 可得</p>
 <blockquote>
 <script type="math/tex; mode=display">
-H^*(x)=\arg\min_{H(x)}E_{x\sim \mathcal D}(-\log(1+e^{-2f(x)H(x)})=\frac12\ln\frac{P(f(x)=1|x)}{P(f(x)=-1|x)}\tag{29}</script></blockquote>
+H^*(x)=\arg\min_{H(x)}E_{x\sim \mathcal D}(-\log(1+e^{-2f(x)H(x)})=\frac12\ln\frac{P(f(x)=1|x)}{P(f(x)=-1|x)}\tag{30}</script></blockquote>
 <p>与指数损失函数一致。</p>
 <p>下面用Newton Boosting的思想来分析</p>
 <p>由logistic回归的性质，我们容易得出</p>
 <blockquote>
 <script type="math/tex; mode=display">
-L(H|D)=E_{x\sim D}\left[2f(x)^*H(x)-\log\left[1+e^{2(H(x))}\right]\right]\tag{30}</script></blockquote>
+L(H|D)=E_{x\sim D}\left[2f(x)^*H(x)-\log\left[1+e^{2(H(x))}\right]\right]\tag{31}</script></blockquote>
 <p>将上式关于 $H$ 求一阶二阶偏导得</p>
 <blockquote>
 <script type="math/tex; mode=display">
 \begin{aligned}&\frac{\partial E_{x\sim D}L(H|D)}{\partial H(x)}=2E_{x\sim D}(f(x)^*-p(x))\\
 &\frac{\partial ^2E_{x\sim D}L(H|D)}{\partial H(x)^2}=-4E_{x\sim D}(p(x)(1-p(x)))
-\end{aligned}\tag{31}</script></blockquote>
+\end{aligned}\tag{32}</script></blockquote>
 <p>所以根据牛顿法更新步骤为 </p>
 <blockquote>
 <script type="math/tex; mode=display">
 \begin{aligned}H(x)&=H(x)-{\left(\frac{\partial ^2E_{x\sim D}L(H|D)}{\partial H(x)^2}\right)}^{-1}\left(\frac{\partial E_{x\sim D}L(H|D)}{\partial H(x)}\right)\\
 &=H(x)+\frac12\frac{E_{x\sim D}\left[f(x)^*-p(x)\right]}{E_{X\sim D}\left[p(x)(1-p(x))\right]}\\
 &=H(x)+\frac12 E_{w}\left[\frac{f(x)^*-p(x)}{p(x)(1-p(x))}\right]
-\end{aligned}\tag{32}</script></blockquote>
+\end{aligned}\tag{33}</script></blockquote>
 <p>其中 $w(x)=\frac{p(x)(1-p(x))}{E_{x\sim D}(p(x)(1-p(x)))}$，而在假设空间 $\mathcal H$ 中选择最优假设可以通过求解下列加权最小二乘问题得到</p>
 <blockquote>
 <script type="math/tex; mode=display">
-\min _{h(x)} E_{w(x)}\left(H(x)+\frac{1}{2} \frac{f(x)^{*}-p(x)}{p(x)(1-p(x))}-(H(x)+h(x))\right)^{2}\tag{33}</script></blockquote>
+\min _{h(x)} E_{w(x)}\left(H(x)+\frac{1}{2} \frac{f(x)^{*}-p(x)}{p(x)(1-p(x))}-(H(x)+h(x))\right)^{2}\tag{34}</script></blockquote>
 <p>综上，LogitBoost算法的完整过程为：</p>
 <blockquote>
 <p><strong>LogitBoost算法</strong>：</p>
@@ -540,6 +544,7 @@ L(H|D)=E_{x\sim D}\left[2f(x)^*H(x)-\log\left[1+e^{2(H(x))}\right]\right]\tag{30
 <p>[7] Schapire R E, Freund Y. Boosting: Foundations and algorithms[J]. Kybernetes, 2013.</p>
 <p>[8] Chen L P . Mehryar Mohri, Afshin Rostamizadeh, and Ameet Talwalkar: Foundations of machine learning, second edition[J]. Statal Papers, 2019, 60.</p>
 <p>[9] Schapire R E. The strength of weak learnability[J]. Machine learning, 1990, 5(2): 197-227.</p>
+<p>[10] Hastie T, Rosset S, Zhu J, et al. Multi-class adaboost[J]. Statistics and its Interface, 2009, 2(3): 349-360.</p>
 
         </div>
         
